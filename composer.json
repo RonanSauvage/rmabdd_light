@@ -1,5 +1,5 @@
 {
-    "name": "rma/rmaBDD_light",
+    "name": "rma/rmabdd_light",
     "license": "proprietary",
     "type": "project",
     "description": "Bundle pour gérer des extract de base de données en ligne de commande ou CRON",
