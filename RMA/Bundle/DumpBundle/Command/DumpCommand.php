@@ -11,6 +11,8 @@ use Symfony\Component\Console\Question\ChoiceQuestion;
 use Symfony\Component\Console\Input\InputOption;
 
 use RMA\Bundle\DumpBundle\Factory\RDumpFactory;
+use RMA\Bundle\DumpBundle\Tools\Tools;
+use RMA\Bundle\DumpBundle\Command\CleanDumpCommand;
 
 class DumpCommand extends ContainerAwareCommand {
     
@@ -35,8 +37,13 @@ class DumpCommand extends ContainerAwareCommand {
                false,
                InputOption::VALUE_NONE,
                'Si ftp est spécifié, le dump sera sauvegardé sur le serveur FTP défini en paramètre ou dans les interactions avec i. '
-            );
-                
+            )
+            ->addOption(
+               'name',
+               false,
+               InputOption::VALUE_REQUIRED,
+               'Permet de définir un nom pour le dossier de sauvegarde. '
+            );      
     }
     
     protected function execute(InputInterface $input, OutputInterface $output) 
@@ -44,8 +51,16 @@ class DumpCommand extends ContainerAwareCommand {
         $helper = $this->getHelper('question');
         
         $params = array();
-        $params['repertoire_name'] = date('Y-m-d-H\\hi') . '__' . uniqid(); 
+        $date = date('Y-m-d-H\\hi');
+        $params['repertoire_name'] = $date . '__' . uniqid(); 
+        $params['logger'] = $this->getContainer()->get('logger');
         
+        if ($input->getOption('name')) 
+        {
+            $name_rep =  Tools::cleanString($input->getOption('name')) ;
+            $params['repertoire_name'] = $name_rep . '__' . uniqid(); 
+        }
+       
         $parametres = array(
             'host'          => 'Veuillez renseigner l\'ip de votre connexion : ',
             'port'          => 'Veuillez renseigner le port : ', 
@@ -54,26 +69,29 @@ class DumpCommand extends ContainerAwareCommand {
             'compress'      => 'Voulez-vous compression les dumps {none, gzip, bzip2}  ? ',
             'zip'           => 'Voulez-vous zipper le résultats {true, false}? ',
             'dir_dump'      => 'Veuillez renseigner le dossier dans lequel sauvegarder les dump : ',
-            'dir_zip'       => 'Veuillez renseigner le dossier dans lequel sauvegarder les zip : '
+            'dir_zip'       => 'Veuillez renseigner le dossier dans lequel sauvegarder les zip : ',
         );
         
         $parametres_ftp = array(
-                'ftp_ip'        => 'Veuillez renseigner l\'ip de connexion au ftp : ',
-                'ftp_username'  => 'Veuillez renseigner l\'username du ftp utilisé : ',
-                'ftp_password'  => 'Veuillez renseigner le password du ftp utilisé : ',
-                'ftp_port'      => 'Veuillez renseigner le port du ftp utilisé : ',
-                'ftp_timeout'   => 'Veuillez renseigner le timeout du ftp utilisé : ',
-                'ftp_path'      => 'Veuillez renseigner le path du ftp utilisé : '
-            );
+            'ftp_ip'        => 'Veuillez renseigner l\'ip de connexion au ftp : ',
+            'ftp_username'  => 'Veuillez renseigner l\'username du ftp utilisé : ',
+            'ftp_password'  => 'Veuillez renseigner le password du ftp utilisé : ',
+            'ftp_port'      => 'Veuillez renseigner le port du ftp utilisé : ',
+            'ftp_timeout'   => 'Veuillez renseigner le timeout du ftp utilisé : ',
+            'ftp_path'      => 'Veuillez renseigner le path du ftp utilisé : '
+        );
 
+        // A gérer l'extension pour le FTP
         $params['extension'] = '.zip';
         
+        // On charge les params pour le FTP
         if ($input->getOption('ftp')) 
         {
-             foreach ($parametres_ftp as $parametre => $libelle)
+            foreach ($parametres_ftp as $parametre => $libelle)
             {
                 $parametre_defaut = $this->getContainer()->getParameter('rma_'.$parametre);
                 $$parametre = $parametre_defaut;
+                // Si l'utilisateur a envoyé l'option i on lui pose les questions correspondantes
                 if ($input->getOption('i')){
                     $question = new Question($libelle . '['.$parametre_defaut.'] ', $parametre_defaut);
                     $$parametre = $helper->ask($input, $output, $question);
@@ -91,6 +109,7 @@ class DumpCommand extends ContainerAwareCommand {
             }
         }
   
+        // On gère les autres paramètres
         foreach ($parametres as $parametre => $libelle)
         {
             $parametre_defaut = $this->getContainer()->getParameter('rma_'.$parametre);
@@ -104,6 +123,7 @@ class DumpCommand extends ContainerAwareCommand {
         
         $params['dir_fichier'] = $dir_zip; 
      
+        // On charge l'objet dump pour gérer toutes les fonctionnalités 
         $dump = RDumpFactory::create($params);
         $databases = $dump->rmaDumpGetListDatabases();          
 
@@ -122,29 +142,38 @@ class DumpCommand extends ContainerAwareCommand {
 
         // On vérifie que la connexionDB contienne au moins 1 base de données
         if (count($databases) == 0) {
-            throw new Exception ('Aucune base de données détectée avec les paramètres définis');
+            throw new \Exception ('Aucune base de données détectée avec les paramètres définis');
         }
            
+        // On charge un objet progressbar qui affichera l'avancement pour chaque base de données
         $progress = new ProgressBar($output, count($databases));
         $progress->setFormat('verbose');
-            
+        $array = array();
+        
         foreach ($databases as $database) {
             $output->writeln($database . ' : ');
             $progress->advance();
             $output->writeln('');
             $output->writeln('');
-            $dump->rmaDumpForDatabase($database);
+            $array = $dump->rmaDumpForDatabase($database, $array);
         }
         
+        $infos = $dump->rmaGetInfosDump($date, $params['dir_dump'], $params['repertoire_name'], count($databases), $array);
+        
+        $dump->rmaWriteDump($infos, $dir_dump);
+
         $progress->finish();
-        $output->writeln('');
+        $output->writeln('-----------');
         $output->writeln('Dump mis à disposition dans le répertoire ' . $dir_dump . DIRECTORY_SEPARATOR . $params['repertoire_name']);
         
         $dump->rmaDumpJustZip();
-        
+     
         if ($input->getOption('ftp')) 
         {
             $dump->rmaDepotFTP();
         }
+        $output->writeln('-----------');
+        $nb_jour = $this->getContainer()->getParameter('rma_nb_jour');
+        CleanDumpCommand::cleanCommand($input, $output, $dir_dump, $nb_jour);
     }
 }

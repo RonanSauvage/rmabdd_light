@@ -34,6 +34,7 @@ class RMAConfiguration implements ConfigurationInterface
                 ->end() 
                 ->append($this->addParametersNode())
                 ->append($this->addParametersNodeFTP())
+                ->append($this->addParametersNodeClass())
             ->end();
         return $treeBuilder;
     }
@@ -63,6 +64,9 @@ class RMAConfiguration implements ConfigurationInterface
                 ->end()
                 ->scalarNode('rma_dir_dump')
                     ->defaultValue('')
+                ->end()
+                ->scalarNode('rma_nb_jour')
+                    ->defaultValue(7)
                 ->end()
             ->end()
         ;
@@ -103,6 +107,42 @@ class RMAConfiguration implements ConfigurationInterface
                 ->end()
                 ->scalarNode('rma_ftp_path')
                     ->defaultValue('/home/rma/dump')
+                    ->cannotBeEmpty()
+                ->end()
+            ->end()
+        ;
+        return $node;
+    }
+    
+    /**
+     * Permet de configurer les classes d'accès
+     * @return TreeBuilder
+     */
+    public function addParametersNodeClass()
+    {
+        $builder = new TreeBuilder();
+        $node = $builder->root('classes');
+
+        $node
+            ->children()
+                ->scalarNode('rma_connexiondb')
+                    ->defaultValue('RMA\Bundle\DumpBundle\ConnexionDB\ConnexionDB')
+                    ->cannotBeEmpty()
+                ->end()
+                ->scalarNode('rma_ftp')
+                    ->defaultValue('RMA\Bundle\DumpBundle\Ftp\Rftp')
+                    ->cannotBeEmpty()
+                ->end()
+                ->scalarNode('rma_zip')
+                    ->defaultValue('RMA\Bundle\DumpBundle\Zip\Rzip')
+                    ->cannotBeEmpty()
+                ->end()
+                ->booleanNode('rma_dump')
+                    ->defaultValue('RMA\Bundle\DumpBundle\Dump\RMADump')
+                    ->cannotBeEmpty()
+                ->end()
+                ->booleanNode('rma_dump_mysql')
+                    ->defaultValue('RMA\Bundle\DumpBundle\Dump\DumpMysql')
                     ->cannotBeEmpty()
                 ->end()
             ->end()

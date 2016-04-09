@@ -7,6 +7,7 @@ use RMA\Bundle\DumpBundle\ConnexionDB\ConnexionDB;
 use RMA\Bundle\DumpBundle\Zip\RZip;
 use RMA\Bundle\DumpBundle\Dump\DumpMysql;
 use RMA\Bundle\DumpBundle\Ftp\Rftp;
+use RMA\Bundle\DumpBundle\Tools\WriteDump;
 
 /**
  * Description of RDumpFactory
@@ -18,7 +19,7 @@ class RDumpFactory{
     /**
      * Factory pour l'utilisation de RMADump
      * @param array $params
-     * @return \RMA\Bundle\DumpBundle\Factory\RMADump
+     * @return \RMA\Bundle\DumpBundle\Dump\RMADump
      */
     public static function create(array $params)
     {
@@ -26,6 +27,7 @@ class RDumpFactory{
         $rzip = new RZip($params['dir_zip']);
         $mysqldump = new DumpMysql($connexiondb, $params); 
         $rftp = new Rftp($params);
-        return new RMADump($connexiondb, $mysqldump, $rzip, $params['zip'], $rftp);
+        $writedump = new WriteDump();
+        return new RMADump($connexiondb, $mysqldump, $rzip, $params['zip'], $rftp, $params['logger'], $writedump);
     }  
 }

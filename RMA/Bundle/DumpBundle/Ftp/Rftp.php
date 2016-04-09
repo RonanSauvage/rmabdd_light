@@ -10,6 +10,8 @@ class Rftp implements FtpInterface {
     protected $_path;
     protected $ftp_connect;
     protected $_repertoire_name;
+    protected $_username;
+    protected $_password;
     
     /**
      * Permet de lancer une connexion ftp
@@ -20,13 +22,8 @@ class Rftp implements FtpInterface {
         $this->_path = $params['ftp_path'];
         $this->_fichier = $params['repertoire_name'] . $params['extension'];
         $this->_dir_fichier = $params['dir_fichier'];
-        if ($this->ftp_connect){
-            ftp_login($this->ftp_connect, $params['ftp_username'], $params['ftp_password']);
-            ftp_pasv($this->ftp_connect, true);
-        }
-        else {
-            throw new Exception("Impossible de se connecter au serveur FTP");
-        }   
+        $this->_username = $params['ftp_username'];
+        $this->_password = $params['ftp_password'];
     }
     
     /**
@@ -34,7 +31,14 @@ class Rftp implements FtpInterface {
      * Close la connexion FTP après le transfert
      * @param type $mode
      */
-    public function DepotSurFTP($mode = FTP_ASCII){
+    public function depotSurFTP($mode = FTP_ASCII){
+        if ($this->ftp_connect){
+            ftp_login($this->ftp_connect, $this->_username, $this->_password);
+            ftp_pasv($this->ftp_connect, true);
+        }
+        else {
+            throw new Exception("Impossible de se connecter au serveur FTP");
+        } 
         ftp_chdir($this->ftp_connect,  $this->_path); 
         ftp_put($this->ftp_connect, $this->_fichier, $this->_dir_fichier. DIRECTORY_SEPARATOR. $this->_fichier, $mode);
         $this->CloseConnexionFTP();
@@ -43,7 +47,7 @@ class Rftp implements FtpInterface {
     /**
      * Permet de close la connexion courante
      */
-    public function CloseConnexionFTP(){
+    public function closeConnexionFTP(){
         ftp_close($this->ftp_connect);
     }
 }

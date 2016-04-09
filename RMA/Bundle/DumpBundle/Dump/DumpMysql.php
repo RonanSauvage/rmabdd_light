@@ -47,23 +47,30 @@ class DumpMysql implements DumpInterface{
      */
     public function execDumpForConnexiondb (Array $databases)
     {
+        $infos = array();
         foreach ($databases as $database){
-           $this->execDumpForOneDatabase($database, $this->_repertoire_name);         
+           $infos = array_merge($infos, $this->execDumpForOneDatabase($database));         
         }
+        return $infos;
     }
        
     /**
      * Permet d'executer un dump pour une base de données précise
      * @param string $name_database
+     * @return array $infos
      */
-    public function execDumpForOneDatabase($name_database){
-       
+    public function execDumpForOneDatabase($name_database)
+    {
         if (!file_exists($this->getPathDumpsWithDir())){
             mkdir($this->getPathDumpsWithDir());
         }   
-        $name = $name_database .'.' . $this->_extension;
+        $name = $name_database . '.' . $this->_extension;
         $path_destination_interne_with_db = $this->getPathDumpsWithDir() . DIRECTORY_SEPARATOR . $name;  
         $this->_mysqlDump->start($path_destination_interne_with_db);
+        $infos = array ( 
+                   "$name" => $this->getPathDumpsWithDir() . DIRECTORY_SEPARATOR . $name
+            );
+        return $infos;
     }
     
     /**
@@ -76,8 +83,11 @@ class DumpMysql implements DumpInterface{
         if ($compression == "none"){
             return "sql";
          }
-         else {
+         elseif ($compression == "gzip"){
             return "gz";
+         }
+         else {
+            return "bz2";
          }
     }
     

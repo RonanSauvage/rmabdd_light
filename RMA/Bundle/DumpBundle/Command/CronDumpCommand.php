@@ -9,36 +9,30 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\InputArgument;
 
 use RMA\Bundle\DumpBundle\Factory\RDumpFactory;
+use RMA\Bundle\DumpBundle\Tools\Tools;
 
 class CronDumpCommand extends ContainerAwareCommand {
     
     protected function configure() {
       
         $this->setName('rma:dump:cron')
-             ->setDescription('Permet de réaliser un dump en crontab. Si vous ne mettez pas d\'argument toutes les bases de données seront sauvegardées. '
-                     . 'Pour utiliser la commande vous devez indiquer les options suivantes : '
-                     . 'Host de la connection --host='
-                     . 'Port de la connexion --port='
-                     . 'Le username --username='
-                     . 'Le password --password='
-                     . 'La compression --compress={Gzip, Bzip2}'
-                     . 'Le zip --zip')
+             ->setDescription('Permet de réaliser un dump en crontab. Si vous ne mettez pas d\'argument toutes les bases de données seront sauvegardées.')
              ->addOption(
                'host',
                '',
-               InputOption::VALUE_REQUIRED,
+               InputOption::VALUE_OPTIONAL,
                'L\'ip de la connexion à la base de données.'
             )
             ->addOption(
                'port',
                '',
-               InputOption::VALUE_REQUIRED,
+               InputOption::VALUE_OPTIONAL,
                'Le port d\'accès à la base de données.'
             )
             ->addOption(
                'username',
                '',
-               InputOption::VALUE_REQUIRED,
+               InputOption::VALUE_OPTIONAL,
                'L\'username de connexion à la base de données.'
             )
             ->addOption(
@@ -77,6 +71,42 @@ class CronDumpCommand extends ContainerAwareCommand {
                InputOption::VALUE_OPTIONAL,
                'Permet de transférer le dump en FTP'
             )
+            ->addOption(
+               'ftp_ip',
+               '',
+               InputOption::VALUE_OPTIONAL,
+               'Ip du FTP'
+            )
+            ->addOption(
+               'ftp_username',
+               '',
+               InputOption::VALUE_OPTIONAL,
+               'Username pour le FTP'
+            )
+            ->addOption(
+               'ftp_password',
+               '',
+               InputOption::VALUE_OPTIONAL,
+               'Mot de passe pour le ftp'
+            )
+            ->addOption(
+               'ftp_port',
+               '',
+               InputOption::VALUE_OPTIONAL,
+               'Le port pour le FTP'
+            )
+            ->addOption(
+               'ftp_timeout',
+               '',
+               InputOption::VALUE_OPTIONAL,
+               'Le timeout paramétré pour le FTP'
+            )
+            ->addOption(
+               'ftp_path',
+               '',
+               InputOption::VALUE_OPTIONAL,
+               'Le path pour la sauvegarde sur le FTP'
+            )
             ->addArgument(
                 'databases',
                 InputArgument::IS_ARRAY,
@@ -87,41 +117,20 @@ class CronDumpCommand extends ContainerAwareCommand {
     
     protected function execute(InputInterface $input, OutputInterface $output) 
     {        
-        $params = array();
-        $params['repertoire_name'] = date('Y-m-d-H\\hi') . '__' . uniqid();  
-                
-        $options = array(
-            'host'     ,
-            'port'     , 
-            'username' ,
-            'password' ,
-            'compress' ,
-            'zip'      ,
-            'dir_dump' ,
-            'dir_zip'  ,
-            'ftp_ip'   ,
-            'ftp_username'  ,
-            'ftp_password'  ,
-            'ftp_port'      ,
-            'ftp_timeout'   ,
-            'ftp_path'     );
-      
-        foreach($options as $option)
-        {
-            $$option = $this->getContainer()->getParameter('rma_'.$option);
-            if (!is_null($input->getOption($option)))
-            {
-                $$option = $input->getOption($option);
-            }
-            $params[$option] = $$option;
-        }
+        $container = $this->getContainer();
 
+        $params = Tools::hydrateInputOptions($input, $container);
+
+        // A gérer l'extension pour le FTP
+        $params['extension'] = '.zip';
+        $params['dir_fichier'] = $params['dir_zip']; 
+        
         // On gère le mot de passe pouvant être vide 
         if(($input->getOption('password'))== 'none')
         {
             $params['password'] = '';
         }
-        
+
         $dump = RDumpFactory::create($params);
         $databases = $dump->rmaDumpGetListDatabases(); 
         
@@ -132,7 +141,7 @@ class CronDumpCommand extends ContainerAwareCommand {
    
         // On vérifie que la connexionDB contienne au moins 1 base de données
         if (count($databases) == 0) {
-            throw new Exception ('Aucune base de données detectée avec les paramètres définis');
+            throw new \Exception ('Aucune base de données detectée avec les paramètres définis');
         }
  
         $dump->rmaDumpForDatabases($databases);
@@ -141,5 +150,8 @@ class CronDumpCommand extends ContainerAwareCommand {
         {
             $dump->rmaDepotFTP();
         }
+        
+        $nb_jour = $this->getContainer()->getParameter('rma_nb_jour');
+        CleanDumpCommand::cleanCommand($input, $output, $params['dir_dump'], $nb_jour);
     }
 }

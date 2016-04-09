@@ -4,8 +4,7 @@ namespace RMA\Bundle\DumpBundle\Ftp;
 
 interface FtpInterface 
 {
-    public function DepotSurFTP($mode = FTP_ASCII);
+    public function depotSurFTP($mode = FTP_ASCII);
     
-    public function CloseConnexionFTP();
+    public function closeConnexionFTP();
 }
-
