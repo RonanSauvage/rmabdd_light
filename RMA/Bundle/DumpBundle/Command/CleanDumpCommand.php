@@ -32,7 +32,7 @@ class CleanDumpCommand extends ContainerAwareCommand {
     protected function execute(InputInterface $input, OutputInterface $output) 
     {            
         $dir_dump = $this->getContainer()->getParameter('rma_dir_dump');
-        $nb_jour = $this->getContainer()->getParameter('rma_nb_jour');
+        $number_clean = $this->getContainer()->getParameter('rma_nb_jour');
     
         if(($input->getOption('dir_dump')))
         {

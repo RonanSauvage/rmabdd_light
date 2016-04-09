@@ -24,6 +24,6 @@
         "symfony/monolog-bundle": "~2.4",
         "sensio/distribution-bundle": "~5.0",
         "incenteev/composer-parameter-handler": "~2.0",
-        "ifsnop/mysqldump-php" : "dev-master"
+        "ifsnop/mysqldump-php" : "~2.1"
     }
 }

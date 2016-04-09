@@ -58,6 +58,7 @@ class RMADump extends ContainerAware {
         {
             $this->rmaDumpJustZip($this->_zip_bool);
         }
+        return $infos;
     }
     
     /**
@@ -136,9 +137,10 @@ class RMADump extends ContainerAware {
      */
     public function rmaGetInfosDump($date, $dir_dump, $repertoire_name, $numer_databases, Array $data)
     {
-        return $infos = array(
+        $infos = array(
             $date ." | ". $dir_dump . " | " . $repertoire_name . " | " . $numer_databases ." databases " =>  $data
         );
+        return $infos;
     }
 }
 

@@ -62,14 +62,21 @@ class SyncDump implements SyncDumpInterface {
         return $content;
     }
     
-    function ScanDirectory($Directory)
+    function scanDirectory($Directory)
     {
-        $MyDirectory = opendir($Directory) or die('Erreur');
+        if (opendir($Directory))
+        {
+            $MyDirectory = opendir($Directory);
+        }
+        else 
+        {
+            throw new \Exception("Impossible d'ouvrir le répertoire " . $Directory);
+        }
         $myarray = array();
-        while($Entry = @readdir($MyDirectory)) {
+        while($Entry = readdir($MyDirectory)) {
             if(is_dir($Directory.'/'.$Entry)&& $Entry != '.' && $Entry != '..' && $Entry != self::NAME_DUMP) {
                 $myarray[$Entry] =  array();
-                $this->ScanDirectory($Directory.'/'.$Entry);
+                $this->scanDirectory($Directory.'/'.$Entry);
             }
             else {
                 array_push($myarray[$Entry], $Entry);

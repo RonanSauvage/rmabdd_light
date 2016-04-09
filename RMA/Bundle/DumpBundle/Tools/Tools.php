@@ -3,6 +3,7 @@
 namespace RMA\Bundle\DumpBundle\Tools;
 
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\DependencyInjection\Container;
 
 
 /**
@@ -34,14 +35,19 @@ class Tools {
     public static function getArrayDump($dump)
     {
         $resultats = explode('|', $dump);
-        return $resultat = array (
+        $resultat = array (
             "date"          =>  trim($resultats[0]),
             "path"          =>  trim($resultats[1]),
             "identifiant"   =>  trim($resultats[2]),
             "number_db"     =>  trim($resultats[3])
         );
+        return $resultat;
     }
     
+    /**
+     * Permet de supprimer le contenu d'un dossier ainsi que le dossier lui même
+     * @param string $src
+     */
     public static function rrmdir($src) 
     {
         $dir = opendir($src);
@@ -60,10 +66,15 @@ class Tools {
                 }
             }
         }
-    closedir($dir);
-    rmdir($src);
+        closedir($dir);
+        rmdir($src);
     }
     
+    /**
+     * Permet de nettoyer une chaine des caractères spéciaux
+     * @param string $chaine
+     * @return string
+     */
     public static function cleanString($chaine)
     {
         $caracteres = array(
@@ -78,11 +89,16 @@ class Tools {
 
 	$chaine = strtr($chaine, $caracteres);
 	$chaine = preg_replace('#[^A-Za-z0-9]+#', '-', $chaine);
-	$chaine = trim($chaine, '-');
-	return $chaine;
+	return trim($chaine, '-');
     }
     
-    public static function hydrateInputOptions(InputInterface $input, $container)
+    /**
+     * Permet d'hydrater l'array Params selon les options définies au niveau de la commande
+     * @param InputInterface $input
+     * @param Container $container
+     * @return array $params
+     */
+    public static function hydrateInputOptions(InputInterface $input, Container $container)
     {
         $roptions = $input->getOptions();
         $params = array ();
