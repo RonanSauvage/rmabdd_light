@@ -13,7 +13,6 @@
     "autoload": {
         "psr-4": { "RMA\\Bundle\\DumpBundle": "" }
     },
-    "target-dir": "RMA/Bundle/DumpBundle",
     "minimum-stability": "dev",
     "require": {
         "php": ">=5.3.9",
