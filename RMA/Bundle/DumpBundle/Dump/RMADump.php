@@ -54,7 +54,7 @@ class RMADump extends ContainerAware {
     public function rmaDumpForDatabases(Array $databases)
     {
         $infos = $this->_dump->execDumpForConnexiondb($databases);
-        if ($this->_zip_bool)
+        if ($this->_zip_bool == 'yes')
         {
             $this->rmaDumpJustZip($this->_zip_bool);
         }
@@ -80,9 +80,9 @@ class RMADump extends ContainerAware {
      * Sinon si l'utilisateur peut forcer à true
      * @param boolean $zip
      */
-    public function rmaDumpJustZip($zip = false)
+    public function rmaDumpJustZip($zip = 'no')
     {
-        if ($zip != false || ($this->_zip_bool && $this->_zip_bool !== 'false'))
+        if ($zip !== 'no' || ($this->_zip_bool !== 'no'))
         {
             $this->_zip->execZip($this->_dump->getPathDumpsWithDir());
             $this->rmaLogger('ZIP : L\'archive zip a été correctement créée');
@@ -117,7 +117,7 @@ class RMADump extends ContainerAware {
     } 
     
     /**
-     * Permet d'écrire les infos liés au dump dans le fichier .dump.ini lié
+     * Permet d'écrire les infos liées au dump dans le fichier .dump.ini lié
      * @param array $infos
      * @param string $fichier
      */

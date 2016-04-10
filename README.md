@@ -22,7 +22,7 @@ Ensuite, vous pouvez lancer composer update afin configurer votre bundle.
     "symfony/monolog-bundle": "~2.4",
     "sensio/distribution-bundle": "~5.0",
     "incenteev/composer-parameter-handler": "~2.0",
-    "ifsnop/mysqldump-php" : "dev-master"
+    "ifsnop/mysqldump-php" : "~2.1"
 
 A la fin du composer, vous devrez saisir les parameters liés à l'application. Elle n'embarque pas de base de données, les parameters à saisir concernent la connexion à sauvegarder par défaut
     
@@ -68,7 +68,7 @@ Les commandes mises à disposition sont préfixées par "rma:"
             --username
             --password  (pour mettre un mot de passe vide, mettez le paramètre --password=none)
             --compress  {none, gzip, bzip2}
-            --zip       {true, false}
+            --zip       {yes, no}
             --dir_zip   Pour les dir, vous devez doubler les DIRECTORY SEPARATOR 
             --dir_dump  exemple :  --dir_dump=C:\\Users\\rmA\\Desktop
             --ftp_ip 

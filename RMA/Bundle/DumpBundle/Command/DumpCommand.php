@@ -49,25 +49,29 @@ class DumpCommand extends ContainerAwareCommand {
     protected function execute(InputInterface $input, OutputInterface $output) 
     {          
         $helper = $this->getHelper('question');
+
+        $container = $this->getContainer();
         
         $params = array();
         $date = date('Y-m-d-H\\hi');
-        $params['repertoire_name'] = $date . '__' . uniqid(); 
-        $params['logger'] = $this->getContainer()->get('logger');
-        
-        if ($input->getOption('name')) 
+        $params['repertoire_name'] = $date . '__' . uniqid();
+        $params['logger'] = $container->get('logger');
+        $params['ftp'] = $container->getParameter('rma_ftp');
+        $params['nb_jour'] = $container->getParameter('rma_nb_jour');
+
+        if ($input->getOption('name'))
         {
             $name_rep =  Tools::cleanString($input->getOption('name')) ;
-            $params['repertoire_name'] = $name_rep . '__' . uniqid(); 
+            $params['repertoire_name'] = $name_rep . '__' . uniqid();
         }
-       
+
         $parametres = array(
             'host'          => 'Veuillez renseigner l\'ip de votre connexion : ',
-            'port'          => 'Veuillez renseigner le port : ', 
+            'port'          => 'Veuillez renseigner le port : ',
             'username'      => 'Veuillez renseigner le username utilisé : ',
             'password'      => 'Veuillez renseigner le password : ',
             'compress'      => 'Voulez-vous compression les dumps {none, gzip, bzip2}  ? ',
-            'zip'           => 'Voulez-vous zipper le résultats {true, false}? ',
+            'zip'           => 'Voulez-vous zipper le résultats {yes, no}? ',
             'dir_dump'      => 'Veuillez renseigner le dossier dans lequel sauvegarder les dump : ',
             'dir_zip'       => 'Veuillez renseigner le dossier dans lequel sauvegarder les zip : ',
         );
@@ -87,9 +91,10 @@ class DumpCommand extends ContainerAwareCommand {
         // On charge les params pour le FTP
         if ($input->getOption('ftp')) 
         {
+            $params['ftp'] = 'yes';
             foreach ($parametres_ftp as $parametre => $libelle)
             {
-                $parametre_defaut = $this->getContainer()->getParameter('rma_'.$parametre);
+                $parametre_defaut = $container->getParameter('rma_'.$parametre);
                 $$parametre = $parametre_defaut;
                 // Si l'utilisateur a envoyé l'option i on lui pose les questions correspondantes
                 if ($input->getOption('i')){
@@ -103,7 +108,7 @@ class DumpCommand extends ContainerAwareCommand {
         else {
             foreach ($parametres_ftp as $parametre => $libelle)
             {
-                $parametre_defaut = $this->getContainer()->getParameter('rma_'.$parametre);
+                $parametre_defaut = $container->getParameter('rma_'.$parametre);
                 $$parametre = $parametre_defaut;
                 $params[$parametre] = $$parametre;
             }
@@ -112,7 +117,7 @@ class DumpCommand extends ContainerAwareCommand {
         // On gère les autres paramètres
         foreach ($parametres as $parametre => $libelle)
         {
-            $parametre_defaut = $this->getContainer()->getParameter('rma_'.$parametre);
+            $parametre_defaut = $container->getParameter('rma_'.$parametre);
             $$parametre = $parametre_defaut;
             if ($input->getOption('i')){
                 $question = new Question($libelle . '['.$parametre_defaut.'] ', $parametre_defaut);
@@ -160,20 +165,20 @@ class DumpCommand extends ContainerAwareCommand {
         
         $infos = $dump->rmaGetInfosDump($date, $params['dir_dump'], $params['repertoire_name'], count($databases), $array);
         
-        $dump->rmaWriteDump($infos, $dir_dump);
+        $dump->rmaWriteDump($infos, $params['dir_dump']);
 
         $progress->finish();
         $output->writeln('-----------');
-        $output->writeln('Dump mis à disposition dans le répertoire ' . $dir_dump . DIRECTORY_SEPARATOR . $params['repertoire_name']);
-        
+        $output->writeln('Dump mis à disposition dans le répertoire ' . $params['dir_dump'] . DIRECTORY_SEPARATOR . $params['repertoire_name']);
+
+        // On zip le dump
         $dump->rmaDumpJustZip();
-     
-        if ($input->getOption('ftp')) 
-        {
-            $dump->rmaDepotFTP();
-        }
-        $output->writeln('-----------');
-        $nb_jour = $this->getContainer()->getParameter('rma_nb_jour');
-        CleanDumpCommand::cleanCommand($input, $output, $dir_dump, $nb_jour);
+
+        // On sauvegarde le dump sur le serveur FTP
+        FtpCommand::saveDumpInFtp($params['ftp'], $dump);
+        
+
+        // On lance l'action de suppression des anciens dumps
+        CleanDumpCommand::cleanCommand($output, $params['dir_dump'], $params['nb_jour']);
     }
 }

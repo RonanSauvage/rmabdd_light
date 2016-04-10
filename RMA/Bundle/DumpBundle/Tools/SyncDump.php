@@ -4,13 +4,15 @@ namespace RMA\Bundle\DumpBundle\Tools;
 
 use RMA\Bundle\DumpBundle\Tools\WriteDump;
 use RMA\Bundle\DumpBundle\Tools\SyncDumpInterface;
- 
+use Symfony\Component\DependencyInjection\ContainerAwareInterface;
+use Symfony\Component\DependencyInjection\ContainerInterface;
+
 /**
  * Description of SyncDump
  *
  * @author rmA
  */
-class SyncDump implements SyncDumpInterface {
+class SyncDump implements SyncDumpInterface, ContainerAwareInterface {
     
     CONST NAME_DUMP = ".dump.ini";
     
@@ -61,7 +63,12 @@ class SyncDump implements SyncDumpInterface {
         }  
         return $content;
     }
-    
+
+    /**
+     * Permet de scanner un répertoire
+     * @param string $Directory
+     * @throws \Exception
+     */
     function scanDirectory($Directory)
     {
         if (opendir($Directory))
@@ -109,7 +116,7 @@ class SyncDump implements SyncDumpInterface {
         $a = 0;
         foreach ($content as $dump => $data)
         {
-            $datas = Tools::getArrayDump($dump); 
+            $datas = Tools::getArrayDump($dump);
             $date_dump = new \Datetime(substr($datas['date'], 0, 10));
             if ($date_dump < $date)
             {
@@ -121,7 +128,7 @@ class SyncDump implements SyncDumpInterface {
                     Tools::rrmdir($path_dump_to_delete);
                     $a += 1;
                 }
-                
+
                 // On met à jour le fichier de dump
                 unset($content[$dump]);
             }
@@ -139,5 +146,10 @@ class SyncDump implements SyncDumpInterface {
         $writeDump = new WriteDump();
         $writeDump->remplaceDumpFic($content, $dir_rep);
         return $response;
+    }
+
+    public function setContainer(ContainerInterface $container = null)
+    {
+
     }
 }

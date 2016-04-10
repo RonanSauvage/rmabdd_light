@@ -1,7 +1,7 @@
 {
     "name": "rma/rmabdd_light",
-    "version": "0.2",
-    "license": "proprietary",
+    "version": "0.3",
+    "license": "MIT",
     "type": "project",
     "description": "Bundle pour gérer des extract de base de données en ligne de commande ou CRON",
     "authors": [
@@ -11,7 +11,7 @@
         }
     ],
     "autoload": {
-        "psr-0": { "RMA\\Bundle\\DumpBundle": "" }
+        "psr-4": { "RMA\\Bundle\\DumpBundle": "" }
     },
     "target-dir": "RMA/Bundle/DumpBundle",
     "minimum-stability": "dev",
@@ -24,6 +24,7 @@
         "symfony/monolog-bundle": "~2.4",
         "sensio/distribution-bundle": "~5.0",
         "incenteev/composer-parameter-handler": "~2.0",
-        "ifsnop/mysqldump-php" : "~2.1"
+        "ifsnop/mysqldump-php": "~2.1",
+        "dropbox/dropbox-sdk": "1.1.*"
     }
 }

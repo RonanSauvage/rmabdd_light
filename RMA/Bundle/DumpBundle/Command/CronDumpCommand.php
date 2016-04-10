@@ -2,6 +2,7 @@
 
 namespace RMA\Bundle\DumpBundle\Command;
 
+use RMA\Bundle\DumpBundle\Factory\RToolsFactory;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -119,8 +120,9 @@ class CronDumpCommand extends ContainerAwareCommand {
     {        
         $container = $this->getContainer();
 
-        $params = Tools::hydrateInputOptions($input, $container);
-
+        $tools = RToolsFactory::create();
+        $params = $tools->rmaHydrateInputOptions($input, $container);
+        
         // A gérer l'extension pour le FTP
         $params['extension'] = '.zip';
         $params['dir_fichier'] = $params['dir_zip']; 
@@ -132,26 +134,23 @@ class CronDumpCommand extends ContainerAwareCommand {
         }
 
         $dump = RDumpFactory::create($params);
-        $databases = $dump->rmaDumpGetListDatabases(); 
-        
-        if ($input->getArgument('databases')) 
+        $databases = $dump->rmaDumpGetListDatabases();
+
+        if ($input->getArgument('databases'))
         {
             $databases = $input->getArgument('databases');
-        }    
-   
+        }
+
         // On vérifie que la connexionDB contienne au moins 1 base de données
         if (count($databases) == 0) {
             throw new \Exception ('Aucune base de données detectée avec les paramètres définis');
         }
- 
+
         $dump->rmaDumpForDatabases($databases);
         
-        if ($params['ftp'] && $params['ftp'] !== 'false') 
-        {
-            $dump->rmaDepotFTP();
-        }
+        FtpCommand::saveDumpInFtp($params['ftp'], $dump);
         
-        $nb_jour = $this->getContainer()->getParameter('rma_nb_jour');
-        CleanDumpCommand::cleanCommand($input, $output, $params['dir_dump'], $nb_jour);
+        $nb_jour = $container->getParameter('rma_nb_jour');
+        CleanDumpCommand::cleanCommand($output, $params['dir_dump'], $nb_jour);
     }
 }

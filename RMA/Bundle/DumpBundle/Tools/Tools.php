@@ -3,16 +3,18 @@
 namespace RMA\Bundle\DumpBundle\Tools;
 
 use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\DependencyInjection\Container;
-
+use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\DependencyInjection\ContainerAware;
 
 /**
  * Description of Tools
  *
  * @author rma
  */
-class Tools {
-
+class Tools extends ContainerAware implements ToolsInterface{
+    
+    protected $_container;
+    
     /**
      * Permet d'obtenir le path complet du fichier en vérifiant le dernier caractère 
      * @param string $dir
@@ -95,27 +97,29 @@ class Tools {
     /**
      * Permet d'hydrater l'array Params selon les options définies au niveau de la commande
      * @param InputInterface $input
-     * @param Container $container
      * @return array $params
      */
-    public static function hydrateInputOptions(InputInterface $input, Container $container)
+
+    public function hydrateInputOptions (InputInterface $input, ContainerInterface $container)
     {
-        $roptions = $input->getOptions();
+        $rOptions = $input->getOptions();
         $params = array ();
-        $params['repertoire_name'] = date('Y-m-d-H\\hi') . '__' . uniqid(); 
+        $params['repertoire_name'] = date('Y-m-d-H\\hi') . '__' . uniqid();
         $params['logger'] = $container->get('logger');
-        foreach ($roptions as $roption => $rvalue)
+        foreach ($rOptions as $rOption => $rvalue)
         {
-            if($container->hasParameter('rma_'.$roption))
+            if($container->hasParameter('rma_'.$rOption))
             {
-                $$roption = $container->getParameter('rma_'.$roption);
-            }
+                $$rOption = $container->getParameter('rma_'.$rOption);
+        }
             if (!is_null($rvalue))
             {
-                $$roption = $rvalue;
+                $$rOption = $rvalue;
             }
-            $params[$roption] = $$roption;
+            $params[$rOption] = $$rOption;
         }
         return $params;
     }
+
 }
+

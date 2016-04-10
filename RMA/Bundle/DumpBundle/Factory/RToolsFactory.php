@@ -3,6 +3,7 @@
 namespace RMA\Bundle\DumpBundle\Factory;
 
 use RMA\Bundle\DumpBundle\Tools\SyncDump;
+use RMA\Bundle\DumpBundle\Tools\Tools;
 use RMA\Bundle\DumpBundle\Tools\WriteDump;
 use RMA\Bundle\DumpBundle\Tools\RTools;
 
@@ -21,6 +22,7 @@ class RToolsFactory{
     {
         $writedump = new WriteDump();
         $syncdump = new SyncDump();
-        return new RTools($writedump, $syncdump);
+        $tools = new Tools();
+        return new RTools($writedump, $syncdump, $tools);
     }  
 }

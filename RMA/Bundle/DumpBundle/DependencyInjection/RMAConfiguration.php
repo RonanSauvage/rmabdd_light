@@ -55,8 +55,9 @@ class RMAConfiguration implements ConfigurationInterface
                     ->defaultValue('none')
                     ->cannotBeEmpty()
                 ->end()
-                ->booleanNode('rma_zip')
-                    ->defaultValue(false)
+                ->enumNode('rma_zip')
+                    ->values(array('yes', 'no'))
+                    ->defaultValue('no')
                     ->cannotBeEmpty()
                 ->end()
                 ->scalarNode('rma_dir_zip')
@@ -85,6 +86,11 @@ class RMAConfiguration implements ConfigurationInterface
 
         $node
             ->children()
+                ->enumNode('rma_ftp')
+                    ->values(array('yes', 'no'))
+                    ->defaultValue('no')
+                    ->cannotBeEmpty()
+                ->end()
                 ->scalarNode('rma_ftp_ip')
                     ->defaultValue('127.0.0.1')
                     ->cannotBeEmpty()

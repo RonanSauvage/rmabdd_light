@@ -42,11 +42,12 @@ class CleanDumpCommand extends ContainerAwareCommand {
         if(($input->getOption('nb_jour')))
         {
             $number_clean = $input->getOption('nb_jour');
-            $this->cleanCommand($input, $output, $dir_dump, $number_clean);
+
         }
+        $this->cleanCommand($input, $output, $dir_dump, $number_clean);
     }
     
-    public static function cleanCommand(InputInterface $input, OutputInterface $output, $dir_dump, $number_clean)
+    public static function cleanCommand(OutputInterface $output, $dir_dump, $number_clean)
     {
         $tools = RToolsFactory::create();
         $output->writeln('Suppression des dumps de plus de ' . $number_clean . ' jours');
