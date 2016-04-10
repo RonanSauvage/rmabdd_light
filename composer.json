@@ -11,7 +11,7 @@
         }
     ],
     "autoload": {
-        "psr-4": { "RMA\\Bundle\\DumpBundle": "" }
+        "psr-4": { "RMA\\Bundle\\DumpBundle\\": "" }
     },
     "minimum-stability": "dev",
     "require": {
