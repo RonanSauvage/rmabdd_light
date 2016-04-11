@@ -2,7 +2,6 @@
 
 namespace RMA\Bundle\DumpBundle\Command;
 
-use RMA\Bundle\DumpBundle\Factory\RToolsFactory;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Output\OutputInterface;

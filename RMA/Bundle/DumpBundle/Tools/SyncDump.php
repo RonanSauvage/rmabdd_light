@@ -147,9 +147,4 @@ class SyncDump implements SyncDumpInterface, ContainerAwareInterface {
         $writeDump->remplaceDumpFic($content, $dir_rep);
         return $response;
     }
-
-    public function setContainer(ContainerInterface $container = null)
-    {
-
-    }
 }

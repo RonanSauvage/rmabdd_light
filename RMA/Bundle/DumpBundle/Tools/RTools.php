@@ -41,10 +41,5 @@ class RTools extends ContainerAware {
     {
         return $this->_syncdump->deleteOldDump($dir_rep, $jour);
     }
-    
-    public function rmaHydrateInputOptions(InputInterface $input, ContainerInterface $container)
-    {
-        return $this->_tools->hydrateInputOptions($input, $container);
-    }
 }
 
