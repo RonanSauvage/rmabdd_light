@@ -10,7 +10,6 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\InputArgument;
 
 use RMA\Bundle\DumpBundle\Factory\RDumpFactory;
-use RMA\Bundle\DumpBundle\Tools\Tools;
 
 class CronDumpCommand extends ContainerAwareCommand {
     
@@ -120,8 +119,7 @@ class CronDumpCommand extends ContainerAwareCommand {
     {        
         $container = $this->getContainer();
 
-        $tools = RToolsFactory::create();
-        $params = $tools->rmaHydrateInputOptions($input, $container);
+        $params = $this->hydrateInputOptions($input);
         
         // A gérer l'extension pour le FTP
         $params['extension'] = '.zip';
@@ -149,8 +147,36 @@ class CronDumpCommand extends ContainerAwareCommand {
         $dump->rmaDumpForDatabases($databases);
         
         FtpCommand::saveDumpInFtp($params['ftp'], $dump);
-        
+
         $nb_jour = $container->getParameter('rma_nb_jour');
         CleanDumpCommand::cleanCommand($output, $params['dir_dump'], $nb_jour);
+    }
+
+
+    /**
+     * Permet d'hydrater l'array Params selon les options définies au niveau de la commande
+     * @param InputInterface $input
+     * @return array $params
+     */
+    public function hydrateInputOptions (InputInterface $input)
+    {
+        $rOptions = $input->getOptions();
+        $container = $this->getContainer();
+        $params = array ();
+        $params['repertoire_name'] = date('Y-m-d-H\\hi') . '__' . uniqid();
+        $params['logger'] = $container->get('logger');
+        foreach ($rOptions as $rOption => $rvalue)
+        {
+            if($container->hasParameter('rma_'.$rOption))
+            {
+                $$rOption = $container->getParameter('rma_'.$rOption);
+            }
+            if (!is_null($rvalue))
+            {
+                $$rOption = $rvalue;
+            }
+            $params[$rOption] = $$rOption;
+        }
+        return $params;
     }
 }

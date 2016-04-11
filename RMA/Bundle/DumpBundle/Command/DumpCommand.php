@@ -12,7 +12,6 @@ use Symfony\Component\Console\Input\InputOption;
 
 use RMA\Bundle\DumpBundle\Factory\RDumpFactory;
 use RMA\Bundle\DumpBundle\Tools\Tools;
-use RMA\Bundle\DumpBundle\Command\CleanDumpCommand;
 
 class DumpCommand extends ContainerAwareCommand {
     
@@ -51,13 +50,8 @@ class DumpCommand extends ContainerAwareCommand {
         $helper = $this->getHelper('question');
 
         $container = $this->getContainer();
-        
-        $params = array();
-        $date = date('Y-m-d-H\\hi');
-        $params['repertoire_name'] = $date . '__' . uniqid();
-        $params['logger'] = $container->get('logger');
-        $params['ftp'] = $container->getParameter('rma_ftp');
-        $params['nb_jour'] = $container->getParameter('rma_nb_jour');
+
+        $params = $this->getParams();
 
         if ($input->getOption('name'))
         {
@@ -168,6 +162,7 @@ class DumpCommand extends ContainerAwareCommand {
         $dump->rmaWriteDump($infos, $params['dir_dump']);
 
         $progress->finish();
+        $output->writeln('');
         $output->writeln('-----------');
         $output->writeln('Dump mis à disposition dans le répertoire ' . $params['dir_dump'] . DIRECTORY_SEPARATOR . $params['repertoire_name']);
 
@@ -176,9 +171,23 @@ class DumpCommand extends ContainerAwareCommand {
 
         // On sauvegarde le dump sur le serveur FTP
         FtpCommand::saveDumpInFtp($params['ftp'], $dump);
-        
 
         // On lance l'action de suppression des anciens dumps
         CleanDumpCommand::cleanCommand($output, $params['dir_dump'], $params['nb_jour']);
     }
+
+    public function getParams()
+    {
+        $container = $this->getContainer();
+
+        $params = array();
+        $date = date('Y-m-d-H\\hi');
+        $params['repertoire_name'] = $date . '__' . uniqid();
+        $params['logger'] = $container->get('logger');
+        $params['ftp'] = $container->getParameter('rma_ftp');
+        $params['nb_jour'] = $container->getParameter('rma_nb_jour');
+
+        return $params;
+    }
+
 }

@@ -2,10 +2,14 @@
 
 namespace RMA\Bundle\DumpBundle\Tools;
 
-use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 
 interface ToolsInterface
 {
-    public function hydrateInputOptions (InputInterface $input, ContainerInterface $container);
+    public static function cleanString ($string);
+
+    public static function rrmDir($src);
+
+    public static function formatDirWithDumpFile($path, $fic);
+
+    public static function getArrayDump($dump);
 }

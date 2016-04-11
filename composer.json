@@ -1,9 +1,9 @@
 {
     "name": "rma/rmabdd_light",
-    "version": "0.3",
     "license": "MIT",
     "type": "project",
     "description": "Bundle pour gérer des extract de base de données en ligne de commande ou CRON",
+    "keywords": ["dump", "bundle", "database", "mysql"],
     "authors": [
         {
             "name": "Ronan Sauvage",

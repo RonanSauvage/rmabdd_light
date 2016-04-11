@@ -2,19 +2,14 @@
 
 namespace RMA\Bundle\DumpBundle\Tools;
 
-use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\DependencyInjection\ContainerInterface;
-use Symfony\Component\DependencyInjection\ContainerAware;
 
 /**
  * Description of Tools
  *
  * @author rma
  */
-class Tools extends ContainerAware implements ToolsInterface{
-    
-    protected $_container;
-    
+class Tools implements ToolsInterface{
+
     /**
      * Permet d'obtenir le path complet du fichier en vérifiant le dernier caractère 
      * @param string $dir
@@ -50,7 +45,7 @@ class Tools extends ContainerAware implements ToolsInterface{
      * Permet de supprimer le contenu d'un dossier ainsi que le dossier lui même
      * @param string $src
      */
-    public static function rrmdir($src) 
+    public static function rrMdir($src)
     {
         $dir = opendir($src);
         while(false !== ( $file = readdir($dir)) ) 
@@ -89,36 +84,9 @@ class Tools extends ContainerAware implements ToolsInterface{
             '$' => 's'
         );
 
-	$chaine = strtr($chaine, $caracteres);
-	$chaine = preg_replace('#[^A-Za-z0-9]+#', '-', $chaine);
-	return trim($chaine, '-');
-    }
-    
-    /**
-     * Permet d'hydrater l'array Params selon les options définies au niveau de la commande
-     * @param InputInterface $input
-     * @return array $params
-     */
-
-    public function hydrateInputOptions (InputInterface $input, ContainerInterface $container)
-    {
-        $rOptions = $input->getOptions();
-        $params = array ();
-        $params['repertoire_name'] = date('Y-m-d-H\\hi') . '__' . uniqid();
-        $params['logger'] = $container->get('logger');
-        foreach ($rOptions as $rOption => $rvalue)
-        {
-            if($container->hasParameter('rma_'.$rOption))
-            {
-                $$rOption = $container->getParameter('rma_'.$rOption);
-        }
-            if (!is_null($rvalue))
-            {
-                $$rOption = $rvalue;
-            }
-            $params[$rOption] = $$rOption;
-        }
-        return $params;
+        $chaine = strtr($chaine, $caracteres);
+        $chaine = preg_replace('#[^A-Za-z0-9]+#', '-', $chaine);
+        return trim($chaine, '-');
     }
 
 }
