@@ -8,10 +8,6 @@ use RMA\Bundle\DumpBundle\Tools\SyncDumpInterface;
 use RMA\Bundle\DumpBundle\Tools\WriteDumpInterface;
 use RMA\Bundle\DumpBundle\Tools\ToolsInterface;
 
-use Symfony\Component\DependencyInjection\ContainerInterface;
-use Symfony\Component\Console\Input\InputInterface;
-
-
 
 /**
  * Description of RTools

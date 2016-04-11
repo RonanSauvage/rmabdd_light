@@ -4,15 +4,13 @@ namespace RMA\Bundle\DumpBundle\Tools;
 
 use RMA\Bundle\DumpBundle\Tools\WriteDump;
 use RMA\Bundle\DumpBundle\Tools\SyncDumpInterface;
-use Symfony\Component\DependencyInjection\ContainerAwareInterface;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Description of SyncDump
  *
  * @author rmA
  */
-class SyncDump implements SyncDumpInterface, ContainerAwareInterface {
+class SyncDump implements SyncDumpInterface {
     
     CONST NAME_DUMP = ".dump.ini";
     
