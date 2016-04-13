@@ -39,7 +39,7 @@ class CleanDumpCommand extends ContainerAwareCommand {
         $logger = $container->get('logger');
         $io = new SymfonyStyle($input, $output);
         
-        SyncDumpCommand::SyncCommand($io, $dir_dump, $logger);
+        SyncDumpCommand::syncCommand($io, $dir_dump, $logger);
     
         if(($input->getOption('dir_dump')))
         {

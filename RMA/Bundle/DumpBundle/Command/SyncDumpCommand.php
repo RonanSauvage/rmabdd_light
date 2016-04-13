@@ -36,10 +36,10 @@ class SyncDumpCommand extends CommonCommand {
             $params['dir_dump'] = $input->getOption('dir_dump');
         }
         
-        $this->SyncCommand($io, $params['dir_dump'], $params['logger']);
+        $this->syncCommand($io, $params['dir_dump'], $params['logger']);
     }
     
-    public static function SyncCommand($io, $dir_dump, LoggerInterface $logger)
+    public static function syncCommand($io, $dir_dump, LoggerInterface $logger)
     {
         $tools = RToolsFactory::create(array('logger' => $logger));
         $infos = $tools->rmaSyncRep($dir_dump);

@@ -128,7 +128,7 @@ class DumpCommand extends CommonCommand {
             $databases = $io->choice('Sélectionnez la base de données à sauvegarder', $databases);
         }
            
-        SyncDumpCommand::SyncCommand($io, $params['dir_dump'], $params['logger']);
+        SyncDumpCommand::syncCommand($io, $params['dir_dump'], $params['logger']);
         
         // On charge un objet progressbar qui affichera l'avancement pour chaque base de données
         $io->title('Dump des ' . count($databases) . ' base(s) de données');

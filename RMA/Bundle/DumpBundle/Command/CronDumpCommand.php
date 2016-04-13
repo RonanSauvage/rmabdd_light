@@ -129,7 +129,7 @@ class CronDumpCommand extends CommonCommand {
             $params['password'] = '';
         }
 
-        SyncDumpCommand::SyncCommand($io, $params['dir_dump'], $params['logger']);
+        SyncDumpCommand::syncCommand($io, $params['dir_dump'], $params['logger']);
         
         $dump = RDumpFactory::create($params);
         $databases = $dump->rmaDumpGetListDatabases($params['excludes']);
