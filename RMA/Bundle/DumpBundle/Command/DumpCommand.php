@@ -3,27 +3,25 @@
 namespace RMA\Bundle\DumpBundle\Command;
 
 use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Question\Question;  
-use Symfony\Component\Console\Helper\ProgressBar;
-use Symfony\Component\Console\Question\ChoiceQuestion;
 use Symfony\Component\Console\Input\InputOption;
+use Symfony\Component\Console\Style\SymfonyStyle;
 
 use RMA\Bundle\DumpBundle\Factory\RDumpFactory;
 use RMA\Bundle\DumpBundle\Tools\Tools;
+use RMA\Bundle\DumpBundle\Command\CommonCommand;
 
-class DumpCommand extends ContainerAwareCommand {
+class DumpCommand extends CommonCommand {
     
     protected function configure() {
       
         $this->setName('rma:dump:database')
              ->setDescription('Permet de réaliser un dump. Option --not-all pour ne pas sauvegarder toutes les bases')
              ->addOption(
-               'not-all',
+               'one',
                false,
                InputOption::VALUE_NONE,
-               'Si not-all est spécifié, vous devrez sélectionner la base de données à dump'
+               'Si one est spécifié, vous devrez sélectionner la base de données à dump'
             )
             ->addOption(
                'i',
@@ -47,11 +45,9 @@ class DumpCommand extends ContainerAwareCommand {
     
     protected function execute(InputInterface $input, OutputInterface $output) 
     {          
-        $helper = $this->getHelper('question');
-
         $container = $this->getContainer();
-
-        $params = $this->getParams();
+        $io = new SymfonyStyle($input, $output);
+        $params = $this->constructParamsArray($input);
 
         if ($input->getOption('name'))
         {
@@ -78,9 +74,6 @@ class DumpCommand extends ContainerAwareCommand {
             'ftp_timeout'   => 'Veuillez renseigner le timeout du ftp utilisé : ',
             'ftp_path'      => 'Veuillez renseigner le path du ftp utilisé : '
         );
-
-        // A gérer l'extension pour le FTP
-        $params['extension'] = '.zip';
         
         // On charge les params pour le FTP
         if ($input->getOption('ftp')) 
@@ -92,8 +85,7 @@ class DumpCommand extends ContainerAwareCommand {
                 $$parametre = $parametre_defaut;
                 // Si l'utilisateur a envoyé l'option i on lui pose les questions correspondantes
                 if ($input->getOption('i')){
-                    $question = new Question($libelle . '['.$parametre_defaut.'] ', $parametre_defaut);
-                    $$parametre = $helper->ask($input, $output, $question);
+                    $$parametre = $io->ask($libelle . '['.$parametre_defaut.'] ', $parametre_defaut);
                 }
                $params[$parametre] = $$parametre;
             }
@@ -114,57 +106,55 @@ class DumpCommand extends ContainerAwareCommand {
             $parametre_defaut = $container->getParameter('rma_'.$parametre);
             $$parametre = $parametre_defaut;
             if ($input->getOption('i')){
-                $question = new Question($libelle . '['.$parametre_defaut.'] ', $parametre_defaut);
-                $$parametre = $helper->ask($input, $output, $question);
+                $$parametre = $io->ask($libelle , $parametre_defaut);
             }
            $params[$parametre] = $$parametre;
         }
-        
-        $params['dir_fichier'] = $dir_zip; 
+      
+        if ($params['password'] == 'none')
+        {
+            $params['password'] = '';
+        }
      
+        $params['dir_fichier'] = $dir_zip; 
+        
         // On charge l'objet dump pour gérer toutes les fonctionnalités 
         $dump = RDumpFactory::create($params);
-        $databases = $dump->rmaDumpGetListDatabases();          
+        $databases = $dump->rmaDumpGetListDatabases($params['excludes']);          
 
         // On propose à l'utilisateur de sélectionner la ou les bases de données à sauvegarder
-        if ($input->getOption('not-all'))
+        if ($input->getOption('one'))
         {
-            $question_dbb = new ChoiceQuestion(
-                'Sélectionnez la ou les bases de données à sauvegarder (séparer par des virgules)',
-                $databases,
-                0
-            );
-            $question_dbb->setMultiselect(true);
-            $question_dbb->setErrorMessage('La base de données %s est introuvable.');
-            $databases = $helper->ask($input, $output, $question_dbb);
-        }
-
-        // On vérifie que la connexionDB contienne au moins 1 base de données
-        if (count($databases) == 0) {
-            throw new \Exception ('Aucune base de données détectée avec les paramètres définis');
+            $databases = $io->choice('Sélectionnez la base de données à sauvegarder', $databases);
         }
            
+        SyncDumpCommand::SyncCommand($io, $params['dir_dump'], $params['logger']);
+        
         // On charge un objet progressbar qui affichera l'avancement pour chaque base de données
-        $progress = new ProgressBar($output, count($databases));
-        $progress->setFormat('verbose');
-        $array = array();
+        $io->title('Dump des ' . count($databases) . ' base(s) de données');
+        $io->progressStart(count($databases));
+
+        $logs = array();
         
-        foreach ($databases as $database) {
-            $output->writeln($database . ' : ');
-            $progress->advance();
-            $output->writeln('');
-            $output->writeln('');
-            $array = $dump->rmaDumpForDatabase($database, $array);
+        if ($input->getOption('one'))
+        {
+            $io->progressAdvance();
+            $logs = $dump->rmaDumpForDatabase($databases, $logs);
         }
-        
-        $infos = $dump->rmaGetInfosDump($date, $params['dir_dump'], $params['repertoire_name'], count($databases), $array);
-        
+        else 
+        {
+            foreach ($databases as $database) {
+                $io->progressAdvance();
+                $logs = $dump->rmaDumpForDatabase($database, $logs);
+            }
+        }
+
+        $infos = $dump->rmaGetInfosDump($params['date'], $params['dir_dump'], $params['repertoire_name'], count($databases), $logs);
         $dump->rmaWriteDump($infos, $params['dir_dump']);
 
-        $progress->finish();
-        $output->writeln('');
-        $output->writeln('-----------');
-        $output->writeln('Dump mis à disposition dans le répertoire ' . $params['dir_dump'] . DIRECTORY_SEPARATOR . $params['repertoire_name']);
+        $io->progressFinish();
+
+        $io->success('Dump mis à disposition dans le répertoire ');
 
         // On zip le dump
         $dump->rmaDumpJustZip();
@@ -173,21 +163,6 @@ class DumpCommand extends ContainerAwareCommand {
         FtpCommand::saveDumpInFtp($params['ftp'], $dump);
 
         // On lance l'action de suppression des anciens dumps
-        CleanDumpCommand::cleanCommand($output, $params['dir_dump'], $params['nb_jour']);
+        CleanDumpCommand::cleanCommand($io, $params['dir_dump'], $params['nb_jour'], $params['logger']);
     }
-
-    public function getParams()
-    {
-        $container = $this->getContainer();
-
-        $params = array();
-        $date = date('Y-m-d-H\\hi');
-        $params['repertoire_name'] = $date . '__' . uniqid();
-        $params['logger'] = $container->get('logger');
-        $params['ftp'] = $container->getParameter('rma_ftp');
-        $params['nb_jour'] = $container->getParameter('rma_nb_jour');
-
-        return $params;
-    }
-
 }

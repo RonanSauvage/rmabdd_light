@@ -86,6 +86,11 @@ class WriteDump implements WriteDumpInterface {
         return $content;
     }
     
+    /**
+     * Permet de remplacer les DATAS d'un fichier de dump 
+     * @param array $infos
+     * @param string $path_dir
+     */
     public function remplaceDumpFic(Array $infos, $path_dir)
     {
         $path_file = Tools::formatDirWithDumpFile($path_dir, self::NAME_DUMP);

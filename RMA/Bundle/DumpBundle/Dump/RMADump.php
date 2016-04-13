@@ -25,6 +25,7 @@ class RMADump extends ContainerAware {
     protected $_ftp;
     protected $_logger;
     protected $_writedump;
+    protected $_excludes;
     
    /**
     * 
@@ -36,7 +37,7 @@ class RMADump extends ContainerAware {
     * @param LoggerInterface $logger
     * @param WriteDumpInterface $writedump
     */
-    public function __construct (ConnexionDBInterface $connexiondb, DumpInterface $dump, ZipInterface $zip, $zip_bool, FtpInterface $ftp, LoggerInterface $logger, WriteDumpInterface $writedump)
+    public function __construct (ConnexionDBInterface $connexiondb, DumpInterface $dump, ZipInterface $zip, $zip_bool, FtpInterface $ftp, LoggerInterface $logger, WriteDumpInterface $writedump, Array $excludes)
     {
         $this->_zip = $zip;
         $this->_connexiondb = $connexiondb;
@@ -45,15 +46,16 @@ class RMADump extends ContainerAware {
         $this->_ftp = $ftp; 
         $this->_logger = $logger;
         $this->_writedump = $writedump;
+        $this->_excludes = $excludes;
     }
     
     /**
      * Lance un dump pour plusieurs databases
      * @param array $databases
      */
-    public function rmaDumpForDatabases(Array $databases)
+    public function rmaDumpForDatabases(Array $databases, Array $excludes)
     {
-        $infos = $this->_dump->execDumpForConnexiondb($databases);
+        $infos = $this->_dump->execDumpForConnexiondb($databases, $excludes);
         if ($this->_zip_bool == 'yes')
         {
             $this->rmaDumpJustZip($this->_zip_bool);
@@ -68,7 +70,7 @@ class RMADump extends ContainerAware {
      */
     public function rmaDumpForDatabase($database, $infos_old)
     {
-        $infos = $this->_dump->execDumpForOneDatabase($database);
+        $infos = $this->_dump->execDumpForOneDatabase($database, $this->_excludes);
         $infos = array_merge($infos_old, $infos);
         $this->rmaLogger('Dump : La base de données '. $database .' a bien été exportée');
         return $infos;
@@ -93,9 +95,10 @@ class RMADump extends ContainerAware {
      * Permet de récupérer les databases dans une base de données
      * @return Array $databases
      */
-    public function rmaDumpGetListDatabases()
+    public function rmaDumpGetListDatabases($excludes)
     {
-        return  $this->_connexiondb->getListDatabases();
+        $databases = $this->_connexiondb->getListDatabases();
+        return $this->_dump->unsetDataTablesExclude($databases, $excludes);
     }
     
     /**
@@ -104,7 +107,7 @@ class RMADump extends ContainerAware {
     public function rmaDepotFTP()
     {
         $this->_ftp->depotSurFTP();
-         $this->rmaLogger('FTP : L\'export FTP s\'est correctement déroulé');
+        $this->rmaLogger('FTP : L\'export FTP s\'est correctement déroulé');
     }
     
     /**

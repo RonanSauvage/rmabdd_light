@@ -2,7 +2,7 @@
 
 namespace RMA\Bundle\DumpBundle\Tools;
 
-use Symfony\Component\DependencyInjection\ContainerAware;
+use Psr\Log\LoggerInterface;
 
 use RMA\Bundle\DumpBundle\Tools\SyncDumpInterface;
 use RMA\Bundle\DumpBundle\Tools\WriteDumpInterface;
@@ -14,17 +14,19 @@ use RMA\Bundle\DumpBundle\Tools\ToolsInterface;
  *
  * @author rmA
  */
-class RTools extends ContainerAware {
+class RTools {
     
     protected $_writedump;
     protected $_syncdump;
     protected $_tools;
+    protected $_logger;
 
-    public function __construct (WriteDumpInterface $writedump, SyncDumpInterface $syncdump, ToolsInterface $tools)
+    public function __construct (WriteDumpInterface $writedump, SyncDumpInterface $syncdump, ToolsInterface $tools, LoggerInterface $logger)
     {
         $this->_syncdump = $syncdump;
         $this->_writedump = $writedump;
         $this->_tools = $tools;
+        $this->_logger = $logger;
     }
 
     /**
@@ -36,6 +38,19 @@ class RTools extends ContainerAware {
     public function rmaDeleteOldDump($dir_rep, $jour)
     {
         return $this->_syncdump->deleteOldDump($dir_rep, $jour);
+        $this->_logger->notice('Les dumps de plus de '. $jours .' jours dans le répertoire '. $dir_rep .' ont bien été supprimés');
+    }
+    
+    /**
+     * Synchronise le fichier de sauvegarde selon les dumps encore présents dans le répertoire
+     * @param string $dir_rep
+     */
+    public function rmaSyncRep($dir_rep)
+    {
+        $infos = $this->_syncdump->syncRep($dir_rep);
+        $this->_writedump->remplaceDumpFic($infos["infos"], $dir_rep);
+        $this->_logger->notice('Le répertoire '. $dir_rep .' a bien été synchronisé');
+        return $infos;
     }
 }
 

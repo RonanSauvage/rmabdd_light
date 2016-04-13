@@ -6,6 +6,8 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Input\InputOption;
+use Psr\Log\LoggerInterface;
+use Symfony\Component\Console\Style\SymfonyStyle;
 
 use RMA\Bundle\DumpBundle\Factory\RToolsFactory; 
 
@@ -31,8 +33,13 @@ class CleanDumpCommand extends ContainerAwareCommand {
     
     protected function execute(InputInterface $input, OutputInterface $output) 
     {            
-        $dir_dump = $this->getContainer()->getParameter('rma_dir_dump');
-        $number_clean = $this->getContainer()->getParameter('rma_nb_jour');
+        $container = $this->getContainer();
+        $dir_dump = $container->getParameter('rma_dir_dump');
+        $number_clean = $container->getParameter('rma_nb_jour');
+        $logger = $container->get('logger');
+        $io = new SymfonyStyle($input, $output);
+        
+        SyncDumpCommand::SyncCommand($io, $dir_dump, $logger);
     
         if(($input->getOption('dir_dump')))
         {
@@ -44,14 +51,15 @@ class CleanDumpCommand extends ContainerAwareCommand {
             $number_clean = $input->getOption('nb_jour');
 
         }
-        $this->cleanCommand($input, $output, $dir_dump, $number_clean);
+        $this->cleanCommand($io, $dir_dump, $number_clean, $logger);
     }
     
-    public static function cleanCommand(OutputInterface $output, $dir_dump, $number_clean)
+    public static function cleanCommand($io, $dir_dump, $number_clean, LoggerInterface $logger)
     {
-        $tools = RToolsFactory::create();
-        $output->writeln('Suppression des dumps de plus de ' . $number_clean . ' jours');
+        $tools = RToolsFactory::create(array('logger' => $logger));
+
+        $io->title('Clean des anciens dumps de plus de ' . $number_clean .' jours');
         $response_clean = $tools->rmaDeleteOldDump($dir_dump, $number_clean);
-        $output->writeln($response_clean);
+        $io->success($response_clean);
     }
 }

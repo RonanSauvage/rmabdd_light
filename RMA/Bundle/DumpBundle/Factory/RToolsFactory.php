@@ -16,13 +16,14 @@ class RToolsFactory{
         
     /**
      * Factory pour l'utilisation de RTools
+     * @param Array $params
      * @return \RMA\Bundle\DumpBundle\Factory\RTools
      */
-    public static function create()
+    public static function create(Array $params)
     {
         $writedump = new WriteDump();
         $syncdump = new SyncDump();
         $tools = new Tools();
-        return new RTools($writedump, $syncdump, $tools);
+        return new RTools($writedump, $syncdump, $tools, $params['logger']);
     }  
 }

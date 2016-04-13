@@ -3,14 +3,15 @@
 namespace RMA\Bundle\DumpBundle\Command;
 
 use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\InputArgument;
+use Symfony\Component\Console\Style\SymfonyStyle;
 
 use RMA\Bundle\DumpBundle\Factory\RDumpFactory;
+use RMA\Bundle\DumpBundle\Command\CommonCommand;
 
-class CronDumpCommand extends ContainerAwareCommand {
+class CronDumpCommand extends CommonCommand {
     
     protected function configure() {
       
@@ -116,39 +117,36 @@ class CronDumpCommand extends ContainerAwareCommand {
     
     protected function execute(InputInterface $input, OutputInterface $output) 
     {        
-        $container = $this->getContainer();
-
-        $params = $this->hydrateInputOptions($input);
+        $params = $this->hydrateCommand($input);
+        $io = new SymfonyStyle($input, $output);
         
-        // A gérer l'extension pour le FTP
-        $params['extension'] = '.zip';
+        // A gérer l'extension pour le FTP   - A retirer par la suite 
         $params['dir_fichier'] = $params['dir_zip']; 
         
         // On gère le mot de passe pouvant être vide 
-        if(($input->getOption('password'))== 'none')
+        if(($input->getOption('password'))== 'none' || $params['password'] == 'none')
         {
             $params['password'] = '';
         }
 
+        SyncDumpCommand::SyncCommand($io, $params['dir_dump'], $params['logger']);
+        
         $dump = RDumpFactory::create($params);
-        $databases = $dump->rmaDumpGetListDatabases();
+        $databases = $dump->rmaDumpGetListDatabases($params['excludes']);
 
         if ($input->getArgument('databases'))
         {
             $databases = $input->getArgument('databases');
         }
 
-        // On vérifie que la connexionDB contienne au moins 1 base de données
-        if (count($databases) == 0) {
-            throw new \Exception ('Aucune base de données detectée avec les paramètres définis');
-        }
-
-        $dump->rmaDumpForDatabases($databases);
+        $array = $dump->rmaDumpForDatabases($databases, $params['excludes']);
+        
+        $infos = $dump->rmaGetInfosDump($params['date'], $params['dir_dump'], $params['repertoire_name'], count($databases), $array);
+        $dump->rmaWriteDump($infos, $params['dir_dump']);
         
         FtpCommand::saveDumpInFtp($params['ftp'], $dump);
 
-        $nb_jour = $container->getParameter('rma_nb_jour');
-        CleanDumpCommand::cleanCommand($output, $params['dir_dump'], $nb_jour);
+        CleanDumpCommand::cleanCommand($io, $params['dir_dump'], $params['nb_jour'], $params['logger']);
     }
 
 
@@ -157,13 +155,13 @@ class CronDumpCommand extends ContainerAwareCommand {
      * @param InputInterface $input
      * @return array $params
      */
-    public function hydrateInputOptions (InputInterface $input)
+    public function hydrateCommand (InputInterface $input)
     {
         $rOptions = $input->getOptions();
         $container = $this->getContainer();
-        $params = array ();
-        $params['repertoire_name'] = date('Y-m-d-H\\hi') . '__' . uniqid();
-        $params['logger'] = $container->get('logger');
+        
+        $params = $this->constructParamsArray($input);
+        
         foreach ($rOptions as $rOption => $rvalue)
         {
             if($container->hasParameter('rma_'.$rOption))

@@ -44,9 +44,11 @@ class DumpMysql implements DumpInterface{
     /**
      * Permet de lancer le dump pour une liste de databases
      * @param array $databases
+     * @param array $excludes
      */
-    public function execDumpForConnexiondb (Array $databases)
+    public function execDumpForConnexiondb (Array $databases, Array $excludes)
     {
+        $databases = $this->unsetDataTablesExclude($databases, $excludes);
         $infos = array();
         foreach ($databases as $database){
            $infos = array_merge($infos, $this->execDumpForOneDatabase($database));         
@@ -116,6 +118,25 @@ class DumpMysql implements DumpInterface{
     public function getPathDumpsWithDir() 
     {
         return $this->_pathDumps . DIRECTORY_SEPARATOR . $this->_repertoire_name;
+    }
+    
+    /**
+     * Permet de retirer les tables qui doivent être excludes de l'array d'origine
+     * @param type array $bases_de_donnees
+     * @param type array $excludes
+     * @return type array $bases_de_donnees
+     */
+    public function unsetDataTablesExclude($bases_de_donnees, $excludes){      
+        foreach ($excludes as $exclude) {
+            $i = 0;
+            foreach ($bases_de_donnees as $key => $base_de_donnees){           
+                if($base_de_donnees == $exclude){
+                     unset ($bases_de_donnees[$key]);
+                } 
+            $i++;
+            }   
+        }
+        return $bases_de_donnees;
     }
 
 }

@@ -23,25 +23,30 @@ class SyncDump implements SyncDumpInterface {
     {       
         // On récupère les données stockées dans .dump.init
         $content = $this->recupData($dir_rep);  
+        $count_initial = count($content);
        
         // On récupère tous les répertoires dans le répertoire envoyé en paramètre
-        $contenu_content_rep = array_diff(scandir($dir_rep), array('..', '.', self::NAME_DUMP));
-        $contenu_content_rep = array_values($contenu_content_rep);
-        $my_array = array ();
-                 
+        $contenu_content_rep = array_values(array_diff(scandir($dir_rep), array('..', '.', self::NAME_DUMP)));
+        
+        $my_array = array ();       
         foreach ($content as $name_dump => $data_dump)
         {
             $resultats = explode('|', $name_dump);
             foreach ($contenu_content_rep as $dump_in_dir)
             {
                 if ($dump_in_dir == trim($resultats[2])){
-                    array_push($my_array, trim($resultats[2]));
+                    $my_array[$name_dump] = $data_dump;
                 }
             }          
             
         }
-        $file_content = array_merge($content, $infos);
-        $this->putInitFile($file, $file_content);
+        $count_final = count($my_array);
+        return array (
+            "infos"         => $my_array,
+            "count_initial" => $count_initial,
+            "count_final"   => $count_final,
+            "synchro"       => $count_initial - $count_final
+        );
     }
     
     

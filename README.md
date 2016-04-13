@@ -1,7 +1,8 @@
-rmABDD_light.
+rmABDD_light :
+
 Ce projet est une adaptation light de rmaBDD. Elle n'intègre que la partie console.
 
-## Si vous télécharger rmaBDD comme Bundle, vous avez 2 possibilités :
+### Si vous souhaitez téléchargé rmaBDD comme Bundle, vous avez 2 possibilités :
 
 Utiliser Composer:
     $ composer require rma/rmabdd_light:dev-master
@@ -13,9 +14,9 @@ Via le fichier json :
 
 Ensuite, vous pouvez lancer composer update afin configurer votre bundle.
 
-## Dépendances 
+### Dépendances
     "php": ">=5.3.9",
-    "symfony/symfony": "2.7.*",
+    "symfony/symfony": "2.8.*",
     "doctrine/orm": "^2.4.8",
     "doctrine/doctrine-bundle": "~1.4",
     "symfony/swiftmailer-bundle": "~2.3",
@@ -29,7 +30,7 @@ A la fin du composer, vous devrez saisir les parameters liés à l'application. 
     rma_host:           127.0.0.1
     rma_port:           3306
     rma_username:       root
-    rma_password:       ''
+    rma_password:       none
     rma_compress:       gzip
     rma_zip:            false
     rma_dir_zip:        %kernel.root_dir%/../web/zip
@@ -40,11 +41,16 @@ A la fin du composer, vous devrez saisir les parameters liés à l'application. 
     rma_ftp_port:       21
     rma_ftp_timeout:    90
     rma_ftp_path:       /home/rma/dump
+    rma_nb_jour: 5
+    rma_excludes:
+        - mysql
+        - performance_schema
 
-Attention : Pour mettre un password vide, n'oubliez pas les deux côtes.
+Attention : Pour mettre un password vide, n'oubliez pas le 'none'.
 Attention : Pour les dir, vous devez doubler les DIRECTORY SEPARATOR. (exemple : dir_dump=C:\\Users\\rmA\\Desktop)
+Attention : Si vous ne souhaitez pas exclude de base de données dans vos dumps, inscrivez - none
 
-## Les commandes :
+### Les commandes :
 
 Pour voir les commandes mises à votre disposition rendez-vous à la racine et écrivez :
     
@@ -54,7 +60,7 @@ Les commandes mises à disposition sont préfixées par "rma:"
     
     rma:dump:database ----  Permet de réaliser un dump 
         Option :
-            --not-all pour ne pas sauvegarder toutes les bases
+            --one pour sauvegarder une base unique
             --i pour ouvrir l'interface d'intéractions pour les données de connexion (sinon les infos en parameters seront prises par défaut)
             --ftp permet de sauvegarder le dump en FTP. Ne fonctionne actuellement que pour une archive zippée. 
             --name permet de définir un nom custom pour le dump
@@ -99,3 +105,8 @@ Les commandes mises à disposition sont préfixées par "rma:"
                 php app/console rma:dump:clean --nb-jour=4 
             Tous les dates de plus de 4 jours seront supprimés
 
+    rma:dump:sync ---- Commande pour synchroniser les logs de dump avec les dumps effectivement présents dans le répertoire de dump
+        Permet notamment de mettre à jour le dossier des logs dans le cas où vous supprimeriez manuellement des dumps
+        Par défaut le répertoire à vider est celui défini au niveau du parameters.yml
+        Options :
+            --dir_dump ; permet de définir un répertoire à gérer spécifique 

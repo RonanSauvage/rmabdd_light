@@ -28,6 +28,6 @@ class RDumpFactory{
         $mysqldump = new DumpMysql($connexiondb, $params); 
         $rftp = new Rftp($params);
         $writedump = new WriteDump();
-        return new RMADump($connexiondb, $mysqldump, $rzip, $params['zip'], $rftp, $params['logger'], $writedump);
+        return new RMADump($connexiondb, $mysqldump, $rzip, $params['zip'], $rftp, $params['logger'], $writedump, $params['excludes']);
     }  
 }
