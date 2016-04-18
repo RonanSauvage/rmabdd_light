@@ -9,8 +9,31 @@ class CommonCommand extends ContainerAwareCommand {
     
     protected function configure() {
       
-        $this->setName('rma:dump:configuration');
+        $this->setName('rma:dump:help');
     }
+    /*
+    protected function execute(InputInterface $input, OutputInterface $output) 
+    {            
+        $params = $this->hydrateCommand($input);
+        $io = new SymfonyStyle($input, $output);
+
+        $io->title('Commandes disponibles dans le bundle rma :');
+
+        $headers = array (
+            'Commandes', 'Fonctionnement', 'Options', 'Paramètres'
+        );
+        $rows = array(
+            array ('rma:dump:database', 'Cette commande permet de générer un dump des différents schémas de la base de données','',''),
+            array ('rma:dump:clean', 'Cette commande permet de nettoyer les dumps','',''),
+            array ('rma:dump:sync', 'Cette commande permet de synchroniser les métadatas','',''),
+            array ('rma:dump:ftp', 'Cette commande permet d\'envoyer un dump par FTP','',''),
+            array ('rma:dump:cron', 'Cette commande est prévue spécialement pour être réalisée en CRON','','')
+            
+        );
+        $io->table($headers, $rows);
+
+        $io->note('Nombre de dumps effacés des logs : ' . $infos['synchro']);
+    }*/
     
     public function constructParamsArray (InputInterface $input)
     {

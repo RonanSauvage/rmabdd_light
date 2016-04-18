@@ -21,6 +21,7 @@ class WriteDump implements WriteDumpInterface {
     public function writeInDumpFic(Array $infos, $path_dir)
     {
         $path_file = Tools::formatDirWithDumpFile($path_dir, self::NAME_DUMP);
+               
         $content = $this->recupData($path_file);
         $file_content = array_merge($content, $infos);
         $this->putInitFile($path_file, $file_content);
@@ -39,7 +40,10 @@ class WriteDump implements WriteDumpInterface {
             if(is_array($val))
             {
                 $res[] = "[$key]";
-                foreach($val as $skey => $sval) $res[] = "$skey = ".(is_numeric($sval) ? $sval : '"'.$sval.'"');
+                foreach($val as $skey => $sval)
+                {
+                    $res[] = "$skey = ".(is_numeric($sval) ? $sval : '"'.$sval.'"');
+                } 
             }
             else $res[] = "$key = ".(is_numeric($val) ? $val : '"'.$val.'"');
         }
@@ -56,10 +60,12 @@ class WriteDump implements WriteDumpInterface {
         if ($fp = fopen($fileName, 'w'))
         {
             $startTime = microtime();
-            do
-            {            
+            do {            
                 $canWrite = flock($fp, LOCK_EX);
-                if(!$canWrite) usleep(round(rand(0, 100)*1000));
+                if(!$canWrite)
+                {
+                    usleep(round(rand(0, 100)*1000));
+                } 
             } while ((!$canWrite)and((microtime()-$startTime) < 1000));
             if ($canWrite)
             {            

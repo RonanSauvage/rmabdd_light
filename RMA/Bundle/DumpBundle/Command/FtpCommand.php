@@ -20,11 +20,13 @@ class FtpCommand extends ContainerAwareCommand {
         
     }
     
-    public static function saveDumpInFtp ($ftp, $dump)
+    public static function saveDumpInFtp ($io, $dump, Array $params)
     {
-        if ($ftp == 'yes')
+        if ($params['ftp'] == 'yes')
         {
+            $io->title('Sauvegarde du dump sur le serveur FTP :');
             $dump->rmaDepotFTP();
+            $io->success('Sauvegarde sur le serveur FTP réussie');
         }
     }
 }

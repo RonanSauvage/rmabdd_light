@@ -4,7 +4,7 @@ namespace RMA\Bundle\DumpBundle\Dump;
 
 interface DumpInterface 
 {
-    public function execDumpForConnexiondb (Array $databases, Array $excludes);
+    public function execDumpForConnexiondb (Array $databases);
     
     public function execDumpForOneDatabase($name_database);
     

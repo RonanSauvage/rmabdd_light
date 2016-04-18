@@ -3,7 +3,6 @@
 namespace RMA\Bundle\DumpBundle\Command;
 
 use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Psr\Log\LoggerInterface;
@@ -11,7 +10,7 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 
 use RMA\Bundle\DumpBundle\Factory\RToolsFactory; 
 
-class CleanDumpCommand extends ContainerAwareCommand {
+class CleanDumpCommand extends CommonCommand {
     
     protected function configure() {
       
@@ -33,33 +32,36 @@ class CleanDumpCommand extends ContainerAwareCommand {
     
     protected function execute(InputInterface $input, OutputInterface $output) 
     {            
-        $container = $this->getContainer();
-        $dir_dump = $container->getParameter('rma_dir_dump');
-        $number_clean = $container->getParameter('rma_nb_jour');
-        $logger = $container->get('logger');
+        $params = $this->hydrateCommand($input);
         $io = new SymfonyStyle($input, $output);
-        
-        SyncDumpCommand::syncCommand($io, $dir_dump, $logger);
-    
+   
         if(($input->getOption('dir_dump')))
         {
-            $dir_dump = $input->getOption('dir_dump');
+            $params['dir_dump'] = $input->getOption('dir_dump');
         }
         
         if(($input->getOption('nb_jour')))
         {
-            $number_clean = $input->getOption('nb_jour');
+            $params['nb_jour'] = $input->getOption('nb_jour');
 
         }
-        $this->cleanCommand($io, $dir_dump, $number_clean, $logger);
+        
+        SyncDumpCommand::syncCommand($io, $params);
+        $this->cleanCommand($io, $params);
     }
     
-    public static function cleanCommand($io, $dir_dump, $number_clean, LoggerInterface $logger)
+    public static function cleanCommand($io, $params)
     {
-        $tools = RToolsFactory::create(array('logger' => $logger));
-
-        $io->title('Clean des anciens dumps de plus de ' . $number_clean .' jours');
-        $response_clean = $tools->rmaDeleteOldDump($dir_dump, $number_clean);
+        $tools = RToolsFactory::create($params);
+     
+        $io->title('Clean des anciens dumps de plus de ' . $params['nb_jour'] .' jours');
+        $response_clean = $tools->rmaDeleteOldDump($params['dir_dump'], $params['nb_jour']);
         $io->success($response_clean);
+    }
+    
+    public function hydrateCommand(InputInterface $input)
+    {
+        $params = $this->constructParamsArray($input);
+        return $params;
     }
 }

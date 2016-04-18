@@ -5,11 +5,11 @@ Ce projet est une adaptation light de rmaBDD. Elle n'intègre que la partie cons
 ### Si vous souhaitez téléchargé rmaBDD comme Bundle, vous avez 2 possibilités :
 
 Utiliser Composer:
-    $ composer require rma/rmabdd_light:dev-master
+    $ composer require rma/rmabdd_light:~0.3.*
 
 Via le fichier json :
     "require": {
-        "rma/rmabdd_light":"dev-master"
+        "rma/rmabdd_light":"~0.3.*"
     }
 
 Ensuite, vous pouvez lancer composer update afin configurer votre bundle.
@@ -21,7 +21,7 @@ Ensuite, vous pouvez lancer composer update afin configurer votre bundle.
     "doctrine/doctrine-bundle": "~1.4",
     "symfony/swiftmailer-bundle": "~2.3",
     "symfony/monolog-bundle": "~2.4",
-    "sensio/distribution-bundle": "~5.0",
+    "sensio/distribution-bundle": "~5.0|~3.0",
     "incenteev/composer-parameter-handler": "~2.0",
     "ifsnop/mysqldump-php" : "~2.1"
 

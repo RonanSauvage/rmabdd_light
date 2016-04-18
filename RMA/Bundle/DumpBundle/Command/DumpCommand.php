@@ -6,6 +6,8 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Style\SymfonyStyle;
+use Symfony\Component\Console\Helper\ProgressBar;
+
 
 use RMA\Bundle\DumpBundle\Factory\RDumpFactory;
 use RMA\Bundle\DumpBundle\Tools\Tools;
@@ -47,7 +49,7 @@ class DumpCommand extends CommonCommand {
     {          
         $container = $this->getContainer();
         $io = new SymfonyStyle($input, $output);
-        $params = $this->constructParamsArray($input);
+        $params = $this->hydrateCommand($input);
 
         if ($input->getOption('name'))
         {
@@ -127,42 +129,34 @@ class DumpCommand extends CommonCommand {
         {
             $databases = $io->choice('Sélectionnez la base de données à sauvegarder', $databases);
         }
-           
-        SyncDumpCommand::syncCommand($io, $params['dir_dump'], $params['logger']);
         
-        // On charge un objet progressbar qui affichera l'avancement pour chaque base de données
-        $io->title('Dump des ' . count($databases) . ' base(s) de données');
-        $io->progressStart(count($databases));
+        SyncDumpCommand::syncCommand($io, $params);
 
-        $logs = array();
-        
-        if ($input->getOption('one'))
-        {
-            $io->progressAdvance();
-            $logs = $dump->rmaDumpForDatabase($databases, $logs);
-        }
-        else 
-        {
-            foreach ($databases as $database) {
-                $io->progressAdvance();
-                $logs = $dump->rmaDumpForDatabase($database, $logs);
-            }
-        }
-
-        $infos = $dump->rmaGetInfosDump($params['date'], $params['dir_dump'], $params['repertoire_name'], count($databases), $logs);
-        $dump->rmaWriteDump($infos, $params['dir_dump']);
-
-        $io->progressFinish();
-
-        $io->success('Dump mis à disposition dans le répertoire ');
-
+        DumpCommand::dumpDatabases($io, $databases, $params, $dump);
         // On zip le dump
         $dump->rmaDumpJustZip();
 
         // On sauvegarde le dump sur le serveur FTP
-        FtpCommand::saveDumpInFtp($params['ftp'], $dump);
+        FtpCommand::saveDumpInFtp($io, $dump, $params);
 
         // On lance l'action de suppression des anciens dumps
-        CleanDumpCommand::cleanCommand($io, $params['dir_dump'], $params['nb_jour'], $params['logger']);
+        CleanDumpCommand::cleanCommand($io, $params);
     }
+    
+    public function hydrateCommand(InputInterface $input)
+    {
+        $params = $this->constructParamsArray($input);
+        return $params;
+    }
+    
+    public static function dumpDatabases($io, $databases, $params, $dump)
+    {
+         // On charge un objet progressbar qui affichera l'avancement pour chaque base de données
+        $io->title('Dump des ' . count($databases) . ' base(s) de données');
+
+        $dump->dumpAndWriteLogs($databases, $params);
+
+        $io->success('Dump mis à disposition dans le répertoire ');
+    }
+    
 }

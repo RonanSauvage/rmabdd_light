@@ -53,9 +53,9 @@ class RMADump extends ContainerAware {
      * Lance un dump pour plusieurs databases
      * @param array $databases
      */
-    public function rmaDumpForDatabases(Array $databases, Array $excludes)
+    public function rmaDumpForDatabases(Array $databases)
     {
-        $infos = $this->_dump->execDumpForConnexiondb($databases, $excludes);
+        $infos = $this->_dump->execDumpForConnexiondb($databases);
         if ($this->_zip_bool == 'yes')
         {
             $this->rmaDumpJustZip($this->_zip_bool);
@@ -124,7 +124,7 @@ class RMADump extends ContainerAware {
      * @param array $infos
      * @param string $fichier
      */
-    public function rmaWriteDump(Array $infos, $fichier  = 'C:/wamp/www/rmabdd_console/web/dump/')
+    public function rmaWriteDump(Array $infos, $fichier)
     {
         $this->_writedump->writeInDumpFic($infos, $fichier);
     }
@@ -138,12 +138,29 @@ class RMADump extends ContainerAware {
      * @param array $data
      * @return array $infos
      */
-    public function rmaGetInfosDump($date, $dir_dump, $repertoire_name, $numer_databases, Array $data)
+    public function rmaGetInfosDump($date, $dir_dump, $repertoire_name, $numer_databases, $data)
     {
         $infos = array(
             $date ." | ". $dir_dump . " | " . $repertoire_name . " | " . $numer_databases ." databases " =>  $data
         );
         return $infos;
+    }
+    
+    /**
+    * Permet de lancer un dump et d'enregistrer les logs correspondants
+    * @param array $databases
+    * @param array $params
+    *
+    */
+    public function dumpAndWriteLogs(Array $databases, Array $params)
+    {
+        $logs = array();
+        foreach ($databases as $database)
+        {
+            $logs = $this->rmaDumpForDatabase($database, $logs); 
+        }
+        $infos = $this->rmaGetInfosDump($params['date'], $params['dir_dump'], $params['repertoire_name'], count($databases), $logs);
+        $this->rmaWriteDump($infos, $params['dir_dump']);
     }
 }
 

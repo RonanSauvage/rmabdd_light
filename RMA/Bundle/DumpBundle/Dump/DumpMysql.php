@@ -46,9 +46,8 @@ class DumpMysql implements DumpInterface{
      * @param array $databases
      * @param array $excludes
      */
-    public function execDumpForConnexiondb (Array $databases, Array $excludes)
+    public function execDumpForConnexiondb (Array $databases)
     {
-        $databases = $this->unsetDataTablesExclude($databases, $excludes);
         $infos = array();
         foreach ($databases as $database){
            $infos = array_merge($infos, $this->execDumpForOneDatabase($database));         

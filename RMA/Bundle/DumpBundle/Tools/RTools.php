@@ -38,7 +38,7 @@ class RTools {
     public function rmaDeleteOldDump($dir_rep, $jour)
     {
         $response = $this->_syncdump->deleteOldDump($dir_rep, $jour);
-        $this->_logger->notice('Les dumps de plus de '. $jours .' jours dans le répertoire '. $dir_rep .' ont bien été supprimés');
+        $this->_logger->notice('Les dumps de plus de '. $jour .' jours dans le répertoire '. $dir_rep .' ont bien été supprimés');
         return $response;
     }
     
