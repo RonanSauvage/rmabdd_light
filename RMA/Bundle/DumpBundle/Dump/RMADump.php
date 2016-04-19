@@ -8,7 +8,6 @@ use RMA\Bundle\DumpBundle\Ftp\FtpInterface;
 use RMA\Bundle\DumpBundle\ConnexionDB\ConnexionDBInterface;
 use RMA\Bundle\DumpBundle\Dump\DumpInterface;
 use RMA\Bundle\DumpBundle\Zip\ZipInterface;
-use Psr\Log\LoggerInterface;
 use RMA\Bundle\DumpBundle\Tools\WriteDumpInterface;
 
 /**
@@ -20,33 +19,28 @@ class RMADump extends ContainerAware {
     
     protected $_zip;
     protected $_dump;
-    protected $_zip_bool;
     protected $_connexiondb;
     protected $_ftp;
-    protected $_logger;
     protected $_writedump;
-    protected $_excludes;
+    protected $_params;
     
    /**
     * 
     * @param ConnexionDBInterface $connexiondb
     * @param DumpInterface $dump
-    * @param ZipInterface $zip
-    * @param string $zip_bool
+    * @param ZipInterface $_zip_bool
     * @param FtpInterface $ftp
-    * @param LoggerInterface $logger
     * @param WriteDumpInterface $writedump
+    * @param Array $params | ['zip'], ['logger'], ['excludes'], ['date'], ['repertoire_name'], ['dir_dump'] 
     */
-    public function __construct (ConnexionDBInterface $connexiondb, DumpInterface $dump, ZipInterface $zip, $zip_bool, FtpInterface $ftp, LoggerInterface $logger, WriteDumpInterface $writedump, Array $excludes)
+    public function __construct (ConnexionDBInterface $connexiondb, DumpInterface $dump, ZipInterface $zip, FtpInterface $ftp, WriteDumpInterface $writedump, Array $params)
     {
         $this->_zip = $zip;
         $this->_connexiondb = $connexiondb;
         $this->_dump = $dump;  
-        $this->_zip_bool = $zip_bool; 
         $this->_ftp = $ftp; 
-        $this->_logger = $logger;
         $this->_writedump = $writedump;
-        $this->_excludes = $excludes;
+        $this->_params = $params;
     }
     
     /**
@@ -56,9 +50,9 @@ class RMADump extends ContainerAware {
     public function rmaDumpForDatabases(Array $databases)
     {
         $infos = $this->_dump->execDumpForConnexiondb($databases);
-        if ($this->_zip_bool == 'yes')
+        if ($this->_params['zip'] == 'yes')
         {
-            $this->rmaDumpJustZip($this->_zip_bool);
+            $this->rmaDumpJustZip($this->_params['zip']);
         }
         return $infos;
     }
@@ -70,7 +64,7 @@ class RMADump extends ContainerAware {
      */
     public function rmaDumpForDatabase($database, $infos_old)
     {
-        $infos = $this->_dump->execDumpForOneDatabase($database, $this->_excludes);
+        $infos = $this->_dump->execDumpForOneDatabase($database, $this->_params['excludes']);
         $infos = array_merge($infos_old, $infos);
         $this->rmaLogger('Dump : La base de données '. $database .' a bien été exportée');
         return $infos;
@@ -79,12 +73,11 @@ class RMADump extends ContainerAware {
     /**
      * Permet de lancer l'action de zip 
      * Si le paramètre n'est pas renseigné, la valeur prise est celle initialisée dans le construct
-     * Sinon si l'utilisateur peut forcer à true
      * @param boolean $zip
      */
     public function rmaDumpJustZip($zip = 'no')
     {
-        if ($zip !== 'no' || ($this->_zip_bool !== 'no'))
+        if ($zip !== 'no' || ($this->_params['zip'] !== 'no'))
         {
             $this->_zip->execZip($this->_dump->getPathDumpsWithDir());
             $this->rmaLogger('ZIP : L\'archive zip a été correctement créée');
@@ -95,10 +88,10 @@ class RMADump extends ContainerAware {
      * Permet de récupérer les databases dans une base de données
      * @return Array $databases
      */
-    public function rmaDumpGetListDatabases($excludes)
+    public function rmaDumpGetListDatabases()
     {
         $databases = $this->_connexiondb->getListDatabases();
-        return $this->_dump->unsetDataTablesExclude($databases, $excludes);
+        return $this->_dump->unsetDataTablesExclude($databases, $this->_params['excludes']);
     }
     
     /**
@@ -116,32 +109,28 @@ class RMADump extends ContainerAware {
      */
     public function rmaLogger($message)
     {
-        $this->_logger->notice($message);
+        $this->_params['logger']->notice($message);
     } 
     
     /**
      * Permet d'écrire les infos liées au dump dans le fichier .dump.ini lié
      * @param array $infos
-     * @param string $fichier
      */
-    public function rmaWriteDump(Array $infos, $fichier)
+    public function rmaWriteDump(Array $infos)
     {
-        $this->_writedump->writeInDumpFic($infos, $fichier);
+        $this->_writedump->writeInDumpFic($infos, $this->_params['dir_dump']);
     }
     
     /**
      * Permet d'écrire la première ligne du fichier liés au dump
-     * @param string $date
-     * @param string $dir_dump
-     * @param string $repertoire_name
      * @param int $numer_databases
      * @param array $data
      * @return array $infos
      */
-    public function rmaGetInfosDump($date, $dir_dump, $repertoire_name, $numer_databases, $data)
+    public function rmaGetInfosDump($numer_databases, $data)
     {
         $infos = array(
-            $date ." | ". $dir_dump . " | " . $repertoire_name . " | " . $numer_databases ." databases " =>  $data
+            $this->_params['date'] ." | ".  $this->_params['dir_dump'] . " | " .  $this->_params['repertoire_name'] . " | " . $numer_databases ." databases " =>  $data
         );
         return $infos;
     }
@@ -149,18 +138,27 @@ class RMADump extends ContainerAware {
     /**
     * Permet de lancer un dump et d'enregistrer les logs correspondants
     * @param array $databases
-    * @param array $params
     *
     */
-    public function dumpAndWriteLogs(Array $databases, Array $params)
+    public function dumpAndWriteLogs(Array $databases)
     {
         $logs = array();
         foreach ($databases as $database)
         {
             $logs = $this->rmaDumpForDatabase($database, $logs); 
         }
-        $infos = $this->rmaGetInfosDump($params['date'], $params['dir_dump'], $params['repertoire_name'], count($databases), $logs);
-        $this->rmaWriteDump($infos, $params['dir_dump']);
+        $infos = $this->rmaGetInfosDump(count($databases), $logs);
+        $this->rmaWriteDump($infos, $this->_params['dir_dump']);
+    }
+    
+    /**
+     * Méthode pour modifier un paramètre à n'importe quel moment (après initialisation notamment)
+     * return l'objet mis à jour 
+     */
+    public function setParams($params_name, $value)
+    {
+        $this->_params[$params_name] = $value;
+        return $this;
     }
 }
 

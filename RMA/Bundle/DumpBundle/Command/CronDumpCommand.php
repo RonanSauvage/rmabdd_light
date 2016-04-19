@@ -52,13 +52,13 @@ class CronDumpCommand extends CommonCommand {
         SyncDumpCommand::syncCommand($io, $params);
         
         $dump = RDumpFactory::create($params);
-        $databases = $dump->rmaDumpGetListDatabases($params['excludes']);
+        
+        $databases = $dump->rmaDumpGetListDatabases();
 
         if ($input->getArgument('databases'))
         {
             $databases = $input->getArgument('databases');
         }
-
         
         DumpCommand::dumpDatabases($io, $databases, $params, $dump);
         

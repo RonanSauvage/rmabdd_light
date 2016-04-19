@@ -24,6 +24,6 @@ class RToolsFactory{
         $writedump = new WriteDump();
         $syncdump = new SyncDump();
         $tools = new Tools();
-        return new RTools($writedump, $syncdump, $tools, $params['logger']);
+        return new RTools($writedump, $syncdump, $tools, $params);
     }  
 }

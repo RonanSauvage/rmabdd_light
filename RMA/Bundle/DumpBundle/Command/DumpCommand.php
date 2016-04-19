@@ -49,14 +49,48 @@ class DumpCommand extends CommonCommand {
     {          
         $container = $this->getContainer();
         $io = new SymfonyStyle($input, $output);
+        
+        // On charge l'array params avec les options / parameters
         $params = $this->hydrateCommand($input);
+        
+        // On charge l'objet dump pour gérer toutes les fonctionnalités 
+        $dump = RDumpFactory::create($params);
+        $databases = $dump->rmaDumpGetListDatabases();          
 
+        // On propose à l'utilisateur de sélectionner la ou les bases de données à sauvegarder
+        if ($input->getOption('one'))
+        {
+            $databases = $io->choice('Sélectionnez la base de données à sauvegarder', $databases);
+        }
+        
+        // On synchronise le fichier de logs des dumps 
+        SyncDumpCommand::syncCommand($io, $params);
+
+        // On lance la commande de dump
+        DumpCommand::dumpDatabases($io, $databases, $params, $dump, $output);
+        
+        // On zip le dump
+        $dump->rmaDumpJustZip();
+
+        // On sauvegarde le dump sur le serveur FTP
+        FtpCommand::saveDumpInFtp($io, $dump, $params);
+
+        // On lance l'action de suppression des anciens dumps
+        CleanDumpCommand::cleanCommand($io, $params);
+    }
+    
+    public function hydrateCommand(InputInterface $input)
+    {
+        $params = $this->constructParamsArray($input);
+        $container = $this->getContainer();
+        
         if ($input->getOption('name'))
         {
             $name_rep =  Tools::cleanString($input->getOption('name')) ;
             $params['repertoire_name'] = $name_rep . '__' . uniqid();
         }
 
+        // On charge les paramètres et les questions correspondantes dans le cas où l'utilisateur demande de l'intéraction
         $parametres = array(
             'host'          => 'Veuillez renseigner l\'ip de votre connexion : ',
             'port'          => 'Veuillez renseigner le port : ',
@@ -96,9 +130,8 @@ class DumpCommand extends CommonCommand {
         else {
             foreach ($parametres_ftp as $parametre => $libelle)
             {
-                $parametre_defaut = $container->getParameter('rma_'.$parametre);
-                $$parametre = $parametre_defaut;
-                $params[$parametre] = $$parametre;
+                $param = $container->getParameter('rma_'.$parametre);
+                $params[$parametre] = $param;
             }
         }
   
@@ -120,41 +153,32 @@ class DumpCommand extends CommonCommand {
      
         $params['dir_fichier'] = $dir_zip; 
         
-        // On charge l'objet dump pour gérer toutes les fonctionnalités 
-        $dump = RDumpFactory::create($params);
-        $databases = $dump->rmaDumpGetListDatabases($params['excludes']);          
-
-        // On propose à l'utilisateur de sélectionner la ou les bases de données à sauvegarder
-        if ($input->getOption('one'))
-        {
-            $databases = $io->choice('Sélectionnez la base de données à sauvegarder', $databases);
-        }
-        
-        SyncDumpCommand::syncCommand($io, $params);
-
-        DumpCommand::dumpDatabases($io, $databases, $params, $dump);
-        // On zip le dump
-        $dump->rmaDumpJustZip();
-
-        // On sauvegarde le dump sur le serveur FTP
-        FtpCommand::saveDumpInFtp($io, $dump, $params);
-
-        // On lance l'action de suppression des anciens dumps
-        CleanDumpCommand::cleanCommand($io, $params);
-    }
-    
-    public function hydrateCommand(InputInterface $input)
-    {
-        $params = $this->constructParamsArray($input);
         return $params;
     }
     
-    public static function dumpDatabases($io, $databases, $params, $dump)
+    public static function dumpDatabases($io, Array $databases,Array $params, $dump,OutputInterface $output)
     {
+        $number_databases = count($databases);
          // On charge un objet progressbar qui affichera l'avancement pour chaque base de données
-        $io->title('Dump des ' . count($databases) . ' base(s) de données');
+        $io->title('Dump des ' . $number_databases . ' base(s) de données');
+      
+        // On charge la progressbar et défini son format notamment pour afficher le nom de la base de données à chaque advance
+        $progress = new ProgressBar($output, $number_databases);
+        $progress->start();
+        $progress->setRedrawFrequency(1);
+        $progress->setFormat(' %current%/%max% [%bar%] %percent:3s%% %elapsed:6s%/%estimated:-6s% %memory:6s% %message%');
 
-        $dump->dumpAndWriteLogs($databases, $params);
+        $logs = array();
+        foreach ($databases as $database)
+        {
+            $progress->setMessage($database);
+            $logs = $dump->rmaDumpForDatabase($database, $logs); 
+            $progress->advance();
+        }
+        
+        $progress->finish();
+        $infos = $dump->rmaGetInfosDump($number_databases, $logs);
+        $dump->rmaWriteDump($infos);
 
         $io->success('Dump mis à disposition dans le répertoire ');
     }

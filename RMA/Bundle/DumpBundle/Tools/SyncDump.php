@@ -25,7 +25,7 @@ class SyncDump implements SyncDumpInterface {
         $content = $this->recupData($dir_rep);  
         $count_initial = count($content);
        
-        // On récupère tous les répertoires dans le répertoire envoyé en paramètre
+        // On récupère tous les répertoires de  dump dans le répertoire envoyé en paramètre
         $contenu_content_rep = array_values(array_diff(scandir($dir_rep), array('..', '.', self::NAME_DUMP)));
         
         $my_array = array ();       
@@ -93,18 +93,18 @@ class SyncDump implements SyncDumpInterface {
             }
         }
         closedir($MyDirectory);
+        return $myarray;
     }
     
     /**
      * Permet de supprimer les dumps plus anciens que le nombre de jours envoyé
-     * @param string $dir_rep
-     * @param int $jour
+     * @param Array $params
      */
-    public function deleteOldDump($dir_rep, $jour)
+    public function deleteOldDump(Array $params)
     {
         $date = new \Datetime();
-        $date->sub(new \DateInterval('P'.$jour.'D'));
-        return $this->selectDumpWithDate($dir_rep, $date);
+        $date->sub(new \DateInterval('P'.$params['nb_jour'].'D'));
+        return $this->selectDumpWithDate($params['dir_dump'], $date);
     }
     
     /**
@@ -113,7 +113,7 @@ class SyncDump implements SyncDumpInterface {
      * @param string $dir_rep
      * @param \Datetime $date
      */
-    public function selectDumpWithDate($dir_rep, $date)
+    public function selectDumpWithDate($dir_rep, \Datetime $date)
     {
         $content = $this->recupData($dir_rep); 
         $a = 0;
@@ -150,4 +150,41 @@ class SyncDump implements SyncDumpInterface {
         $writeDump->remplaceDumpFic($content, $dir_rep);
         return $response;
     }
+    
+    /**
+     * Permet de supprimer les dumps au dessus d'un certain nombre envoyé en paramètre $params['nombre']
+     * On synchronise le fichier de logs de dump après suppression
+     */
+    public function deleteDumpAfterThan (Array $params)
+    {  
+        // On récupère les logs liés au répertoire de dump
+        $array_fic_dump_ini = $this->recupData($params['dir_dump']);
+        
+        $count_array_fic_dump_ini = count( $array_fic_dump_ini );
+        $a = 0;
+        
+        // On renverse l'array pour avoir un ordre chronologique
+        $array_after_reverse = array_reverse($array_fic_dump_ini);
+        // On coupe l'array selon le nombre de dump - 1 à conserver (car commence à 0)
+        $array_after_splice_for_delete = array_splice($array_after_reverse, $params['nombre'] - 1, $count_array_fic_dump_ini);
+       
+        // On parcourt chaque entrée pour récupérer l'identifiant / nom du répertoire
+        foreach ($array_after_splice_for_delete as $name_dump => $data_dump)
+        {
+            $resultats = explode('|', $name_dump);
+            $path_dump_to_delete = Tools::formatDirWithDumpFile($params['dir_dump'] , trim($resultats[2]));
+           
+            Tools::rrmdir($path_dump_to_delete);
+            $a += 1;
+        }  
+           
+        // On resynchronise le fichier de logs lié au répertoire de dump pour mettre à jour les suppression   
+        $this->syncRep($params['dir_dump']);
+        $resultats = array (
+            "nombre"    => $params['nombre'],
+            "supprimes" => $a
+        );
+        return  $resultats;
+    }
+   
 }

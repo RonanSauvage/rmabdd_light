@@ -72,6 +72,9 @@ class RMAConfiguration implements ConfigurationInterface
                 ->scalarNode('rma_nb_jour')
                     ->defaultValue(7)
                 ->end()
+                ->scalarNode('rma_nombre_dump')
+                    ->defaultValue(10)
+                ->end()
             ->end()
         ;
 

@@ -41,10 +41,11 @@ class SyncDumpCommand extends CommonCommand {
     
     public static function syncCommand($io, Array $params)
     {
-        $tools = RToolsFactory::create(array('logger' => $params['logger']));
-        $infos = $tools->rmaSyncRep($params['dir_dump']);
         $io->title('Synchronisation du répertoire : ' . $params['dir_dump']);
 
+        $tools = RToolsFactory::create($params);
+        $infos = $tools->rmaSyncRep();
+      
         $io->note('Nombre de dumps référencés dans les logs : ' . $infos['count_initial']);
         $io->note('Nombre de dumps trouvés dans le répertoire : ' . $infos['count_final']);
         $io->note('Nombre de dumps effacés des logs : ' . $infos['synchro']);

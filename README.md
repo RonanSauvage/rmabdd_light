@@ -21,7 +21,7 @@ Ensuite, vous pouvez lancer composer update afin configurer votre bundle.
     "doctrine/doctrine-bundle": "~1.4",
     "symfony/swiftmailer-bundle": "~2.3",
     "symfony/monolog-bundle": "~2.4",
-    "sensio/distribution-bundle": "~5.0|~3.0",
+    "sensio/distribution-bundle": ">=3.0|<=5.0.5",
     "incenteev/composer-parameter-handler": "~2.0",
     "ifsnop/mysqldump-php" : "~2.1"
 
@@ -32,16 +32,18 @@ A la fin du composer, vous devrez saisir les parameters liés à l'application. 
     rma_username:       root
     rma_password:       none
     rma_compress:       gzip
-    rma_zip:            false
+    rma_zip:            no
     rma_dir_zip:        %kernel.root_dir%/../web/zip
     rma_dir_dump:       %kernel.root_dir%/../web/dump
+    rma_nb_jour:        5
+    rma_nombre_dump:    10
+    rma_ftp:            no
     rma_ftp_ip:         127.0.0.1
     rma_ftp_username:   rma
     rma_ftp_password:   rma_password
     rma_ftp_port:       21
     rma_ftp_timeout:    90
     rma_ftp_path:       /home/rma/dump
-    rma_nb_jour: 5
     rma_excludes:
         - mysql
         - performance_schema
@@ -49,6 +51,7 @@ A la fin du composer, vous devrez saisir les parameters liés à l'application. 
 Attention : Pour mettre un password vide, n'oubliez pas le 'none'.
 Attention : Pour les dir, vous devez doubler les DIRECTORY SEPARATOR. (exemple : dir_dump=C:\\Users\\rmA\\Desktop)
 Attention : Si vous ne souhaitez pas exclude de base de données dans vos dumps, inscrivez - none
+Attention : Pour ne pas effacer de dump au fur et à mesure renseigner 'none' aux champs nb_jour et nombre_dump
 
 ### Les commandes :
 
@@ -58,15 +61,15 @@ Pour voir les commandes mises à votre disposition rendez-vous à la racine et �
 
 Les commandes mises à disposition sont préfixées par "rma:"
     
-    rma:dump:database ----  Permet de réaliser un dump 
+    ** rma:dump:database ----  Permet de réaliser un dump 
         Option :
             --one pour sauvegarder une base unique
             --i pour ouvrir l'interface d'intéractions pour les données de connexion (sinon les infos en parameters seront prises par défaut)
             --ftp permet de sauvegarder le dump en FTP. Ne fonctionne actuellement que pour une archive zippée. 
             --name permet de définir un nom custom pour le dump
 
-    rma:dump:cron ---- Commande prévue spécialement pour les CRON
-        Permet de réaliser un dump en crontab. Si vous ne mettez pas d\'argument toutes les bases de données seront sauvegardées.
+    ** rma:dump:cron ---- Commande prévue spécialement pour les CRON
+        Permet de réaliser un dump en crontab. Si vous ne mettez pas d'argument toutes les bases de données seront sauvegardées.
         Par défaut les paramètres sont ceux définis au niveau de votre paramters.yml
         Options : 
             --host
@@ -95,17 +98,20 @@ Les commandes mises à disposition sont préfixées par "rma:"
                 php app/console rma:dump:cron 
 
 
-    rma:dump:clean ---- Commande prévue pour nettoyer les répertoires de dump
+    ** rma:dump:clean ---- Commande prévue pour nettoyer les répertoires de dump
         Permet de supprimer des dumps
         Par défaut le répertoire à vider est celui défini au niveau du parameters.yml
         Options : 
             --nb_jour ; Permet de définir en nombre de jours, la date à partir de laquelle les dump seront conservés
+            --nombre ; Permet de définir le nombre de dump à conserver
 
             Exemple :
                 php app/console rma:dump:clean --nb-jour=4 
             Tous les dates de plus de 4 jours seront supprimés
+                php app/console rma:dump:clean --nombre=15
+            Va conserver les 15 derniers dumps 
 
-    rma:dump:sync ---- Commande pour synchroniser les logs de dump avec les dumps effectivement présents dans le répertoire de dump
+    ** rma:dump:sync ---- Commande pour synchroniser les logs de dump avec les dumps effectivement présents dans le répertoire de dump
         Permet notamment de mettre à jour le dossier des logs dans le cas où vous supprimeriez manuellement des dumps
         Par défaut le répertoire à vider est celui défini au niveau du parameters.yml
         Options :

@@ -44,6 +44,7 @@ class CommonCommand extends ContainerAwareCommand {
         $params['logger'] = $container->get('logger');
         $params['extension'] = '.zip';
         $params['nb_jour'] = $container->getParameter('rma_nb_jour');
+        $params['nombre'] = $container->getParameter('rma_nombre_dump');
 
         $params['ftp'] = $container->getParameter('rma_ftp');
         $params['dir_dump'] = $container->getParameter('rma_dir_dump');

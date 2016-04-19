@@ -27,6 +27,12 @@ class CleanDumpCommand extends CommonCommand {
                '',
                InputOption::VALUE_OPTIONAL,
                'Permet de définir quel répertoire est à dump. Si pas spécifié, on prend le répertoire dans parameters'
+            )
+            ->addOption(
+               'nombre',
+               '',
+               InputOption::VALUE_OPTIONAL,
+               'Permet de définir le nombre de dump à conserver'
             );      
     }
     
@@ -34,18 +40,7 @@ class CleanDumpCommand extends CommonCommand {
     {            
         $params = $this->hydrateCommand($input);
         $io = new SymfonyStyle($input, $output);
-   
-        if(($input->getOption('dir_dump')))
-        {
-            $params['dir_dump'] = $input->getOption('dir_dump');
-        }
-        
-        if(($input->getOption('nb_jour')))
-        {
-            $params['nb_jour'] = $input->getOption('nb_jour');
-
-        }
-        
+ 
         SyncDumpCommand::syncCommand($io, $params);
         $this->cleanCommand($io, $params);
     }
@@ -54,14 +49,37 @@ class CleanDumpCommand extends CommonCommand {
     {
         $tools = RToolsFactory::create($params);
      
+        // On clean si paramétré les dumps selon une date de conservation
         $io->title('Clean des anciens dumps de plus de ' . $params['nb_jour'] .' jours');
-        $response_clean = $tools->rmaDeleteOldDump($params['dir_dump'], $params['nb_jour']);
+        $response_clean = $tools->rmaDeleteOldDump();
         $io->success($response_clean);
+        
+        // On clean si paramétré les dumps selon un nombre maximum à en garder
+        $io->title('Conservation des ' . $params['nombre'] .' derniers dumps');
+        $response_clean_nombre = $tools->rmaDeleteDumpAfterThan();
+        $io->success($response_clean_nombre);
     }
     
     public function hydrateCommand(InputInterface $input)
     {
         $params = $this->constructParamsArray($input);
+        
+        if(($input->getOption('dir_dump')))
+        {
+            $params['dir_dump'] = $input->getOption('dir_dump');
+        }
+        
+        if(($input->getOption('nb_jour')))
+        {
+            $params['nb_jour'] = $input->getOption('nb_jour');
+        }
+        
+        if(($input->getOption('nombre')))
+        {
+            $params['nombre'] = $input->getOption('nombre');
+
+        }
+        
         return $params;
     }
 }
