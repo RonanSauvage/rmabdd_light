@@ -112,7 +112,7 @@ class DumpMysql implements DumpInterface{
     
     /**
      * Retourne le chemin d'accès pour la création au répertoire directement
-     * @return string
+     * @return string $path_dump
      */
     public function getPathDumpsWithDir() 
     {
@@ -121,9 +121,9 @@ class DumpMysql implements DumpInterface{
     
     /**
      * Permet de retirer les tables qui doivent être excludes de l'array d'origine
-     * @param type array $bases_de_donnees
-     * @param type array $excludes
-     * @return type array $bases_de_donnees
+     * @param array $bases_de_donnees
+     * @param array $excludes
+     * @return array $bases_de_donnees
      */
     public function unsetDataTablesExclude($bases_de_donnees, $excludes){      
         foreach ($excludes as $exclude) {

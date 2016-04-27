@@ -49,9 +49,13 @@ A la fin du composer, vous devrez saisir les parameters liés à l'application. 
         - performance_schema
 
 Attention : Pour mettre un password vide, n'oubliez pas le 'none'.
+
 Attention : Pour les dir, vous devez doubler les DIRECTORY SEPARATOR. (exemple : dir_dump=C:\\Users\\rmA\\Desktop)
+
 Attention : Si vous ne souhaitez pas exclude de base de données dans vos dumps, inscrivez - none
+
 Attention : Pour ne pas effacer de dump au fur et à mesure renseigner 'none' aux champs nb_jour et nombre_dump
+
 
 ### Les commandes :
 
@@ -61,6 +65,8 @@ Pour voir les commandes mises à votre disposition rendez-vous à la racine et �
 
 Les commandes mises à disposition sont préfixées par "rma:"
     
+    ** rma:dump:help ---- Permet d'obtenir des informations complémentaires pour l'utilisation du plugin
+
     ** rma:dump:database ----  Permet de réaliser un dump 
         Option :
             --one pour sauvegarder une base unique
@@ -103,7 +109,7 @@ Les commandes mises à disposition sont préfixées par "rma:"
         Par défaut le répertoire à vider est celui défini au niveau du parameters.yml
         Options : 
             --nb_jour ; Permet de définir en nombre de jours, la date à partir de laquelle les dump seront conservés
-            --nombre ; Permet de définir le nombre de dump à conserver
+            --nombre_dump ; Permet de définir le nombre de dump à conserver
 
             Exemple :
                 php app/console rma:dump:clean --nb-jour=4 
@@ -116,3 +122,5 @@ Les commandes mises à disposition sont préfixées par "rma:"
         Par défaut le répertoire à vider est celui défini au niveau du parameters.yml
         Options :
             --dir_dump ; permet de définir un répertoire à gérer spécifique 
+
+    

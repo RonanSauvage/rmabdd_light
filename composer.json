@@ -1,7 +1,7 @@
 {
     "name": "rma/rmabdd_light",
     "license": "MIT",
-    "type": "project",
+    "type": "symfony-bundle",
     "description": "Bundle pour gérer des extract de base de données en ligne de commande ou CRON",
     "keywords": ["dump", "bundle", "database", "mysql"],
     "authors": [
@@ -11,7 +11,7 @@
         }
     ],
     "autoload": {
-        "psr-4": { "RMA\\Bundle\\DumpBundle\\": "" }
+        "psr-0": { "RMA\\Bundle\\DumpBundle\\": "" }
     },
     "minimum-stability": "dev",
     "require": {

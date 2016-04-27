@@ -5,7 +5,6 @@ namespace RMA\Bundle\DumpBundle\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Input\InputOption;
-use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
 use RMA\Bundle\DumpBundle\Factory\RToolsFactory; 
@@ -17,12 +16,7 @@ class SyncDumpCommand extends CommonCommand {
       
         $this->setName('rma:dump:sync')
             ->setDescription('Permet de synchroniser la sauvegarde des dumps')
-            ->addOption(
-               'dir_dump',
-               '',
-               InputOption::VALUE_OPTIONAL,
-               'Permet de définir quel répertoire est à synchroniser. Si pas spécifié, on prend le répertoire dans parameters'
-            );      
+            ->addOption('dir_dump', '', InputOption::VALUE_OPTIONAL, 'Permet de définir le répertoire à synchroniser. Si pas spécifié, on prend le répertoire dans parameters');      
     }
     
     protected function execute(InputInterface $input, OutputInterface $output) 
@@ -39,6 +33,11 @@ class SyncDumpCommand extends CommonCommand {
         $this->syncCommand($io, $params);
     }
     
+    /**
+     * Permet de synchroniser le fichier 
+     * @param SymfonyStyle $io
+     * @param array $params
+     */
     public static function syncCommand($io, Array $params)
     {
         $io->title('Synchronisation du répertoire : ' . $params['dir_dump']);

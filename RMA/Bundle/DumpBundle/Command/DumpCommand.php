@@ -8,7 +8,6 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\Console\Helper\ProgressBar;
 
-
 use RMA\Bundle\DumpBundle\Factory\RDumpFactory;
 use RMA\Bundle\DumpBundle\Tools\Tools;
 use RMA\Bundle\DumpBundle\Command\CommonCommand;
@@ -18,40 +17,19 @@ class DumpCommand extends CommonCommand {
     protected function configure() {
       
         $this->setName('rma:dump:database')
-             ->setDescription('Permet de réaliser un dump. Option --not-all pour ne pas sauvegarder toutes les bases')
-             ->addOption(
-               'one',
-               false,
-               InputOption::VALUE_NONE,
-               'Si one est spécifié, vous devrez sélectionner la base de données à dump'
-            )
-            ->addOption(
-               'i',
-               false,
-               InputOption::VALUE_NONE,
-               'Si i est spécifié, vous aurez des intéractions pour sélectionner les données à dump. Sinon les parameters sera pris. '
-            )
-            ->addOption(
-               'ftp',
-               false,
-               InputOption::VALUE_NONE,
-               'Si ftp est spécifié, le dump sera sauvegardé sur le serveur FTP défini en paramètre ou dans les interactions avec i. '
-            )
-            ->addOption(
-               'name',
-               false,
-               InputOption::VALUE_REQUIRED,
-               'Permet de définir un nom pour le dossier de sauvegarde. '
-            );      
+            ->setDescription('Permet de réaliser un dump. Option --not-all pour ne pas sauvegarder toutes les bases')
+            ->addOption('one', null, InputOption::VALUE_NONE, 'Si one est spécifié, vous devrez sélectionner la base de données à dump')
+            ->addOption('i', null, InputOption::VALUE_NONE, 'Si i est spécifié, vous aurez des intéractions pour sélectionner les données à dump')
+            ->addOption('ftp', false, InputOption::VALUE_NONE, 'Si ftp est spécifié, le dump sera sauvegardé sur le serveur FTP défini en paramètre ou dans les interactions avec i')
+            ->addOption('name', null, InputOption::VALUE_REQUIRED, 'Permet de définir un nom pour le dossier de sauvegarde. ', null);      
     }
     
     protected function execute(InputInterface $input, OutputInterface $output) 
     {          
-        $container = $this->getContainer();
         $io = new SymfonyStyle($input, $output);
         
         // On charge l'array params avec les options / parameters
-        $params = $this->hydrateCommand($input);
+        $params = $this->hydrateCommand($input, $io);
         
         // On charge l'objet dump pour gérer toutes les fonctionnalités 
         $dump = RDumpFactory::create($params);
@@ -67,7 +45,7 @@ class DumpCommand extends CommonCommand {
         SyncDumpCommand::syncCommand($io, $params);
 
         // On lance la commande de dump
-        DumpCommand::dumpDatabases($io, $databases, $params, $dump, $output);
+        DumpCommand::dumpDatabases($io, $databases, $dump, $output);
         
         // On zip le dump
         $dump->rmaDumpJustZip();
@@ -79,11 +57,10 @@ class DumpCommand extends CommonCommand {
         CleanDumpCommand::cleanCommand($io, $params);
     }
     
-    public function hydrateCommand(InputInterface $input)
+    public function hydrateCommand(InputInterface $input, $io)
     {
         $params = $this->constructParamsArray($input);
         $container = $this->getContainer();
-        
         if ($input->getOption('name'))
         {
             $name_rep =  Tools::cleanString($input->getOption('name')) ;
@@ -152,11 +129,17 @@ class DumpCommand extends CommonCommand {
         }
      
         $params['dir_fichier'] = $dir_zip; 
-        
         return $params;
     }
     
-    public static function dumpDatabases($io, Array $databases,Array $params, $dump,OutputInterface $output)
+    /**
+     * Permet de lancer un dump de la database
+     * @param SymfonyStyle $io
+     * @param array $databases
+     * @param DumpInterface $dump
+     * @param OutputInterface $output
+     */
+    public static function dumpDatabases($io, Array $databases, $dump, OutputInterface $output)
     {
         $number_databases = count($databases);
          // On charge un objet progressbar qui affichera l'avancement pour chaque base de données
@@ -181,6 +164,5 @@ class DumpCommand extends CommonCommand {
         $dump->rmaWriteDump($infos);
 
         $io->success('Dump mis à disposition dans le répertoire ');
-    }
-    
+    } 
 }

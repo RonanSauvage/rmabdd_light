@@ -53,16 +53,16 @@ class RTools {
      */
     public function rmaDeleteDumpAfterThan()
     {
-        if ($this->_params['nombre'] == 'none')
+        if ($this->_params['nombre_dump'] == 'none')
         {
             $this->_params['logger']->notice('Aucun clean n\'est pas prévu avec cette configuration');
         }
-        elseif (!is_int($this->_params['nombre'])) {
-            $this->_params['logger']->notice('La valeur pour le nombre de dump à conserver n\'est pas correcte : '. $this->_params['nombre']);
+        elseif (!is_int($this->_params['nombre_dump'])) {
+            $this->_params['logger']->notice('La valeur pour le nombre de dump à conserver n\'est pas correcte : '. $this->_params['nombre_dump']);
         }
         else {
             $response = $this->_syncdump->deleteDumpAfterThan($this->_params);
-            $message = 'Les ' . $response['nombre'] . ' derniers dumps ont été convervés. Suppression de ' . $response['supprimes'] . ' dump(s) plus ancien(s)';
+            $message = 'Les ' . $response['nombre_dump'] . ' derniers dumps ont été convervés. Suppression de ' . $response['supprimes'] . ' dump(s) plus ancien(s)';
             $this->_params['logger']->notice($message);
         }
         return $message;

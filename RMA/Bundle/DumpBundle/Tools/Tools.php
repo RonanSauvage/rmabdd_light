@@ -89,5 +89,34 @@ class Tools implements ToolsInterface{
         return trim($chaine, '-');
     }
 
+    
+    /**
+     * Permet de scanner un répertoire
+     * @param string $Directory
+     * @throws \Exception
+     */
+    public static function scanDirectory($Directory)
+    {
+        if (opendir($Directory))
+        {
+            $MyDirectory = opendir($Directory);
+        }
+        else 
+        {
+            throw new \Exception("Impossible d'ouvrir le répertoire " . $Directory);
+        }
+        $myarray = array();
+        while($Entry = readdir($MyDirectory)) {
+            if(is_dir($Directory.'/'.$Entry)&& $Entry != '.' && $Entry != '..') {
+                $myarray[$Entry] =  array();
+                self::scanDirectory($Directory.'/'.$Entry);
+            }
+            else {
+                array_push($myarray[$Entry], $Entry);
+            }
+        }
+        closedir($MyDirectory);
+        return $myarray;
+    }  
 }
 

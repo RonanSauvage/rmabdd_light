@@ -2,8 +2,6 @@
 
 namespace RMA\Bundle\DumpBundle\Dump;
 
-use Symfony\Component\DependencyInjection\ContainerAware;
-
 use RMA\Bundle\DumpBundle\Ftp\FtpInterface;
 use RMA\Bundle\DumpBundle\ConnexionDB\ConnexionDBInterface;
 use RMA\Bundle\DumpBundle\Dump\DumpInterface;
@@ -15,7 +13,7 @@ use RMA\Bundle\DumpBundle\Tools\WriteDumpInterface;
  *
  * @author rmA
  */
-class RMADump extends ContainerAware {
+class RMADump {
     
     protected $_zip;
     protected $_dump;

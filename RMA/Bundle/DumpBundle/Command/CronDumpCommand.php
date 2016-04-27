@@ -37,7 +37,7 @@ class CronDumpCommand extends CommonCommand {
     
     protected function execute(InputInterface $input, OutputInterface $output) 
     {        
-        $params = $this->hydrateCommand($input);
+        $params = $this->constructParamsArray($input);
         $io = new SymfonyStyle($input, $output);
         
         // A gérer l'extension pour le FTP   - A retirer par la suite 
@@ -60,38 +60,10 @@ class CronDumpCommand extends CommonCommand {
             $databases = $input->getArgument('databases');
         }
         
-        DumpCommand::dumpDatabases($io, $databases, $params, $dump);
+        DumpCommand::dumpDatabases($io, $databases, $dump, $output);
         
         FtpCommand::saveDumpInFtp($io, $dump, $params);
 
         CleanDumpCommand::cleanCommand($io, $params);
-    }
-
-
-    /**
-     * Permet d'hydrater l'array Params selon les options définies au niveau de la commande
-     * @param InputInterface $input
-     * @return array $params
-     */
-    public function hydrateCommand (InputInterface $input)
-    {
-        $rOptions = $input->getOptions();
-        $container = $this->getContainer();
-        
-        $params = $this->constructParamsArray($input);
-        
-        foreach ($rOptions as $rOption => $rvalue)
-        {
-            if($container->hasParameter('rma_'.$rOption))
-            {
-                $$rOption = $container->getParameter('rma_'.$rOption);
-            }
-            if (!is_null($rvalue))
-            {
-                $$rOption = $rvalue;
-            }
-            $params[$rOption] = $$rOption;
-        }
-        return $params;
     }
 }
