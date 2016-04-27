@@ -148,7 +148,6 @@ class SyncDump implements SyncDumpInterface {
             Tools::rrmdir($path_dump_to_delete);
             $a += 1;
         }  
-        sleep(2); 
         // On resynchronise le fichier de logs lié au répertoire de dump pour mettre à jour les suppression   
         $this->syncRep($params['dir_dump']);
         $resultats = array (
