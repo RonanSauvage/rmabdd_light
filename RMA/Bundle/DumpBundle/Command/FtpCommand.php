@@ -16,9 +16,7 @@ class FtpCommand extends CommonCommand {
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
-    {
-        $params = $this->constructParamsArray($input);
-        
+    {        
         // Prévoir l'ajout d'options pour sélectionner un autre serveur FTP que celui défini au niveau des params
  
         // On affiche les fichiers et/ou répertoires présents dans ce dossier
