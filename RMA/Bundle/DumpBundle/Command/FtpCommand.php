@@ -6,8 +6,6 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Input\InputOption;
 
-use RMA\Bundle\DumpBundle\Ftp\Rftp;
-
 class FtpCommand extends CommonCommand {
 
     protected function configure() {
@@ -31,15 +29,6 @@ class FtpCommand extends CommonCommand {
         // Dans ce cas on zip le répertoire et on peut sauvegarder l'extension comme zip
         
         // Sinon on récupère l'extension et on l'envoie sur le serveur FTP
-        /*
-         * $this->ftp_connect = ftp_connect($params['ftp_ip'], $params['ftp_port'], $params['ftp_timeout']);
-        $this->_path = $params['ftp_path'];
-        $this->_fichier = $params['repertoire_name'] . $params['extension'];
-        $this->_dir_fichier = $params['dir_fichier'];
-        $this->_username = $params['ftp_username'];
-        $this->_password = $params['ftp_password'];
-         */
-        $ftp_server = new Rftp($params);
     }
     
     /**

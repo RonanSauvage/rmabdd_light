@@ -135,7 +135,7 @@ class SyncDump implements SyncDumpInterface {
         $a = 0;
         $array_after_reverse = $array_fic_dump_ini;
         // On renverse l'array pour avoir un ordre chronologique
-        //$array_after_reverse = array_reverse($array_fic_dump_ini);
+        $array_after_reverse = array_reverse($array_fic_dump_ini);
         // On coupe l'array selon le nombre de dump - 1 à conserver (car commence à 0)
         $array_after_splice_for_delete = array_splice($array_after_reverse, $params['nombre_dump'] - 1, $count_array_fic_dump_ini);
        
