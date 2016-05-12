@@ -1,28 +1,59 @@
 {
-    "name": "rma/rmabdd_light",
+    "name": "rmA/rmaBDD_console",
     "license": "MIT",
-    "type": "symfony-bundle",
-    "description": "Bundle pour gérer des extract de base de données en ligne de commande ou CRON",
-    "keywords": ["dump", "bundle", "database", "mysql"],
-    "authors": [
-        {
-            "name": "Ronan Sauvage",
-            "email": "ronan.sau@gmail.com"
-        }
-    ],
+    "type": "project",
+    "description": "Application de dump de bases de données",
     "autoload": {
-        "psr-0": { "RMA\\Bundle\\DumpBundle\\": "" }
+        "psr-4": {
+            "": "src/"
+        },
+        "classmap": ["app/AppKernel.php","app/AppCache.php"]
     },
-    "minimum-stability": "dev",
     "require": {
         "php": ">=5.3.9",
-        "symfony/symfony": "2.8.*",
+        "symfony/symfony": ">=2.8.6|<3.*",
         "doctrine/orm": "^2.4.8",
         "doctrine/doctrine-bundle": "~1.4",
         "symfony/swiftmailer-bundle": "~2.3",
         "symfony/monolog-bundle": "~2.4",
         "sensio/distribution-bundle": ">=3.0|<=5.0.5",
         "incenteev/composer-parameter-handler": "~2.0",
-        "ifsnop/mysqldump-php": "~2.1"
+        "ifsnop/mysqldump-php" : "~2.1"
+    },
+    "require-dev": {
+        "sensio/generator-bundle": "~3.0",
+        "symfony/phpunit-bridge": "~2.7",
+        "behat/behat": "3.1.*"
+    },
+    "scripts": {
+        "post-install-cmd": [
+            "Incenteev\\ParameterHandler\\ScriptHandler::buildParameters",
+            "Sensio\\Bundle\\DistributionBundle\\Composer\\ScriptHandler::buildBootstrap",
+            "Sensio\\Bundle\\DistributionBundle\\Composer\\ScriptHandler::clearCache",
+            "Sensio\\Bundle\\DistributionBundle\\Composer\\ScriptHandler::installRequirementsFile",
+            "Sensio\\Bundle\\DistributionBundle\\Composer\\ScriptHandler::prepareDeploymentTarget"
+        ],
+        "post-update-cmd": [
+            "Incenteev\\ParameterHandler\\ScriptHandler::buildParameters",
+            "Sensio\\Bundle\\DistributionBundle\\Composer\\ScriptHandler::buildBootstrap",
+            "Sensio\\Bundle\\DistributionBundle\\Composer\\ScriptHandler::clearCache",
+            "Sensio\\Bundle\\DistributionBundle\\Composer\\ScriptHandler::installRequirementsFile",
+            "Sensio\\Bundle\\DistributionBundle\\Composer\\ScriptHandler::prepareDeploymentTarget"
+        ]
+    },
+    "config": {
+        "bin-dir": "bin",
+        "platform": {
+            "php": "5.3.9"
+        }
+    },
+    "extra": {
+        "symfony-app-dir": "app",
+        "symfony-web-dir": "web",
+        "symfony-assets-install": "relative",
+        "incenteev-parameters": {
+            "file": "app/config/parameters.yml"
+        }
     }
 }
+
