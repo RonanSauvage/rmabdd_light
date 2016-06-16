@@ -24,21 +24,31 @@ class DumpMysql implements DumpInterface{
      * @param ConnexionDB $connexiondb
      * @param Array $params
      */
-    public function __construct(ConnexionDB $connexiondb, $params)
+    public function __construct(ConnexionDB $connexiondb, Array $params)
     {
         $this->_connexiondb = $connexiondb;
-        $databases = $this->_connexiondb->getListDatabases();
-        $this->_mysqlDump = new IfsnopMysqldump($connexiondb->getDSN($databases[0]), 
-                                        $connexiondb->getUsername(), 
-                                        $connexiondb->getPassword(),
-                                        array("compress" => $params['compress'])); 
-        
+        $this->_mysqlDump = $this->newMysqlDump($connexiondb, $params['compress']);
         if (!file_exists($params['dir_dump'])){
             mkdir($params['dir_dump']);
         }      
         $this->_pathDumps = $params['dir_dump'];
         $this->_repertoire_name = $params['repertoire_name'];
         $this->_extension = $this->setExtension($params['compress']);
+        $this->_params = $params;
+    }
+    
+    public function newMysqlDump(ConnexionDB $connexiondb, $compress, $database = null)
+    {
+        if(is_null($database))
+        {
+            $databases = $this->_connexiondb->getListDatabases();
+            $database = $databases[0];
+        }
+        return  new IfsnopMysqldump($connexiondb->getDSN($database), 
+                                        $connexiondb->getUsername(), 
+                                        $connexiondb->getPassword(),
+                                        array("compress" => $compress)); 
+        
     }
     
     /**
@@ -65,9 +75,10 @@ class DumpMysql implements DumpInterface{
         if (!file_exists($this->getPathDumpsWithDir())){
             mkdir($this->getPathDumpsWithDir());
         }   
+        $mysqlDump = $this->newMysqlDump($this->_connexiondb, $this->_params['compress'], $name_database);
         $name = $name_database . '.' . $this->_extension;
         $path_destination_interne_with_db = $this->getPathDumpsWithDir() . DIRECTORY_SEPARATOR . $name;  
-        $this->_mysqlDump->start($path_destination_interne_with_db);
+        $mysqlDump->start($path_destination_interne_with_db);
         $infos = array ( 
                    "$name" => $this->getPathDumpsWithDir() . DIRECTORY_SEPARATOR . $name
             );

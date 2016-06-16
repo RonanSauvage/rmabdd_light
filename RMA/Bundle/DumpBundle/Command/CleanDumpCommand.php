@@ -15,8 +15,8 @@ class CleanDumpCommand extends CommonCommand {
       
         $this->setName('rma:dump:clean')
             ->setDescription('Permet de nettoyer les dumps')
-            ->addOption('nb_jour', '', InputOption::VALUE_REQUIRED, 'Permet de supprimer tous les dump plus ancien que le nombre de jours défini')
-            ->addOption('dir_dump', '', InputOption::VALUE_REQUIRED, 'Permet de définir quel répertoire est à dump. Si pas spécifié, on prend le répertoire dans parameters')
+            ->addOption('nb_jour', '', InputOption::VALUE_REQUIRED, 'Permet de supprimer tous les dump plus anciens que le nombre de jours défini')
+            ->addOption('dir_dump', '', InputOption::VALUE_REQUIRED, 'Permet de définir le répertoire a clean. Si pas spécifié, on prend le répertoire dans parameters')
             ->addOption('nombre_dump', '', InputOption::VALUE_REQUIRED, 'Permet de définir le nombre de dump à conserver');      
     }
     

@@ -47,24 +47,28 @@ class Tools implements ToolsInterface{
      */
     public static function rrMdir($src)
     {
-        $dir = opendir($src);
-        while(false !== ( $file = readdir($dir)) ) 
-        {
-            if (( $file != '.' ) && ( $file != '..' )) 
+        if($dir = opendir($src)) {
+            while(false !== ( $file = readdir($dir)) ) 
             {
-                $full = $src . '/' . $file;
-                if ( is_dir($full) ) 
+                if (( $file != '.' ) && ( $file != '..' )) 
                 {
-                    rrmdir($full);
-                }
-                else 
-                {
-                    unlink($full);
+                    $full = $src . '/' . $file;
+                    if (is_dir($full)) 
+                    {
+                        self::rrmdir($full);
+                    }
+                    else 
+                    {
+                        unlink($full);
+                    }
                 }
             }
+            closedir($dir);
+            rmdir($src);
         }
-        closedir($dir);
-        rmdir($src);
+        else {
+            throw new \Exception('Le répertoire ' . $src . ' est introuvable.');
+        }
     }
     
     /**
@@ -112,11 +116,22 @@ class Tools implements ToolsInterface{
                 self::scanDirectory($Directory.'/'.$Entry);
             }
             else {
-                array_push($myarray[$Entry], $Entry);
+                if ($Entry != '.' && $Entry != '..')
+                {
+                    $myarray[$Entry] = $Entry;
+                }
             }
         }
         closedir($MyDirectory);
         return $myarray;
     }  
+    
+    public static function removeFalseDir($dir, Array $excludes)
+    {
+        $dirs = scandir($dir);
+        $dirs = array_diff($dirs, array('..', '.'));
+        $dirs = array_diff($dirs, $excludes);
+        return array_values($dirs);
+    }
 }
 

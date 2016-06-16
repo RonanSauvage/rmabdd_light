@@ -18,12 +18,14 @@ class RTools {
     protected $_syncdump;
     protected $_tools;
     protected $_params;
+    protected $_synczip;
 
-    public function __construct (WriteDumpInterface $writedump, SyncDumpInterface $syncdump, ToolsInterface $tools, Array $params)
+    public function __construct (WriteDumpInterface $writedump, SyncDumpInterface $syncdump, ToolsInterface $tools, $synczip, Array $params)
     {
         $this->_syncdump = $syncdump;
         $this->_writedump = $writedump;
         $this->_tools = $tools;
+        $this->_synczip = $synczip;
         $this->_params = $params;
     }
 
@@ -45,6 +47,11 @@ class RTools {
             $this->_params['logger']->notice('Les dumps de plus de '. $this->_params['nb_jour'] .' jours dans le répertoire '. $this->_params['dir_dump'] .' ont bien été supprimés');
         }
         return $response;
+    }
+    
+    public function rmaDeleteOldZip()
+    {
+        $this->_synczip->deleteOldZip($this->_params);
     }
     
     /**

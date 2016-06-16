@@ -26,7 +26,7 @@ class RMADump {
     * 
     * @param ConnexionDBInterface $connexiondb
     * @param DumpInterface $dump
-    * @param ZipInterface $_zip_bool
+    * @param ZipInterface $zip
     * @param FtpInterface $ftp
     * @param WriteDumpInterface $writedump
     * @param Array $params | ['zip'], ['logger'], ['excludes'], ['date'], ['repertoire_name'], ['dir_dump'] 

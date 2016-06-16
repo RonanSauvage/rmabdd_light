@@ -46,7 +46,7 @@ class ConnexionDB implements ConnexionDBInterface
     {
         $this->host = $params['host'];
         $this->port = $params['port'];
-        $this->username = $params['username'];
+        $this->username = $params['user'];
         $this->password = $params['password'];
     }
 

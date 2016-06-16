@@ -1,4 +1,4 @@
-[![SensioLabsInsight](https://insight.sensiolabs.com/projects/b32f2cd1-f941-4327-b1b5-21960d5bbebe/mini.png)](https://insight.sensiolabs.com/projects/b32f2cd1-f941-4327-b1b5-21960d5bbebe) [![Latest Stable Version](https://poser.pugx.org/rma/rmabdd_light/v/stable)](https://packagist.org/packages/rma/rmabdd_light) [![Latest Unstable Version](https://poser.pugx.org/rma/rmabdd_light/v/unstable)](https://packagist.org/packages/rma/rmabdd_light)
+[![SensioLabsInsight](https://insight.sensiolabs.com/projects/b32f2cd1-f941-4327-b1b5-21960d5bbebe/small.png)](https://insight.sensiolabs.com/projects/b32f2cd1-f941-4327-b1b5-21960d5bbebe) [![Latest Stable Version](https://poser.pugx.org/rma/rmabdd_light/v/stable)](https://packagist.org/packages/rma/rmabdd_light) [![Latest Unstable Version](https://poser.pugx.org/rma/rmabdd_light/v/unstable)](https://packagist.org/packages/rma/rmabdd_light)
 
 rmABDD_light :
 
@@ -7,11 +7,11 @@ Ce projet est une adaptation light de rmaBDD. Elle n'intègre que la partie cons
 ### Si vous souhaitez téléchargé rmaBDD comme Bundle, vous avez 2 possibilités :
 
 Utiliser Composer:
-    $ composer require rma/rmabdd_light:~0.3.*
+    $ composer require rma/rmabdd_light:~0.4.*
 
 Via le fichier json :
     "require": {
-        "rma/rmabdd_light":"~0.3.*"
+        "rma/rmabdd_light":"~0.4.*"
     }
 
 Ensuite, vous pouvez lancer composer update afin configurer votre bundle.
@@ -27,11 +27,13 @@ Ensuite, vous pouvez lancer composer update afin configurer votre bundle.
     "incenteev/composer-parameter-handler": "~2.0",
     "ifsnop/mysqldump-php" : "~2.1"
 
-A la fin du composer, vous devrez saisir les parameters liés à l'application. Elle n'embarque pas de base de données, les parameters à saisir concernent la connexion à sauvegarder par défaut
+Par défaut, les paramètres définis pour doctrine seront pris pour effectuer les dumps. (Attention pour le cas où vous avez laissez blanc le password. Vous devez alors le surcharger avec rma_password: none)
+
+Si vous souhaitez les modifier, vous avez accès aux paramètres suivants à mettre directement dans vos parameters :
     
     rma_host:           127.0.0.1
     rma_port:           3306
-    rma_username:       root
+    rma_user:           root
     rma_password:       none
     rma_compress:       gzip
     rma_zip:            no
@@ -82,7 +84,7 @@ Les commandes mises à disposition sont préfixées par "rma:"
         Options : 
             --host
             --port
-            --username
+            --user
             --password  (pour mettre un mot de passe vide, mettez le paramètre --password=none)
             --compress  {none, gzip, bzip2}
             --zip       {yes, no}

@@ -15,8 +15,7 @@ class CommonCommand extends ContainerAwareCommand {
     }
     
     protected function execute(InputInterface $input, OutputInterface $output) 
-    {            
-       
+    {             
         $io = new SymfonyStyle($input, $output);
 
         $io->title('Commandes disponibles dans le bundle rma :');
@@ -50,13 +49,18 @@ class CommonCommand extends ContainerAwareCommand {
             ),
             array ('rma:dump:cron', 
                 'Cette commande est prévue spécialement pour être réalisée en CRON',
-                '--host, --port, --username, --password, --compress, --zip, --dir_dump, ... ',
+                '--host, --port, --user, --password, --compress, --zip, --dir_dump, ... ',
                 'databases'
            )
         );
         $io->table($headers, $rows);
     }
     
+    /**
+     * Permet de constuire l'array $params selon les options, les parameters et les options définies par défaut
+     * @param InputInterface $input
+     * @return array $params
+     */
     public function constructParamsArray (InputInterface $input)
     {
         $container = $this->getContainer();
@@ -65,18 +69,60 @@ class CommonCommand extends ContainerAwareCommand {
         $params['repertoire_name'] = $params['date'] . '__' . uniqid();
         $params['logger'] = $container->get('logger');
         $params['extension'] = '.zip';
-        $params['nb_jour'] = $container->getParameter('rma_nb_jour');
-        $params['nombre_dump'] = $container->getParameter('rma_nombre_dump');
+        
+        $parameters_enables = array (
+            'nb_jour'       => 5, 
+            'nombre_dump'   => 10, 
+            'dir_dump'      => '%kernel.root_dir%/../web/dump', 
+            'excludes'      => array ('performance_schema'), 
+            'ftp_ip'        => '127.0.0.1', 
+            'ftp_port'      => '21',
+            'ftp_username'  => 'rma',
+            'ftp_password'  => 'rma_password',
+            'ftp_timeout'   => 90,
+            'ftp_path'      => '/home/rma/dump',
+            'host'          => 'localhost', 
+            'port'          => '3306', 
+            'user'          => "root", 
+            'password'      => "none", 
+            'compress'      => "none", 
+            'zip'           => "no", 
+            'dir_zip'       => "%kernel.root_dir%/../web/zip",
+            'excludes'      => array('mysql', 'information_schema', 'performance_schema')
+        );
+        
+        $parameters_doctrine = array('host' , 'port', 'user', 'password');
+        
+        foreach ($parameters_enables as $parameter_enable => $default)
+        {
+            // On vérifie si l'utilisateur a défini un paramètre custom dans le paramters.yml pour rma
+            if($container->hasParameter('rma_'.$parameter_enable))
+            {
+                $$parameter_enable = $container->getParameter('rma_'.$parameter_enable);
+            } 
+            // Sinon on prend les parameters définis au niveau de doctrine, s'ils existent
+            else if (in_array($parameter_enable, $parameters_doctrine) && $container->hasParameter('database_'. $parameter_enable))
+            {
+                $$parameter_enable = $container->getParameter('database_'. $parameter_enable);
+            }
+            // Sinon on les initialise avec les valeurs par défaut
+            else 
+            {
+                $$parameter_enable = $default;
+            }
+            $params[$parameter_enable] = $$parameter_enable;
+        }
 
-        $params['ftp'] = $container->getParameter('rma_ftp');
-        $params['dir_dump'] = $container->getParameter('rma_dir_dump');
-        $params['excludes'] = $container->getParameter('rma_excludes');
-        
         $params = $this->loadOptions($input, $params);
-        
         return $params;
     }
     
+    /**
+     * Permet selon les options de load les paramètres correspondants
+     * @param InputInterface $input
+     * @param array $params
+     * @return array $params
+     */
     public function loadOptions(InputInterface $input, Array $params)
     {
         $rOptions = $input->getOptions();
@@ -88,18 +134,51 @@ class CommonCommand extends ContainerAwareCommand {
             {
                 $$rOption = $container->getParameter('rma_'.$rOption);
             }
-            else 
-            {
-                $$rOption = null;
-            }
+
             // On vérifie si une valeur a été transmise en option. Si c'est le cas on surcharge le parameters
             if (!is_null($rvalue))
             {
                 $$rOption = $rvalue;
             }
-            $params[$rOption] = $$rOption;
+            if (isset($$rOption))
+            {
+                 $params[$rOption] = $$rOption;
+            }
         }
         return $params;
     }
     
+    /**
+     * Permet de poser une série de questions à l'utilisateur
+     * @param InputInterface $input
+     * @param array $params
+     * @param array $parametersWithQuestions
+     * @param SymfonyStyle $io
+     * @return array $params
+     */
+    public function rmaAskQuestions(InputInterface $input, Array $params, Array $parametersWithQuestions, SymfonyStyle $io)
+    {
+        foreach ($parametersWithQuestions as $parametre => $libelle)
+        {
+            $parametre_defaut = $params[$parametre];
+            if ($input->getOption('i')){
+                $params[$parametre] = $io->ask($libelle , $parametre_defaut);
+            }
+        }
+        return $params;
+    }
+   
+    /**
+     * 
+     * @param type $dump
+     * @param SymfonyStyle $io
+     */
+    public function zipCommand($dump, SymfonyStyle $io)
+    {
+
+        $io->title('Compression du résultat');
+        $dump->rmaDumpJustZip();
+        $io->success('Compression réussie');
+
+    }
 }

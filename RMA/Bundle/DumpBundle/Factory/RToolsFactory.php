@@ -6,6 +6,7 @@ use RMA\Bundle\DumpBundle\Tools\SyncDump;
 use RMA\Bundle\DumpBundle\Tools\Tools;
 use RMA\Bundle\DumpBundle\Tools\WriteDump;
 use RMA\Bundle\DumpBundle\Tools\RTools;
+use RMA\Bundle\DumpBundle\Tools\SyncZip;
 
 /**
  * Description of RToolsFactory
@@ -24,6 +25,7 @@ class RToolsFactory{
         $writedump = new WriteDump();
         $syncdump = new SyncDump();
         $tools = new Tools();
-        return new RTools($writedump, $syncdump, $tools, $params);
+        $synczip = new Synczip();
+        return new RTools($writedump, $syncdump, $tools, $synczip, $params);
     }  
 }

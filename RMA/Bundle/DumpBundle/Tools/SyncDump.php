@@ -125,6 +125,8 @@ class SyncDump implements SyncDumpInterface {
     /**
      * Permet de supprimer les dumps au dessus d'un certain nombre envoyé en paramètre $params['nombre_dump']
      * On synchronise le fichier de logs de dump après suppression
+     * @param array $params
+     * @return array
      */
     public function deleteDumpAfterThan (Array $params)
     {  
@@ -133,7 +135,7 @@ class SyncDump implements SyncDumpInterface {
         
         $count_array_fic_dump_ini = count( $array_fic_dump_ini );
         $a = 0;
-        $array_after_reverse = $array_fic_dump_ini;
+
         // On renverse l'array pour avoir un ordre chronologique
         $array_after_reverse = array_reverse($array_fic_dump_ini);
         // On coupe l'array selon le nombre de dump - 1 à conserver (car commence à 0)

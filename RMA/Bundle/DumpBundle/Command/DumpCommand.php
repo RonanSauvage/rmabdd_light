@@ -30,12 +30,12 @@ class DumpCommand extends CommonCommand {
         
         // On charge l'array params avec les options / parameters
         $params = $this->hydrateCommand($input, $io);
-        
+
         // On charge l'objet dump pour gérer toutes les fonctionnalités 
         $dump = RDumpFactory::create($params);
         $databases = $dump->rmaDumpGetListDatabases();          
 
-        // On propose à l'utilisateur de sélectionner la ou les bases de données à sauvegarder
+        // On propose à l'utilisateur de sélectionner la base de données à sauvegarder
         if ($input->getOption('one'))
         {
             $databases = $io->choice('Sélectionnez la base de données à sauvegarder', $databases);
@@ -55,12 +55,14 @@ class DumpCommand extends CommonCommand {
 
         // On lance l'action de suppression des anciens dumps
         CleanDumpCommand::cleanCommand($io, $params);
+        
+        $date = date("F d Y H:i:s",filemtime($params['dir_dump']. '/' .$params['repertoire_name']));
     }
     
     public function hydrateCommand(InputInterface $input, $io)
     {
         $params = $this->constructParamsArray($input);
-        $container = $this->getContainer();
+        
         if ($input->getOption('name'))
         {
             $name_rep =  Tools::cleanString($input->getOption('name')) ;
@@ -69,14 +71,15 @@ class DumpCommand extends CommonCommand {
 
         // On charge les paramètres et les questions correspondantes dans le cas où l'utilisateur demande de l'intéraction
         $parametres = array(
-            'host'          => 'Veuillez renseigner l\'ip de votre connexion : ',
-            'port'          => 'Veuillez renseigner le port : ',
-            'username'      => 'Veuillez renseigner le username utilisé : ',
-            'password'      => 'Veuillez renseigner le password : ',
-            'compress'      => 'Voulez-vous compression les dumps {none, gzip, bzip2}  ? ',
-            'zip'           => 'Voulez-vous zipper le résultats {yes, no}? ',
-            'dir_dump'      => 'Veuillez renseigner le dossier dans lequel sauvegarder les dump : ',
-            'dir_zip'       => 'Veuillez renseigner le dossier dans lequel sauvegarder les zip : ',
+            'repertoire_name'   => 'Veuillez donner un nom à votre dump : ',
+            'host'              => 'Veuillez renseigner l\'ip de votre connexion : ',
+            'port'              => 'Veuillez renseigner le port : ',
+            'user'          => 'Veuillez renseigner le username utilisé : ',
+            'password'          => 'Veuillez renseigner le password : ',
+            'compress'          => 'Voulez-vous compression les dumps {none, gzip, bzip2}  ? ',
+            'zip'               => 'Voulez-vous zipper le résultats {yes, no}? ',
+            'dir_dump'          => 'Veuillez renseigner le dossier dans lequel sauvegarder les dump : ',
+            'dir_zip'           => 'Veuillez renseigner le dossier dans lequel sauvegarder les zip : ',
         );
         
         $parametres_ftp = array(
@@ -92,43 +95,17 @@ class DumpCommand extends CommonCommand {
         if ($input->getOption('ftp')) 
         {
             $params['ftp'] = 'yes';
-            foreach ($parametres_ftp as $parametre => $libelle)
-            {
-                $parametre_defaut = $container->getParameter('rma_'.$parametre);
-                $$parametre = $parametre_defaut;
-                // Si l'utilisateur a envoyé l'option i on lui pose les questions correspondantes
-                if ($input->getOption('i')){
-                    $$parametre = $io->ask($libelle . '['.$parametre_defaut.'] ', $parametre_defaut);
-                }
-               $params[$parametre] = $$parametre;
-            }
-            
+            $params = $this->rmaAskQuestions($input, $params, $parametres_ftp, $io);        
         }
-        else {
-            foreach ($parametres_ftp as $parametre => $libelle)
-            {
-                $param = $container->getParameter('rma_'.$parametre);
-                $params[$parametre] = $param;
-            }
-        }
-  
-        // On gère les autres paramètres
-        foreach ($parametres as $parametre => $libelle)
-        {
-            $parametre_defaut = $container->getParameter('rma_'.$parametre);
-            $$parametre = $parametre_defaut;
-            if ($input->getOption('i')){
-                $$parametre = $io->ask($libelle , $parametre_defaut);
-            }
-           $params[$parametre] = $$parametre;
-        }
+
+        $params = $this->rmaAskQuestions($input, $params, $parametres, $io);
       
         if ($params['password'] == 'none')
         {
             $params['password'] = '';
         }
      
-        $params['dir_fichier'] = $dir_zip; 
+        $params['dir_fichier'] = $params['dir_zip']; 
         return $params;
     }
     
@@ -139,7 +116,7 @@ class DumpCommand extends CommonCommand {
      * @param DumpInterface $dump
      * @param OutputInterface $output
      */
-    public static function dumpDatabases($io, Array $databases, $dump, OutputInterface $output)
+    public static function dumpDatabases(SymfonyStyle $io, Array $databases, $dump, OutputInterface $output)
     {
         $number_databases = count($databases);
          // On charge un objet progressbar qui affichera l'avancement pour chaque base de données
@@ -149,17 +126,19 @@ class DumpCommand extends CommonCommand {
         $progress = new ProgressBar($output, $number_databases);
         $progress->start();
         $progress->setRedrawFrequency(1);
-        $progress->setFormat(' %current%/%max% [%bar%] %percent:3s%% %elapsed:6s%/%estimated:-6s% %memory:6s% %message%');
+        $progress->setFormat(' %current%/%max% [%bar%] %percent:3s%% %elapsed:6s%/%estimated:-6s% %memory:6s% %message% ');
 
         $logs = array();
+        
         foreach ($databases as $database)
         {
             $progress->setMessage($database);
             $logs = $dump->rmaDumpForDatabase($database, $logs); 
             $progress->advance();
         }
-        
+
         $progress->finish();
+        $io->newLine(2);
         $infos = $dump->rmaGetInfosDump($number_databases, $logs);
         $dump->rmaWriteDump($infos);
 
