@@ -73,7 +73,7 @@ class CommonCommand extends ContainerAwareCommand {
         $parameters_enables = array (
             'nb_jour'       => 5, 
             'nombre_dump'   => 10, 
-            'dir_dump'      => '%kernel.root_dir%/../web/dump', 
+            'dir_dump'      => 'web/dump', 
             'excludes'      => array ('performance_schema'), 
             'ftp_ip'        => '127.0.0.1', 
             'ftp_port'      => '21',
@@ -87,11 +87,13 @@ class CommonCommand extends ContainerAwareCommand {
             'password'      => "none", 
             'compress'      => "none", 
             'zip'           => "no", 
-            'dir_zip'       => "%kernel.root_dir%/../web/zip",
-            'excludes'      => array('mysql', 'information_schema', 'performance_schema')
+            'ftp'           => "no",
+            'dir_zip'       => "web/zip",
+            'excludes'      => array('mysql', 'information_schema', 'performance_schema'),
+            'name'          => "name_database"
         );
         
-        $parameters_doctrine = array('host' , 'port', 'user', 'password');
+        $parameters_doctrine = array('host' , 'port', 'user', 'password', 'name');
         
         foreach ($parameters_enables as $parameter_enable => $default)
         {
@@ -175,7 +177,6 @@ class CommonCommand extends ContainerAwareCommand {
      */
     public function zipCommand($dump, SymfonyStyle $io)
     {
-
         $io->title('Compression du résultat');
         $dump->rmaDumpJustZip();
         $io->success('Compression réussie');

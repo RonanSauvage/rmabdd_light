@@ -39,10 +39,6 @@ class CleanZipCommand extends CommonCommand {
      
         // On clean si paramétré les dumps selon une date de conservation
         
-        /**$io->title('Clean des anciens zip de plus de ' . $params['nb_jour'] .' jours');
-        $response_clean = $tools->rmaDeleteOldDump();
-        $io->success($response_clean);*/
-        
         // On clean si paramétré les dumps selon un nombre maximum à en garder
         $io->title('Conservation des ' . $params['nombre_dump'] .' derniers zips');
         $response_clean_nombre = $tools->rmaDeleteOldZip();

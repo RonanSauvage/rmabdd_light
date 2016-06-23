@@ -32,7 +32,7 @@ class CronDumpCommand extends CommonCommand {
                 ->addOption('ftp_port', '', InputOption::VALUE_REQUIRED, 'Le port pour le FTP')
                 ->addOption('ftp_timeout', '', InputOption::VALUE_REQUIRED, 'Le timeout paramétré pour le FTP')
                 ->addOption('ftp_path','',InputOption::VALUE_REQUIRED,'Le path pour la sauvegarde sur le FTP')
-                ->addArgument('databases',InputArgument::IS_ARRAY,'Les bases de données à sauvegarder séparés par des espaces.');       
+                ->addArgument('databases',InputArgument::IS_ARRAY,'Les bases de données à sauvegarder séparées par des espaces.');       
     }
     
     protected function execute(InputInterface $input, OutputInterface $output) 

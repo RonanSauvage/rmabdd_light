@@ -7,6 +7,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\Console\Helper\ProgressBar;
+use Symfony\Component\Console\Input\InputArgument;
 
 use RMA\Bundle\DumpBundle\Factory\RDumpFactory;
 use RMA\Bundle\DumpBundle\Tools\Tools;
@@ -17,11 +18,12 @@ class DumpCommand extends CommonCommand {
     protected function configure() {
       
         $this->setName('rma:dump:database')
-            ->setDescription('Permet de réaliser un dump. Option --not-all pour ne pas sauvegarder toutes les bases')
+            ->setDescription('Permet de réaliser un dump.')
             ->addOption('one', null, InputOption::VALUE_NONE, 'Si one est spécifié, vous devrez sélectionner la base de données à dump')
             ->addOption('i', null, InputOption::VALUE_NONE, 'Si i est spécifié, vous aurez des intéractions pour sélectionner les données à dump')
             ->addOption('ftp', false, InputOption::VALUE_NONE, 'Si ftp est spécifié, le dump sera sauvegardé sur le serveur FTP défini en paramètre ou dans les interactions avec i')
-            ->addOption('name', null, InputOption::VALUE_REQUIRED, 'Permet de définir un nom pour le dossier de sauvegarde. ', null);      
+            ->addOption('repertoire_name', null, InputOption::VALUE_REQUIRED, 'Permet de définir un nom pour le dossier de sauvegarde. ', null)
+            ->addArgument('databases',InputArgument::IS_ARRAY,'Les bases de données à sauvegarder séparées par des espaces.');       
     }
     
     protected function execute(InputInterface $input, OutputInterface $output) 
@@ -33,17 +35,31 @@ class DumpCommand extends CommonCommand {
 
         // On charge l'objet dump pour gérer toutes les fonctionnalités 
         $dump = RDumpFactory::create($params);
+        
+        // Par défaut avec l'option all toutes les bases seront extraites
         $databases = $dump->rmaDumpGetListDatabases();          
-
-        // On propose à l'utilisateur de sélectionner la base de données à sauvegarder
+        
+        // On propose à l'utilisateur de sélectionner la base de données à sauvegarder avec l'option one
         if ($input->getOption('one'))
         {
-            $databases = $io->choice('Sélectionnez la base de données à sauvegarder', $databases);
+            $databases = array($io->choice('Sélectionnez la base de données à sauvegarder', $databases));
+        }
+        
+        // On gère la base de données définie dans le parameters
+        if ($params['name'] && !$input->getOption('one'))
+        {
+            $databases = array($params['name']);
         }
         
         // On synchronise le fichier de logs des dumps 
         SyncDumpCommand::syncCommand($io, $params);
 
+        // On permet la saisie du nom des bases de données en arguments
+        if ($input->getArgument('databases'))
+        {
+            $databases = $input->getArgument('databases');
+        }
+        
         // On lance la commande de dump
         DumpCommand::dumpDatabases($io, $databases, $dump, $output);
         
@@ -63,9 +79,9 @@ class DumpCommand extends CommonCommand {
     {
         $params = $this->constructParamsArray($input);
         
-        if ($input->getOption('name'))
+        if ($input->getOption('repertoire_name'))
         {
-            $name_rep =  Tools::cleanString($input->getOption('name')) ;
+            $name_rep =  Tools::cleanString($input->getOption('repertoire_name')) ;
             $params['repertoire_name'] = $name_rep . '__' . uniqid();
         }
 
