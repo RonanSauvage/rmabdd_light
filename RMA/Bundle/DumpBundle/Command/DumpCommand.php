@@ -23,7 +23,9 @@ class DumpCommand extends CommonCommand {
             ->addOption('i', null, InputOption::VALUE_NONE, 'Si i est spécifié, vous aurez des intéractions pour sélectionner les données à dump')
             ->addOption('ftp', false, InputOption::VALUE_NONE, 'Si ftp est spécifié, le dump sera sauvegardé sur le serveur FTP défini en paramètre ou dans les interactions avec i')
             ->addOption('repertoire_name', null, InputOption::VALUE_REQUIRED, 'Permet de définir un nom pour le dossier de sauvegarde. ', null)
-            ->addArgument('databases',InputArgument::IS_ARRAY,'Les bases de données à sauvegarder séparées par des espaces.');       
+            ->addOption('all', null, InputOption::VALUE_NONE, 'Si all est spécifié, exporte toutes les bases quelque soit les paramèters définis')
+            ->addArgument('databases',InputArgument::IS_ARRAY,'Les bases de données à sauvegarder séparées par des espaces.')
+            ->setAliases(['dump']);       
     }
     
     protected function execute(InputInterface $input, OutputInterface $output) 
@@ -38,27 +40,30 @@ class DumpCommand extends CommonCommand {
         
         // Par défaut avec l'option all toutes les bases seront extraites
         $databases = $dump->rmaDumpGetListDatabases();          
-        
-        // On propose à l'utilisateur de sélectionner la base de données à sauvegarder avec l'option one
-        if ($input->getOption('one'))
-        {
-            $databases = array($io->choice('Sélectionnez la base de données à sauvegarder', $databases));
-        }
-        
-        // On gère la base de données définie dans le parameters
-        if ($params['name'] && !$input->getOption('one'))
-        {
-            $databases = array($params['name']);
-        }
+      
+        // Si l'option all est envoyée, on ne gère pes les parameters ni les autres options
+        if (!$input->getOption('all')){
+           // On propose à l'utilisateur de sélectionner la base de données à sauvegarder avec l'option one
+            if ($input->getOption('one'))
+            {
+                $databases = array($io->choice('Sélectionnez la base de données à sauvegarder', $databases));
+            }
+
+            // On gère la base de données définie dans le parameters
+            if ($params['name'] && !$input->getOption('one') && $params['name'] != "name_database")
+            {
+                $databases = array($params['name']);
+            }
+            
+            // On permet la saisie du nom des bases de données en arguments
+            if ($input->getArgument('databases'))
+            {
+                $databases = $input->getArgument('databases');
+            }
+        }   
         
         // On synchronise le fichier de logs des dumps 
         SyncDumpCommand::syncCommand($io, $params);
-
-        // On permet la saisie du nom des bases de données en arguments
-        if ($input->getArgument('databases'))
-        {
-            $databases = $input->getArgument('databases');
-        }
         
         // On lance la commande de dump
         DumpCommand::dumpDatabases($io, $databases, $dump, $output);
@@ -90,7 +95,7 @@ class DumpCommand extends CommonCommand {
             'repertoire_name'   => 'Veuillez donner un nom à votre dump : ',
             'host'              => 'Veuillez renseigner l\'ip de votre connexion : ',
             'port'              => 'Veuillez renseigner le port : ',
-            'user'          => 'Veuillez renseigner le username utilisé : ',
+            'user'              => 'Veuillez renseigner le username utilisé : ',
             'password'          => 'Veuillez renseigner le password : ',
             'compress'          => 'Voulez-vous compression les dumps {none, gzip, bzip2}  ? ',
             'zip'               => 'Voulez-vous zipper le résultats {yes, no}? ',

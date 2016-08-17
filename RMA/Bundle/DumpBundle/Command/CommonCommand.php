@@ -27,7 +27,7 @@ class CommonCommand extends ContainerAwareCommand {
             array (
                 'rma:dump:database', 
                 'Cette commande permet de générer un dump',
-                '--one, --i, --ftp, --name',
+                '--one, --i, --ftp, --name', '-all',
                 '-'
             ),
             array (

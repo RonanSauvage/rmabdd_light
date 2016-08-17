@@ -78,6 +78,7 @@ Les commandes mises à disposition sont préfixées par "rma:"
             --i pour ouvrir l'interface d'intéractions pour les données de connexion (sinon les infos en parameters seront prises par défaut)
             --ftp permet de sauvegarder le dump en FTP. Ne fonctionne actuellement que pour une archive zippée. 
             --name permet de définir un nom custom pour le dump
+            --all permet de dump toutes les bases disponibles avec les parameters fournis (annule l'option -one et les bases de données en argument)
             
         Arguments :
         Les bases de données à extraire. Si aucun argument, toutes les bases seront sauvegardées

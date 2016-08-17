@@ -13,7 +13,6 @@
     "autoload": {
         "psr-0": { "RMA\\Bundle\\DumpBundle\\": "" }
     },
-    "minimum-stability": "dev",
     "require": {
         "php": ">=5.3.9",
         "symfony/symfony": ">=2.8.6|<3.0",
