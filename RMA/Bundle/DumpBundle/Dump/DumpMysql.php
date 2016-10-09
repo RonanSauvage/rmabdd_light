@@ -68,19 +68,23 @@ class DumpMysql implements DumpInterface{
     /**
      * Permet d'executer un dump pour une base de données précise
      * @param string $name_database
+     * @param string $path
      * @return array $infos
      */
-    public function execDumpForOneDatabase($name_database)
+    public function execDumpForOneDatabase($name_database, $path = null)
     {
-        if (!file_exists($this->getPathDumpsWithDir())){
-            mkdir($this->getPathDumpsWithDir());
+        if(is_null($path)){
+            $path = $this->getPathDumpsWithDir();
+        }
+        if (!file_exists($path)){
+            mkdir($path);
         }   
         $mysqlDump = $this->newMysqlDump($this->_connexiondb, $this->_params['compress'], $name_database);
         $name = $name_database . '.' . $this->_extension;
-        $path_destination_interne_with_db = $this->getPathDumpsWithDir() . DIRECTORY_SEPARATOR . $name;  
+        $path_destination_interne_with_db = $path . DIRECTORY_SEPARATOR . $name;  
         $mysqlDump->start($path_destination_interne_with_db);
         $infos = array ( 
-                   "$name" => $this->getPathDumpsWithDir() . DIRECTORY_SEPARATOR . $name
+                   "$name" => $path . DIRECTORY_SEPARATOR . $name
             );
         return $infos;
     }

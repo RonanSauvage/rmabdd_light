@@ -13,10 +13,9 @@
     "autoload": {
         "psr-0": { "RMA\\Bundle\\DumpBundle\\": "" }
     },
-    "minimum-stability": "dev",
     "require": {
         "php": ">=5.3.9",
-        "symfony/symfony": ">=2.8.6|<3.0",
+        "symfony/symfony": "^2.8.6|<3.0",
         "doctrine/orm": "^2.4.8",
         "doctrine/doctrine-bundle": "~1.4",
         "symfony/swiftmailer-bundle": "~2.3",

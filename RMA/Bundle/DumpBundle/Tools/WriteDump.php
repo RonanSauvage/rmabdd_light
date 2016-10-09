@@ -20,8 +20,8 @@ class WriteDump implements WriteDumpInterface {
      */
     public function writeInDumpFic(Array $infos, $path_dir)
     {
-        $path_file = Tools::formatDirWithDumpFile($path_dir, self::NAME_DUMP);
-               
+        $path_file = Tools::formatDirWithFile($path_dir, self::NAME_DUMP);
+
         $content = $this->recupData($path_file);
         $file_content = array_merge($content, $infos);
         $this->putInitFile($path_file, $file_content);
@@ -89,6 +89,9 @@ class WriteDump implements WriteDumpInterface {
         if (file_exists($file)){
             $content = parse_ini_file($file, true);
         }  
+        else {
+            fopen($file, "a");
+        }
         return $content;
     }
     
@@ -99,7 +102,7 @@ class WriteDump implements WriteDumpInterface {
      */
     public function remplaceDumpFic(Array $infos, $path_dir)
     {
-        $path_file = Tools::formatDirWithDumpFile($path_dir, self::NAME_DUMP);
+        $path_file = Tools::formatDirWithFile($path_dir, self::NAME_DUMP);
         $this->putInitFile($path_file, $infos);
     }
     

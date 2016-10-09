@@ -58,7 +58,7 @@ class SyncDump implements SyncDumpInterface {
      */
     private function recupData($dir_rep)
     {
-        $fic = Tools::formatDirWithDumpFile($dir_rep, self::NAME_DUMP);
+        $fic = Tools::formatDirWithFile($dir_rep, self::NAME_DUMP);
         $content = array();
         // On vérifie que le fichier existe
         if (file_exists($fic)){
@@ -94,7 +94,7 @@ class SyncDump implements SyncDumpInterface {
             $date_dump = new \Datetime(substr($datas['date'], 0, 10));
             if ($date_dump < $date)
             {
-                $path_dump_to_delete = Tools::formatDirWithDumpFile($dir_rep , $datas['identifiant']);
+                $path_dump_to_delete = Tools::formatDirWithFile($dir_rep , $datas['identifiant']);
                 // On supprime le dump physiquement
                 // On vérifie que le dossier physique existe
                 if (is_dir($path_dump_to_delete))
@@ -145,7 +145,7 @@ class SyncDump implements SyncDumpInterface {
         foreach ($array_after_splice_for_delete as $name_dump => $data_dump)
         {
             $resultats = explode('|', $name_dump);
-            $path_dump_to_delete = Tools::formatDirWithDumpFile($params['dir_dump'] , trim($resultats[2]));
+            $path_dump_to_delete = Tools::formatDirWithFile($params['dir_dump'] , trim($resultats[2]));
            
             Tools::rrmdir($path_dump_to_delete);
             $a += 1;

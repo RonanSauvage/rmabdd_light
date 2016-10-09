@@ -186,9 +186,14 @@ class ConnexionDB implements ConnexionDBInterface
      * Permet de retourner une instance \PDO pour une ConnexionDB
      * @return \PDO
      */
-    public function getPDO()
+    public function getPDO($database = null)
     {
-        $dsn = self::getDSN();
+        if(is_null($database)){
+            $dsn = self::getDSN();
+        }
+        else {
+            $dsn = self::getDSN($database);
+        }    
         $options = array(
              \PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8',
          );

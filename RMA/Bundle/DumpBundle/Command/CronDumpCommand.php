@@ -32,6 +32,7 @@ class CronDumpCommand extends CommonCommand {
                 ->addOption('ftp_port', '', InputOption::VALUE_REQUIRED, 'Le port pour le FTP')
                 ->addOption('ftp_timeout', '', InputOption::VALUE_REQUIRED, 'Le timeout paramétré pour le FTP')
                 ->addOption('ftp_path','',InputOption::VALUE_REQUIRED,'Le path pour la sauvegarde sur le FTP')
+                ->addOption('all', '',InputOption::VALUE_NONE,'Permet de sauvegarder toutes les bases de données')
                 ->addArgument('databases',InputArgument::IS_ARRAY,'Les bases de données à sauvegarder séparées par des espaces.');       
     }
     
@@ -52,12 +53,21 @@ class CronDumpCommand extends CommonCommand {
         SyncDumpCommand::syncCommand($io, $params);
         
         $dump = RDumpFactory::create($params);
-        
-        $databases = $dump->rmaDumpGetListDatabases();
-
-        if ($input->getArgument('databases'))
+ 
+        // Si l'option all est spécifiée, on lance l'export de toutes les bases
+        if($input->getOption('all'))
+        {
+            $databases = $dump->rmaDumpGetListDatabases();
+        }
+        // On gère les bases fournies en paramètres
+        else if ($input->getArgument('databases') && !$input->getOption('one'))
         {
             $databases = $input->getArgument('databases');
+        }
+        // On gère le parameters défini au niveau du database_name de Doctrine
+        else if ($params['name'] && $params['name'] != "name_database")
+        {
+            $databases = array($params['name']);
         }
         
         DumpCommand::dumpDatabases($io, $databases, $dump, $output);
