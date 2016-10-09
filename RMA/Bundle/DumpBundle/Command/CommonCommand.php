@@ -71,26 +71,29 @@ class CommonCommand extends ContainerAwareCommand {
         $params['extension'] = '.zip';
         
         $parameters_enables = array (
-            'nb_jour'       => 5, 
-            'nombre_dump'   => 10, 
-            'dir_dump'      => 'web/dump', 
-            'excludes'      => array ('performance_schema'), 
-            'ftp_ip'        => '127.0.0.1', 
-            'ftp_port'      => '21',
-            'ftp_username'  => 'rma',
-            'ftp_password'  => 'rma_password',
-            'ftp_timeout'   => 90,
-            'ftp_path'      => '/home/rma/dump',
-            'host'          => 'localhost', 
-            'port'          => '3306', 
-            'user'          => "root", 
-            'password'      => "none", 
-            'compress'      => "none", 
-            'zip'           => "no", 
-            'ftp'           => "no",
-            'dir_zip'       => "web/zip",
-            'excludes'      => array('mysql', 'information_schema', 'performance_schema'),
-            'name'          => "name_database"
+            'nb_jour'               => 5, 
+            'nombre_dump'           => 10, 
+            'dir_dump'              => 'web/dump', 
+            'dir_export'            => 'web/export',
+            'dir_tmp'               => 'web/tmp',
+            'dir_script_migration'  => 'web/script',
+            'excludes'              => array ('performance_schema'), 
+            'ftp_ip'                => '127.0.0.1', 
+            'ftp_port'              => '21',
+            'ftp_username'          => 'rma',
+            'ftp_password'          => 'rma_password',
+            'ftp_timeout'           => 90,
+            'ftp_path'              => '/home/rma/dump',
+            'host'                  => 'localhost', 
+            'port'                  => '3306', 
+            'user'                  => "root", 
+            'password'              => "none", 
+            'compress'              => "none", 
+            'zip'                   => "no", 
+            'ftp'                   => "no",
+            'dir_zip'               => "web/zip",
+            'excludes'              => array('mysql', 'information_schema', 'performance_schema'),
+            'name'                  => "name_database"
         );
         
         $parameters_doctrine = array('host' , 'port', 'user', 'password', 'name');
@@ -171,7 +174,7 @@ class CommonCommand extends ContainerAwareCommand {
     }
    
     /**
-     * 
+     * Permet de lancer la commande de zip
      * @param type $dump
      * @param SymfonyStyle $io
      */
@@ -180,6 +183,5 @@ class CommonCommand extends ContainerAwareCommand {
         $io->title('Compression du résultat');
         $dump->rmaDumpJustZip();
         $io->success('Compression réussie');
-
     }
 }

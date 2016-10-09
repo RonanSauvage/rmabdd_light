@@ -58,11 +58,11 @@ class RMADump {
     /**
      * Lance un dump pour une database
      * @param string $database
-     * @param array $infos
+     * @param array $infos_old
      */
     public function rmaDumpForDatabase($database, $infos_old)
     {
-        $infos = $this->_dump->execDumpForOneDatabase($database, $this->_params['excludes']);
+        $infos = $this->_dump->execDumpForOneDatabase($database);
         $infos = array_merge($infos_old, $infos);
         $this->rmaLogger('Dump : La base de données '. $database .' a bien été exportée');
         return $infos;
@@ -157,6 +157,15 @@ class RMADump {
     {
         $this->_params[$params_name] = $value;
         return $this;
+    }
+    
+    /**
+     * Permet de récupérer la valeur défini en param
+     * @param string $params_name
+     * @return string
+     */
+    public function getParams($params_name){
+        return $this->_params[$params_name];
     }
 }
 

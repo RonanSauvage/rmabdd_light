@@ -15,7 +15,7 @@ class Tools implements ToolsInterface{
      * @param string $dir
      * @param string $fichier
      */
-    public static function formatDirWithDumpFile($path, $fichier){
+    public static function formatDirWithFile($path, $fichier){
        // On vérifie si l'utilisateur a saisi un slash de fin du chemin
         if (substr($path, -1) != "/" && substr($path, -1) != "\\" )
         {

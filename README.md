@@ -7,18 +7,18 @@ Ce projet est une adaptation light de rmaBDD. Elle n'intègre que la partie cons
 ### Si vous souhaitez téléchargé rmaBDD comme Bundle, vous avez 2 possibilités :
 
 Utiliser Composer:
-    $ composer require rma/rmabdd_light:~0.4.*
+    $ composer require rma/rmabdd_light:~{last_version_stable}*
 
 Via le fichier json :
     "require": {
-        "rma/rmabdd_light":"~0.4.*"
+        "rma/rmabdd_light":"~{last_version_stable}*"
     }
 
 Ensuite, vous pouvez lancer composer update afin configurer votre bundle.
 
 ### Dépendances
     "php": ">=5.3.9",
-    "symfony/symfony": "2.8.*",
+    "symfony/symfony": ">=2.8.6|<3.0",
     "doctrine/orm": "^2.4.8",
     "doctrine/doctrine-bundle": "~1.4",
     "symfony/swiftmailer-bundle": "~2.3",
@@ -72,7 +72,7 @@ Les commandes mises à disposition sont préfixées par "rma:"
     
     ** rma:dump:help ---- Permet d'obtenir des informations complémentaires pour l'utilisation du plugin
 
-    ** rma:dump:database ----  Permet de réaliser un dump 
+    ** rma:dump:database ----  Permet de réaliser un dump (alias [dump])
         Options :
             --one pour sauvegarder une base unique
             --i pour ouvrir l'interface d'intéractions pour les données de connexion (sinon les infos en parameters seront prises par défaut)
@@ -136,4 +136,11 @@ Les commandes mises à disposition sont préfixées par "rma:"
         Options :
             --dir_dump ; permet de définir un répertoire à gérer spécifique 
 
-    
+
+    ** rma:dump:export ----  Permet de réaliser un export d'une base de données (alias [export])
+        Options :
+            --script ; le nom du fichier stocké dans le répertoire web/script pour (exemple test.sql)
+            --repertoire_name ; pour définir un nom custom au répertoire d'export
+            --keep_tmp ; laisse la basededonnées temporaire créée pour la migration sur le serveur database
+            --name_database_temp ; permet de donner un nom custom à la database créée pour l'export (ce nom ne doit pas être porté par une database déjà existante sur le serveur)
+     

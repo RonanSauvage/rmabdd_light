@@ -76,8 +76,6 @@ class DumpCommand extends CommonCommand {
 
         // On lance l'action de suppression des anciens dumps
         CleanDumpCommand::cleanCommand($io, $params);
-        
-        $date = date("F d Y H:i:s",filemtime($params['dir_dump']. '/' .$params['repertoire_name']));
     }
     
     public function hydrateCommand(InputInterface $input, $io)

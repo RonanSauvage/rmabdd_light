@@ -9,7 +9,7 @@ interface ToolsInterface
 
     public static function rrmDir($src);
 
-    public static function formatDirWithDumpFile($path, $fic);
+    public static function formatDirWithFile($path, $fic);
 
     public static function getArrayDump($dump);
 }
