@@ -81,7 +81,7 @@ class DumpCommand extends CommonCommand {
     public function hydrateCommand(InputInterface $input, $io)
     {
         $params = $this->constructParamsArray($input);
-        
+  
         if ($input->getOption('repertoire_name'))
         {
             $name_rep =  Tools::cleanString($input->getOption('repertoire_name')) ;

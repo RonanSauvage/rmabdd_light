@@ -37,12 +37,12 @@ Si vous souhaitez les modifier, vous avez accès aux paramètres suivants à met
     rma_password:       none
     rma_name:           name_database
     rma_compress:       gzip
-    rma_zip:            no
+    rma_zip:            no ; {yes|no} 
     rma_dir_zip:        %kernel.root_dir%/../web/zip
     rma_dir_dump:       %kernel.root_dir%/../web/dump
     rma_nb_jour:        5
     rma_nombre_dump:    10
-    rma_ftp:            no
+    rma_ftp:            no ; {yes|no} 
     rma_ftp_ip:         127.0.0.1
     rma_ftp_username:   rma
     rma_ftp_password:   rma_password
@@ -52,6 +52,9 @@ Si vous souhaitez les modifier, vous avez accès aux paramètres suivants à met
     rma_excludes:
         - mysql
         - performance_schema
+    rma_keep_tmp:               no ; {yes|no} 
+    rma_script:                 script_migration.sql 
+    rma_dir_script_migration:   %kernel.root_dir%/../web/script
 
 Attention : Pour mettre un password vide, n'oubliez pas le 'none'.
 

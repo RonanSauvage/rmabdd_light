@@ -39,6 +39,11 @@ class ConnexionDB implements ConnexionDBInterface
     private $host;
     
     /**
+     * 
+     */
+    private $driver;
+    
+    /**
      * Construct pour la classe ConnexionDB
      * @param array $params
      */
@@ -48,6 +53,7 @@ class ConnexionDB implements ConnexionDBInterface
         $this->port = $params['port'];
         $this->username = $params['user'];
         $this->password = $params['password'];
+        $this->driver = 'mysql';
     }
 
     /**
@@ -175,10 +181,10 @@ class ConnexionDB implements ConnexionDBInterface
     {
         if (is_null($dbname))
         {
-            return 'mysql:host=' . $this->getHost() .';port=' . $this->getPort(); 
+            return $this->driver .':host=' . $this->getHost() .';port=' . $this->getPort(); 
         }
         else {
-            return 'mysql:dbname='.$dbname .';host=' . $this->getHost() .';port=' . $this->getPort(); 
+            return $this->driver .':dbname='.$dbname .';host=' . $this->getHost() .';port=' . $this->getPort(); 
         }
     }
     
@@ -208,7 +214,7 @@ class ConnexionDB implements ConnexionDBInterface
     {  
         $pdo = self::getPDO();
         
-        $conn = DriverManager::getConnection(array('driver'=>'pdo_mysql', 'pdo'=>$pdo));
+        $conn = DriverManager::getConnection(array('driver'=>'pdo_' .$this->driver, 'pdo'=>$pdo));
         $sm = $conn->getSchemaManager();
         return $sm;     
     }

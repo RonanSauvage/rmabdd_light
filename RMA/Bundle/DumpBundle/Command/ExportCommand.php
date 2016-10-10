@@ -28,54 +28,63 @@ class ExportCommand extends CommonCommand {
     
     protected function execute(InputInterface $input, OutputInterface $output) 
     {  
+        
         $io = new SymfonyStyle($input, $output);
         $params['keep_tmp'] = false;
         
         // On charge l'array params avec les options / parameters
         $params = $this->hydrateCommand($input, $io);
-        
+    
           // On charge l'objet dump pour gérer toutes les fonctionnalités 
         $dump = RDumpFactory::create($params);
         
         // Par défaut avec l'option all toutes les bases seront extraites
         $databases = $dump->rmaDumpGetListDatabases();
-       
+        
+        // Si aucun nom n'a été spécifié, on génère un nom aléatoire
+        if(!$params['name_database_temp']){
+            $params['name_database_temp'] = uniqid();
+        }
+        
+        $script = Tools::formatDirWithFile($params['dir_script_migration'], $params['script']);
+        
+        if(!file_exists($script)){
+            $io->error('Le fichier de script de migration est introuvable avec la configuration définie : ' . $script);
+            exit;
+        }
+
         // On vérifie qu'il n'existe pas déjà une base de données avec ce nom
-        if(array_merge($databases, array($params['name_database_temp']))){
+        if(in_array($databases, array($params['name_database_temp']))){
             $io->error('Il existe déjà une base de données avec le nom ' . $params['name_database_temp']);
-
+            exit;
         }
-        else {
-      
-            $databases = array($io->choice('Sélectionnez la base de données à sauvegarder', $databases)); 
+        
+        $databases = array($io->choice('Sélectionnez la base de données à sauvegarder', $databases)); 
 
-            DumpCommand::dumpDatabases($io, $databases, $dump, $output);
+        DumpCommand::dumpDatabases($io, $databases, $dump, $output);
 
-            $connexiondb = new ConnexionDB($params);
-            $exportDatabase = new ExportDatabase($connexiondb, $params);
-            $dir = $params['dir_dump'] . DIRECTORY_SEPARATOR .  $params['repertoire_name'] . DIRECTORY_SEPARATOR . $databases[0] .'.sql' ;
+        $connexiondb = new ConnexionDB($params);
+        $exportDatabase = new ExportDatabase($connexiondb, $params);
+        $dir = $params['dir_dump'] . DIRECTORY_SEPARATOR .  $params['repertoire_name'] . DIRECTORY_SEPARATOR . $databases[0] .'.sql' ; 
 
-            // Si aucun nom n'a été spécifié, on génère un nom aléatoire
-            if(!$params['name_database_temp']){
-                $params['name_database_temp'] = uniqid();
-            }
+        $exportDatabase->createDatabaseWithSqlFic($dir, $params['name_database_temp']);
 
-            $exportDatabase->createDatabaseWithSqlFic($dir, $params['name_database_temp']);
 
-            $script = Tools::formatDirWithFile($params['dir_script_migration'], $params['script']);
-            $exportDatabase->lauchScriptForMigration($script, $params['name_database_temp']);
+        $exportDatabase->lauchScriptForMigration($script, $params['name_database_temp']);
 
-            // On change le répertoire de destination pour mettre la base de données migrée dans export
-            $params['dir_dump'] = $params['dir_export'];
-            $dump = RDumpFactory::create($params);
+        // On change le répertoire de destination pour mettre la base de données migrée dans export
+        $params['dir_dump'] = $params['dir_export'];
+        $dump = RDumpFactory::create($params);
 
-            DumpCommand::dumpDatabases($io, array($params['name_database_temp']), $dump, $output);
+        DumpCommand::dumpDatabases($io, array($params['name_database_temp']), $dump, $output);
 
-            if(!$params['keep_tmp'] ) {
+        $param['logger']->notice('Erreur lors du passage du scrpt : ' . $ex);
 
-               $exportDatabase->deleteDB($params['name_database_temp']);
-            }
+        if($params['keep_tmp'] != "yes" ) {
+
+           $exportDatabase->deleteDB($params['name_database_temp']);
         }
+  
     }
     
     public function hydrateCommand(InputInterface $input, $io)
@@ -93,12 +102,7 @@ class ExportCommand extends CommonCommand {
             $name_rep =  Tools::cleanString($input->getOption('repertoire_name')) ;
             $params['repertoire_name'] = $name_rep . '__' . uniqid();
         }
-        
-        if ($input->getOption('keep_tmp'))
-        {
-            $params['keep_tmp']  = true;
-        }
-        
+  
         if ($input->getOption('name_database_temp'))
         {
             $params['name_database_temp'] = Tools::cleanString($input->getOption('name_database_temp'));

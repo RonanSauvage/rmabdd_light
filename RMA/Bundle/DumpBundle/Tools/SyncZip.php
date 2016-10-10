@@ -15,6 +15,6 @@ class SyncZip {
     {
         $tools = new Tools();
         $rep_zip = $tools->scanDirectory($params['dir_zip']);
-    }
-    
+        return $rep_zip;
+    }   
 }

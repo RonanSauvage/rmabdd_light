@@ -93,7 +93,8 @@ class CommonCommand extends ContainerAwareCommand {
             'ftp'                   => "no",
             'dir_zip'               => "web/zip",
             'excludes'              => array('mysql', 'information_schema', 'performance_schema'),
-            'name'                  => "name_database"
+            'name'                  => "name_database",
+            'keep_tmp'              => "no"
         );
         
         $parameters_doctrine = array('host' , 'port', 'user', 'password', 'name');
@@ -117,9 +118,8 @@ class CommonCommand extends ContainerAwareCommand {
             }
             $params[$parameter_enable] = $$parameter_enable;
         }
-
-        $params = $this->loadOptions($input, $params);
-        return $params;
+       
+        return $this->loadOptions($input, $params);
     }
     
     /**
@@ -132,7 +132,7 @@ class CommonCommand extends ContainerAwareCommand {
     {
         $rOptions = $input->getOptions();
         $container = $this->getContainer();
-     
+
         foreach ($rOptions as $rOption => $rvalue)
         {
             if($container->hasParameter('rma_'.$rOption))
@@ -141,7 +141,8 @@ class CommonCommand extends ContainerAwareCommand {
             }
 
             // On vérifie si une valeur a été transmise en option. Si c'est le cas on surcharge le parameters
-            if (!is_null($rvalue))
+            // Pour les options sans valeur, false est défini par défaut dans le container. Nos options fonctionnent avec des strings donc false correspond à pas de valeur
+            if (!is_null($rvalue) && ($rvalue))
             {
                 $$rOption = $rvalue;
             }
