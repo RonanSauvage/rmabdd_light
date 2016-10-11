@@ -27,10 +27,8 @@ class ExportCommand extends CommonCommand {
     }
     
     protected function execute(InputInterface $input, OutputInterface $output) 
-    {  
-        
+    {       
         $io = new SymfonyStyle($input, $output);
-        $params['keep_tmp'] = false;
         
         // On charge l'array params avec les options / parameters
         $params = $this->hydrateCommand($input, $io);
@@ -48,17 +46,15 @@ class ExportCommand extends CommonCommand {
         
         $script = Tools::formatDirWithFile($params['dir_script_migration'], $params['script']);
         
+        // On vérifie que le fichier de script est disponible
         if(!file_exists($script)){
-            $io->error('Le fichier de script de migration est introuvable avec la configuration définie : ' . $script);
-            exit;
+            throw new Exception ('Le fichier de script de migration est introuvable avec la configuration définie : ' . $script); 
         }
-
-        // On vérifie qu'il n'existe pas déjà une base de données avec ce nom
+        // On vérifie qu'il n'existe pas déjà une base de données avec ce nom et
         if(in_array($databases, array($params['name_database_temp']))){
-            $io->error('Il existe déjà une base de données avec le nom ' . $params['name_database_temp']);
-            exit;
+            throw new Exception ('Il existe déjà une base de données avec le nom ' . $params['name_database_temp']);
         }
-        
+           
         $databases = array($io->choice('Sélectionnez la base de données à sauvegarder', $databases)); 
 
         DumpCommand::dumpDatabases($io, $databases, $dump, $output);
@@ -68,7 +64,6 @@ class ExportCommand extends CommonCommand {
         $dir = $params['dir_dump'] . DIRECTORY_SEPARATOR .  $params['repertoire_name'] . DIRECTORY_SEPARATOR . $databases[0] .'.sql' ; 
 
         $exportDatabase->createDatabaseWithSqlFic($dir, $params['name_database_temp']);
-
 
         $exportDatabase->lauchScriptForMigration($script, $params['name_database_temp']);
 
@@ -83,8 +78,7 @@ class ExportCommand extends CommonCommand {
         if($params['keep_tmp'] != "yes" ) {
 
            $exportDatabase->deleteDB($params['name_database_temp']);
-        }
-  
+        }     
     }
     
     public function hydrateCommand(InputInterface $input, $io)
