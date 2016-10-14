@@ -126,6 +126,12 @@ class Tools implements ToolsInterface{
         return $myarray;
     }  
     
+    /**
+     * Permet d'éliminer les répertoires . et .. du listing ainsi que les valeurs à exclure envoyées en param
+     * @param string $dir
+     * @param array $excludes
+     * @return array $dirs
+     */
     public static function removeFalseDir($dir, Array $excludes)
     {
         $dirs = scandir($dir);

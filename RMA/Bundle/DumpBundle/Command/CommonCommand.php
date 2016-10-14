@@ -94,9 +94,10 @@ class CommonCommand extends ContainerAwareCommand {
             'dir_zip'               => "web/zip",
             'excludes'              => array('mysql', 'information_schema', 'performance_schema'),
             'name'                  => "name_database",
-            'keep_tmp'              => "no"
+            'keep_tmp'              => "no",
+            'script'                => 'rma_default_file.sql'
         );
-        
+
         $parameters_doctrine = array('host' , 'port', 'user', 'password', 'name');
         
         foreach ($parameters_enables as $parameter_enable => $default)
