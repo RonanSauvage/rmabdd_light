@@ -27,7 +27,7 @@ class ExportCommand extends CommonCommand {
     }
     
     protected function execute(InputInterface $input, OutputInterface $output) 
-    {       
+    {      
         $io = new SymfonyStyle($input, $output);
         
         // On charge l'array params avec les options / parameters
@@ -50,10 +50,10 @@ class ExportCommand extends CommonCommand {
         if(!file_exists($script)){
             throw new \Exception ('Le fichier de script de migration est introuvable avec la configuration définie : ' . $script . ". Vous pouvez définir votre script d'export avec le parameter rma_script ou en option de la commande"); 
         }
-        
-        // On vérifie qu'il n'existe pas déjà une base de données avec ce nom et
+
+        // On vérifie qu'il n'existe pas déjà une base de données avec ce nom
         if(in_array($params['name_database_temp'], $databases)){
-            throw new \Exception ('Il existe déjà une base de données avec le nom ' . $params['name_database_temp']);
+           throw new \Exception ('Il existe déjà une base de données avec le nom ' . $params['name_database_temp']);
         }
            
         $databases = array($io->choice('Sélectionnez la base de données à sauvegarder', $databases)); 
@@ -64,19 +64,33 @@ class ExportCommand extends CommonCommand {
         $exportDatabase = new ExportDatabase($connexiondb, $params);
         $dir = $params['dir_dump'] . DIRECTORY_SEPARATOR .  $params['repertoire_name'] . DIRECTORY_SEPARATOR . $databases[0] .'.sql' ; 
 
-        $exportDatabase->createDatabaseWithSqlFic($dir, $params['name_database_temp']);
-
-        $exportDatabase->lauchScriptForMigration($script, $params['name_databasee_temp']);
-
+        $io->title('Création de la base de données temporaire : ');
+        try {
+            $exportDatabase->createDatabaseWithSqlFic($dir, $params['name_database_temp']);
+            $io->success('Base de données ' . $params['name_database_temp'] .' correctement créée.');
+        }
+        catch (\Exception $e){
+            $params['logger']->error('Erreur lors de la création de la base de données . ' . $e->getMessage());
+            throw new \Exception('Erreur lors de la création de la base de données. ' . $e->getMessage());
+        }
+      
+        $io->title('Lancement du script : ' . $script);
+        try {
+            $exportDatabase->lauchScriptForMigration($script, $params['name_database_temp']);
+        }
+        catch (\Exception $e){
+            $params['logger']->error('Erreur lors du script de migration pour export. ' . $e->getMessage());
+            $this->deleteDatabase($params['name_database_temp'], $params['keep_tmp'], $exportDatabase, $io);
+            throw new \Exception('Erreur lors du lancement du script de migration. ' . $e->getMessage());
+        }
+    
         // On change le répertoire de destination pour mettre la base de données migrée dans export
         $params['dir_dump'] = $params['dir_export'];
         $dump = RDumpFactory::create($params);
 
         DumpCommand::dumpDatabases($io, array($params['name_database_temp']), $dump, $output);
         
-        if($params['keep_tmp'] != 'yes'){
-             $this->deleteDatabase($params['name_database_temp'], $params['keep_tmp'], $exportDatabase, $io);
-        }
+        $this->deleteDatabase($params['name_database_temp'], $params['keep_tmp'], $exportDatabase, $io);
     }
     
     public function hydrateCommand(InputInterface $input, $io)
@@ -110,6 +124,7 @@ class ExportCommand extends CommonCommand {
      * @param SymfonyStyle $io
      */
     public function deleteDatabase($nameDatabase, $keepTmp, ExportDatabase $exportDatabase, SymfonyStyle $io){
+        $io->title('Gestion de la base de données temporaire : ');
         if($keepTmp != "yes" ) {
 
            $exportDatabase->deleteDB($nameDatabase);

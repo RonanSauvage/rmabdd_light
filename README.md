@@ -31,12 +31,13 @@ Par défaut, les paramètres définis pour doctrine seront pris pour effectuer l
 
 Si vous souhaitez les modifier, vous avez accès aux paramètres suivants à mettre directement dans vos parameters :
     
+    rma_driver:         pdo_mysql ; {pod_mysql, pdo_pgsql}             
     rma_host:           127.0.0.1
     rma_port:           3306
     rma_user:           root
     rma_password:       none
     rma_name:           name_database
-    rma_compress:       gzip
+    rma_compress:       gzip ; {none|gzip}
     rma_zip:            no ; {yes|no} 
     rma_dir_zip:        %kernel.root_dir%/../web/zip
     rma_dir_dump:       %kernel.root_dir%/../web/dump

@@ -51,6 +51,11 @@ class CommonCommand extends ContainerAwareCommand {
                 'Cette commande est prévue spécialement pour être réalisée en CRON',
                 '--host, --port, --user, --password, --compress, --zip, --dir_dump, ... ',
                 'databases'
+           ),
+            array ('rma:dump:export', 
+                "Cette commande permet d'automatiser des scripts sur une base de données en l'exportant",
+                '--script, --repertoire_name, --keep_tmp, --name_database_temp',
+                '-'
            )
         );
         $io->table($headers, $rows);
@@ -71,6 +76,11 @@ class CommonCommand extends ContainerAwareCommand {
         $params['extension'] = '.zip';
         
         $parameters_enables = array (
+            'driver'                => 'pdo_mysql',
+            'host'                  => 'localhost', 
+            'port'                  => '3306', 
+            'user'                  => "root", 
+            'password'              => "none", 
             'nb_jour'               => 5, 
             'nombre_dump'           => 10, 
             'dir_dump'              => 'web/dump', 
@@ -83,11 +93,7 @@ class CommonCommand extends ContainerAwareCommand {
             'ftp_username'          => 'rma',
             'ftp_password'          => 'rma_password',
             'ftp_timeout'           => 90,
-            'ftp_path'              => '/home/rma/dump',
-            'host'                  => 'localhost', 
-            'port'                  => '3306', 
-            'user'                  => "root", 
-            'password'              => "none", 
+            'ftp_path'              => '/home/rma/dump',          
             'compress'              => "none", 
             'zip'                   => "no", 
             'ftp'                   => "no",
@@ -98,7 +104,7 @@ class CommonCommand extends ContainerAwareCommand {
             'script'                => 'rma_default_file.sql'
         );
 
-        $parameters_doctrine = array('host' , 'port', 'user', 'password', 'name');
+        $parameters_doctrine = array('driver', 'host' , 'port', 'user', 'password', 'name');
         
         foreach ($parameters_enables as $parameter_enable => $default)
         {

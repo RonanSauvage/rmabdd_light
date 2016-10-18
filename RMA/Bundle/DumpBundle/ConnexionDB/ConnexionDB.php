@@ -53,7 +53,7 @@ class ConnexionDB implements ConnexionDBInterface
         $this->port = $params['port'];
         $this->username = $params['user'];
         $this->password = $params['password'];
-        $this->driver = 'mysql';
+        $this->driver = $params['driver'];
     }
 
     /**
@@ -181,10 +181,10 @@ class ConnexionDB implements ConnexionDBInterface
     {
         if (is_null($dbname))
         {
-            return $this->driver .':host=' . $this->getHost() .';port=' . $this->getPort(); 
+            return substr($this->driver, 4) .':host=' . $this->getHost() .';port=' . $this->getPort(); 
         }
         else {
-            return $this->driver .':dbname='.$dbname .';host=' . $this->getHost() .';port=' . $this->getPort(); 
+            return substr($this->driver, 4) .':dbname='.$dbname .';host=' . $this->getHost() .';port=' . $this->getPort(); 
         }
     }
     
@@ -199,11 +199,14 @@ class ConnexionDB implements ConnexionDBInterface
         }
         else {
             $dsn = self::getDSN($database);
-        }    
-        $options = array(
-             \PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8',
-         );
-         return new \PDO ($dsn, $this->getUsername(), $this->getPassword(), $options);
+        }  
+        $options = array();
+        if($this->driver == 'pdo_mysql'){
+            $options = array(
+                 \PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8',
+            );
+        }
+        return new \PDO ($dsn, $this->getUsername(), $this->getPassword(), $options);
     }
     
     /**
@@ -214,7 +217,7 @@ class ConnexionDB implements ConnexionDBInterface
     {  
         $pdo = self::getPDO();
         
-        $conn = DriverManager::getConnection(array('driver'=>'pdo_' .$this->driver, 'pdo'=>$pdo));
+        $conn = DriverManager::getConnection(array('driver' => $this->driver, 'pdo' => $pdo));
         $sm = $conn->getSchemaManager();
         return $sm;     
     }

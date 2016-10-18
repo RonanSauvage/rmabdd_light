@@ -6,10 +6,10 @@ use RMA\Bundle\DumpBundle\ConnexionDB\ConnexionDBInterface;
 
 /**
  * Description of ExportDatabase
- *
+ * Permet de manipuler la base de données pour créer une database, lancer un script ou supprimer une database
  * @author rmA
  */
-class ExportDatabase {
+class ExportDatabase implements ExportDatabaseInterface {
     
     protected $_connexiondb;
     protected $_params;

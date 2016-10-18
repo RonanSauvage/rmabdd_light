@@ -17,6 +17,10 @@ class RMAConfiguration implements ConfigurationInterface
 
         $rootNode
             ->children()
+                ->scalarNode('rma_driver')
+                    ->defaultValue('pdo_mysql')
+                    ->info('This value is used to connect database. She can be empty')
+                ->end()
                 ->scalarNode('rma_host')
                     ->defaultValue('127.0.0.1')
                     ->info('This value is used to connect database. She can be empty')
