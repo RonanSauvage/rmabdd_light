@@ -20,7 +20,7 @@ class RMADumpExtension extends Extension
     public function load(array $configs, ContainerBuilder $container)
     {
         $configuration = new RMAConfiguration();
-        $configs_merge = $this->processConfiguration($configuration, $configs);
+        $this->processConfiguration($configuration, $configs);
       
         $loader = new Loader\YamlFileLoader($container, new FileLocator(__DIR__.'/../Resources/config'));
         $loader->load('services.yml'); 
@@ -31,7 +31,7 @@ class RMADumpExtension extends Extension
             'RMA\\Bundle\\DumpBundle\\Tools\\WriteDump',
             'RMA\\Bundle\\DumpBundle\\Tools\\SyncZip', 
             'RMA\\Bundle\\DumpBundle\\Tools\\Tools',
-            'RMA\\Bundle\\DumpBundle\\Tools\\Rtools',
+            'RMA\\Bundle\\DumpBundle\\Tools\\RTools',
             'RMA\\Bundle\\DumpBundle\\Tools\\ExportDatabase',
             'RMA\\Bundle\\DumpBundle\\Ftp\\Rftp',
             'RMA\\Bundle\\DumpBundle\\Factory\\RDumpFactory',
