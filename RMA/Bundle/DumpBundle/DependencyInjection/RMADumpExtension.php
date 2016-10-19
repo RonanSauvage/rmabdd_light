@@ -37,7 +37,7 @@ class RMADumpExtension extends Extension
             'RMA\\Bundle\\DumpBundle\\Factory\\RDumpFactory',
             'RMA\\Bundle\\DumpBundle\\Factory\\RToolsFactory',
             'RMA\\Bundle\\DumpBundle\\ConnexionDB\\ConnexionDB',
-            'RMA\\Bundle\\DumpBundle\\ConnexionDB\\DumpMysql',
+            'RMA\\Bundle\\DumpBundle\\Dump\\DumpMysql',
             'RMA\\Bundle\\DumpBundle\\Dump\\RMADump'
         ));
     }
