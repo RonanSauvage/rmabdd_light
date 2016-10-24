@@ -21,7 +21,7 @@ class Rftp implements FtpInterface {
         $this->ftp_connect = ftp_connect($params['ftp_ip'], $params['ftp_port'], $params['ftp_timeout']);
         $this->_path = $params['ftp_path'];
         $this->_fichier = $params['repertoire_name'] . $params['extension'];
-        $this->_dir_fichier = $params['dir_fichier'];
+        $this->_dir_fichier = $params['dir_zip'];
         $this->_username = $params['ftp_username'];
         $this->_password = $params['ftp_password'];
     }

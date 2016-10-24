@@ -12,7 +12,7 @@ class ToolsTests extends \PHPUnit_Framework_TestCase
 {
     
     
-    public function testFormatDirWithDumpFile()
+    public function testFormatDirWithFile()
     {
         
         $tools = new Tools;
@@ -25,8 +25,8 @@ class ToolsTests extends \PHPUnit_Framework_TestCase
         
         $expected_win = 'rma\dump\rma.log';
               
-        $this->assertEquals($expected_win, $tools->formatDirWithDumpFile($case1_dir_win, $fic));
-        $this->assertEquals($expected_win, $tools->formatDirWithDumpFile($case2_dir_win, $fic));
+        $this->assertEquals($expected_win, $tools->formatDirWithFile($case1_dir_win, $fic));
+        $this->assertEquals($expected_win, $tools->formatDirWithFile($case2_dir_win, $fic));
       
     }
     

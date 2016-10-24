@@ -25,5 +25,25 @@ class RMADumpExtension extends Extension
         $loader = new Loader\YamlFileLoader($container, new FileLocator(__DIR__.'/../Resources/config'));
         $loader->load('services.yml'); 
         $loader->load('config.yml'); 
+       
+        $this->addClassesToCompile(array(
+            'RMA\\Bundle\\DumpBundle\\Tools\\SyncDump',
+            'RMA\\Bundle\\DumpBundle\\Tools\\WriteDump',
+            'RMA\\Bundle\\DumpBundle\\Tools\\SyncZip', 
+            'RMA\\Bundle\\DumpBundle\\Tools\\Tools',
+            'RMA\\Bundle\\DumpBundle\\Tools\\RTools',
+            'RMA\\Bundle\\DumpBundle\\Tools\\ExportDatabase',
+            'RMA\\Bundle\\DumpBundle\\Ftp\\Rftp',
+            'RMA\\Bundle\\DumpBundle\\Factory\\RDumpFactory',
+            'RMA\\Bundle\\DumpBundle\\Factory\\RToolsFactory',
+            'RMA\\Bundle\\DumpBundle\\ConnexionDB\\ConnexionDB',
+            'RMA\\Bundle\\DumpBundle\\Dump\\DumpMysql',
+            'RMA\\Bundle\\DumpBundle\\Dump\\RMADump'
+        ));
+    }
+    
+    public function getAlias()
+    {
+        return "rma_dump";
     }
 }

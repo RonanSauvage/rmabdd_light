@@ -41,9 +41,6 @@ class CronDumpCommand extends CommonCommand {
         $params = $this->constructParamsArray($input);
         $io = new SymfonyStyle($input, $output);
         
-        // A gérer l'extension pour le FTP   - A retirer par la suite 
-        $params['dir_fichier'] = $params['dir_zip']; 
-        
         // On gère le mot de passe pouvant être vide 
         if(($input->getOption('password'))== 'none' || $params['password'] == 'none')
         {

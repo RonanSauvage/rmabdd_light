@@ -27,14 +27,12 @@ class ExportCommand extends CommonCommand {
     }
     
     protected function execute(InputInterface $input, OutputInterface $output) 
-    {  
-        
+    {      
         $io = new SymfonyStyle($input, $output);
-        $params['keep_tmp'] = false;
         
         // On charge l'array params avec les options / parameters
         $params = $this->hydrateCommand($input, $io);
-    
+ 
           // On charge l'objet dump pour gérer toutes les fonctionnalités 
         $dump = RDumpFactory::create($params);
         
@@ -48,17 +46,16 @@ class ExportCommand extends CommonCommand {
         
         $script = Tools::formatDirWithFile($params['dir_script_migration'], $params['script']);
         
+        // On vérifie que le fichier de script est disponible
         if(!file_exists($script)){
-            $io->error('Le fichier de script de migration est introuvable avec la configuration définie : ' . $script);
-            exit;
+            throw new \Exception ('Le fichier de script de migration est introuvable avec la configuration définie : ' . $script . ". Vous pouvez définir votre script d'export avec le parameter rma_script ou en option de la commande"); 
         }
 
         // On vérifie qu'il n'existe pas déjà une base de données avec ce nom
-        if(in_array($databases, array($params['name_database_temp']))){
-            $io->error('Il existe déjà une base de données avec le nom ' . $params['name_database_temp']);
-            exit;
+        if(in_array($params['name_database_temp'], $databases)){
+           throw new \Exception ('Il existe déjà une base de données avec le nom ' . $params['name_database_temp']);
         }
-        
+           
         $databases = array($io->choice('Sélectionnez la base de données à sauvegarder', $databases)); 
 
         DumpCommand::dumpDatabases($io, $databases, $dump, $output);
@@ -67,35 +64,39 @@ class ExportCommand extends CommonCommand {
         $exportDatabase = new ExportDatabase($connexiondb, $params);
         $dir = $params['dir_dump'] . DIRECTORY_SEPARATOR .  $params['repertoire_name'] . DIRECTORY_SEPARATOR . $databases[0] .'.sql' ; 
 
-        $exportDatabase->createDatabaseWithSqlFic($dir, $params['name_database_temp']);
-
-
-        $exportDatabase->lauchScriptForMigration($script, $params['name_database_temp']);
-
+        $io->title('Création de la base de données temporaire : ');
+        try {
+            $exportDatabase->createDatabaseWithSqlFic($dir, $params['name_database_temp']);
+            $io->success('Base de données ' . $params['name_database_temp'] .' correctement créée.');
+        }
+        catch (\Exception $e){
+            $params['logger']->error('Erreur lors de la création de la base de données . ' . $e->getMessage());
+            throw new \Exception('Erreur lors de la création de la base de données. ' . $e->getMessage());
+        }
+      
+        $io->title('Lancement du script : ' . $script);
+        try {
+            $exportDatabase->lauchScriptForMigration($script, $params['name_database_temp']);
+        }
+        catch (\Exception $e){
+            $params['logger']->error('Erreur lors du script de migration pour export. ' . $e->getMessage());
+            $this->deleteDatabase($params['name_database_temp'], $params['keep_tmp'], $exportDatabase, $io);
+            throw new \Exception('Erreur lors du lancement du script de migration. ' . $e->getMessage());
+        }
+    
         // On change le répertoire de destination pour mettre la base de données migrée dans export
         $params['dir_dump'] = $params['dir_export'];
         $dump = RDumpFactory::create($params);
 
         DumpCommand::dumpDatabases($io, array($params['name_database_temp']), $dump, $output);
-
-        $param['logger']->notice('Erreur lors du passage du scrpt : ' . $ex);
-
-        if($params['keep_tmp'] != "yes" ) {
-
-           $exportDatabase->deleteDB($params['name_database_temp']);
-        }
-  
+        
+        $this->deleteDatabase($params['name_database_temp'], $params['keep_tmp'], $exportDatabase, $io);
     }
     
     public function hydrateCommand(InputInterface $input, $io)
     {
         $params = $this->constructParamsArray($input);
         $params['name_database_temp'] = false;
-        
-        if ($input->getOption('script'))
-        {
-            $params['script'] =  $input->getOption('script') ;
-        }
         
         if ($input->getOption('repertoire_name'))
         {
@@ -108,11 +109,31 @@ class ExportCommand extends CommonCommand {
             $params['name_database_temp'] = Tools::cleanString($input->getOption('name_database_temp'));
         }
 
-        $params['dir_fichier'] = $params['dir_zip']; 
         // Il s'agit ici simplement d'utiliser un dump temporaire donc on force à non les options de zip et ftp
         $params['zip'] = 'no';
         $params['ftp'] = 'no';
         $params['dir_dump'] = $params['dir_tmp'];
+        
+        $params = $this->selectConnexion($params, $io);
         return $params;
+    }
+    
+    /**
+     * Permet de delete la database définie
+     * @param string $nameDatabase
+     * @param string $keepTmp {yes | no}
+     * @param ExportDatabase $exportDatabase
+     * @param SymfonyStyle $io
+     */
+    public function deleteDatabase($nameDatabase, $keepTmp, ExportDatabase $exportDatabase, SymfonyStyle $io){
+        $io->title('Gestion de la base de données temporaire : ');
+        if($keepTmp != "yes" ) {
+
+           $exportDatabase->deleteDB($nameDatabase);
+           $io->success('La base temporaire '. $nameDatabase . ' a été correctement effacée.');
+       }  
+       else {
+           $io->success('La base temporaire '. $nameDatabase . ' a été correctement conservée.');
+       }
     }
 }

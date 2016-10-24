@@ -16,7 +16,7 @@ class ConnexionDB implements ConnexionDBInterface
     /**
      * 
      */
-    private $nameConnexion;
+    private $name;
     
     /**
      * @Assert\Type(type="integer", message="Le port doit etre un entier")
@@ -44,6 +44,12 @@ class ConnexionDB implements ConnexionDBInterface
     private $driver;
     
     /**
+     *
+     * @var type array
+     */
+    private $excludes;
+    
+    /**
      * Construct pour la classe ConnexionDB
      * @param array $params
      */
@@ -53,31 +59,32 @@ class ConnexionDB implements ConnexionDBInterface
         $this->port = $params['port'];
         $this->username = $params['user'];
         $this->password = $params['password'];
-        $this->driver = 'mysql';
+        $this->driver = $params['driver'];
+        $this->excludes = $params['excludes'];
     }
 
     /**
-    * Set nameConnexion
+    * Set name
     *
-    * @param string $nameConnexion
+    * @param string $name
     *
     * @return ConnexionDB
     */
-    public function setNameConnexion($nameConnexion)
+    public function setName($name)
     {
-        $this->nameConnexion = $nameConnexion;
+        $this->name = $name;
 
         return $this;
     }
 
     /**
-     * Get nameConnexion
+     * Get name
      *
      * @return string
      */
-    public function getNameConnexion()
+    public function getName()
     {
-        return $this->nameConnexion;
+        return $this->name;
     }
 
     /**
@@ -173,6 +180,44 @@ class ConnexionDB implements ConnexionDBInterface
     }
     
     /**
+     * Set driver
+     *
+     * @param string $driver
+     * @return ConnexionDB
+     */
+    public function setDriver($driver)
+    {
+        $this->driver = $driver;
+
+        return $this;
+    }
+    
+    /**
+     * Get driver
+     *
+     * @return string 
+     */
+    public function getDriver()
+    {
+        return $this->driver;
+    }
+
+    /**
+    * Retourne les params attendus pour la connexion
+    * @return array $params
+    */
+    public function getAllParams(){
+        $params = array (
+            'name',
+            'host',
+            'user',
+            'port',
+            'password'
+        );
+        return $params;
+    }
+    
+    /**
      * Permet de formatter un DSN pour une ConnexionDB
      * @param string dbname 
      * @return string $dsn
@@ -181,10 +226,10 @@ class ConnexionDB implements ConnexionDBInterface
     {
         if (is_null($dbname))
         {
-            return $this->driver .':host=' . $this->getHost() .';port=' . $this->getPort(); 
+            return substr($this->driver, 4) .':host=' . $this->getHost() .';port=' . $this->getPort(); 
         }
         else {
-            return $this->driver .':dbname='.$dbname .';host=' . $this->getHost() .';port=' . $this->getPort(); 
+            return substr($this->driver, 4) .':dbname='.$dbname .';host=' . $this->getHost() .';port=' . $this->getPort(); 
         }
     }
     
@@ -199,11 +244,14 @@ class ConnexionDB implements ConnexionDBInterface
         }
         else {
             $dsn = self::getDSN($database);
-        }    
-        $options = array(
-             \PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8',
-         );
-         return new \PDO ($dsn, $this->getUsername(), $this->getPassword(), $options);
+        }  
+        $options = array();
+        if($this->driver == 'pdo_mysql'){
+            $options = array(
+                 \PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8',
+            );
+        }
+        return new \PDO ($dsn, $this->getUsername(), $this->getPassword(), $options);
     }
     
     /**
@@ -214,7 +262,7 @@ class ConnexionDB implements ConnexionDBInterface
     {  
         $pdo = self::getPDO();
         
-        $conn = DriverManager::getConnection(array('driver'=>'pdo_' .$this->driver, 'pdo'=>$pdo));
+        $conn = DriverManager::getConnection(array('driver' => $this->driver, 'pdo' => $pdo));
         $sm = $conn->getSchemaManager();
         return $sm;     
     }
