@@ -113,6 +113,8 @@ class ExportCommand extends CommonCommand {
         $params['zip'] = 'no';
         $params['ftp'] = 'no';
         $params['dir_dump'] = $params['dir_tmp'];
+        
+        $params = $this->selectConnexion($params, $io);
         return $params;
     }
     

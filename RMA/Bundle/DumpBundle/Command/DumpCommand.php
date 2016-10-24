@@ -37,7 +37,7 @@ class DumpCommand extends CommonCommand {
 
         // On charge l'objet dump pour gérer toutes les fonctionnalités 
         $dump = RDumpFactory::create($params);
-        
+
         // Par défaut avec l'option all toutes les bases seront extraites
         $databases = $dump->rmaDumpGetListDatabases();          
       
@@ -117,9 +117,15 @@ class DumpCommand extends CommonCommand {
             $params = $this->rmaAskQuestions($input, $params, $parametres_ftp, $io);        
         }
 
-        $params = $this->rmaAskQuestions($input, $params, $parametres, $io);
-      
-        if ($params['password'] == 'none')
+        // On charge les params pour le FTP
+        if ($input->getOption('i')) {
+            $params = $this->rmaAskQuestions($input, $params, $parametres, $io);     
+        }
+        else {
+           $params = $this->selectConnexion($params, $io);
+        }
+     
+        if (isset($params['password']) && $params['password'] == 'none')
         {
             $params['password'] = '';
         }

@@ -16,7 +16,7 @@ class ConnexionDB implements ConnexionDBInterface
     /**
      * 
      */
-    private $nameConnexion;
+    private $name;
     
     /**
      * @Assert\Type(type="integer", message="Le port doit etre un entier")
@@ -44,6 +44,12 @@ class ConnexionDB implements ConnexionDBInterface
     private $driver;
     
     /**
+     *
+     * @var type array
+     */
+    private $excludes;
+    
+    /**
      * Construct pour la classe ConnexionDB
      * @param array $params
      */
@@ -54,30 +60,31 @@ class ConnexionDB implements ConnexionDBInterface
         $this->username = $params['user'];
         $this->password = $params['password'];
         $this->driver = $params['driver'];
+        $this->excludes = $params['excludes'];
     }
 
     /**
-    * Set nameConnexion
+    * Set name
     *
-    * @param string $nameConnexion
+    * @param string $name
     *
     * @return ConnexionDB
     */
-    public function setNameConnexion($nameConnexion)
+    public function setName($name)
     {
-        $this->nameConnexion = $nameConnexion;
+        $this->name = $name;
 
         return $this;
     }
 
     /**
-     * Get nameConnexion
+     * Get name
      *
      * @return string
      */
-    public function getNameConnexion()
+    public function getName()
     {
-        return $this->nameConnexion;
+        return $this->name;
     }
 
     /**
@@ -170,6 +177,44 @@ class ConnexionDB implements ConnexionDBInterface
     public function getHost()
     {
         return $this->host;
+    }
+    
+    /**
+     * Set driver
+     *
+     * @param string $driver
+     * @return ConnexionDB
+     */
+    public function setDriver($driver)
+    {
+        $this->driver = $driver;
+
+        return $this;
+    }
+    
+    /**
+     * Get driver
+     *
+     * @return string 
+     */
+    public function getDriver()
+    {
+        return $this->driver;
+    }
+
+    /**
+    * Retourne les params attendus pour la connexion
+    * @return array $params
+    */
+    public function getAllParams(){
+        $params = array (
+            'name',
+            'host',
+            'user',
+            'port',
+            'password'
+        );
+        return $params;
     }
     
     /**

@@ -1,32 +1,32 @@
 [![SensioLabsInsight](https://insight.sensiolabs.com/projects/b32f2cd1-f941-4327-b1b5-21960d5bbebe/small.png)](https://insight.sensiolabs.com/projects/b32f2cd1-f941-4327-b1b5-21960d5bbebe) [![Latest Stable Version](https://poser.pugx.org/rma/rmabdd_light/v/stable)](https://packagist.org/packages/rma/rmabdd_light) [![Latest Unstable Version](https://poser.pugx.org/rma/rmabdd_light/v/unstable)](https://packagist.org/packages/rma/rmabdd_light)
 
-rmABDD_light :
+## Si vous souhaitez téléchargé rmaBDD comme Bundle, vous avez 2 possibilités :
 
-Ce projet est une adaptation light de rmaBDD. Elle n'intègre que la partie console.
-
-### Si vous souhaitez téléchargé rmaBDD comme Bundle, vous avez 2 possibilités :
-
-Utiliser Composer:
+> Utiliser Composer:
+```
     $ composer require rma/rmabdd_light:~{last_version_stable}*
+```
 
-Via le fichier json :
+> Via le fichier json :
+```
     "require": {
         "rma/rmabdd_light":"~{last_version_stable}*"
     }
+```
 
 Ensuite, vous pouvez lancer composer update afin configurer votre bundle.
 
-### Dépendances
-    "php": ">=5.3.9",
+## Dépendances
+    "php": ">=5.6",
     "symfony/symfony": ">=2.8.6|<3.0",
     "doctrine/orm": "^2.4.8",
     "doctrine/doctrine-bundle": "~1.4",
-    "symfony/swiftmailer-bundle": "~2.3",
     "symfony/monolog-bundle": "~2.4",
     "sensio/distribution-bundle": ">=3.0|<=5.0.5",
     "incenteev/composer-parameter-handler": "~2.0",
     "ifsnop/mysqldump-php" : "~2.1"
 
+<<<<<<< HEAD
 Par défaut, les paramètres définis pour doctrine seront pris pour effectuer les dumps.
 
 Si vous souhaitez les modifier, vous avez accès aux paramètres suivants à mettre directement dans vos parameters :
@@ -67,16 +67,21 @@ Attention : Pour ne pas effacer de dump au fur et à mesure renseigner 'none' au
 
 
 ### Les commandes :
+=======
+## Les commandes :
+>>>>>>> v0.5.0
 
 Pour voir les commandes mises à votre disposition rendez-vous à la racine et écrivez :
     
-    php app/console 
+> php app/console 
 
-Les commandes mises à disposition sont préfixées par "rma:"
+*Les commandes mises à disposition sont préfixées par "rma:"*
     
-    ** rma:dump:help ---- Permet d'obtenir des informations complémentaires pour l'utilisation du plugin
+    - rma:dump:help ---- Permet d'obtenir des informations complémentaires pour l'utilisation du plugin
 
-    ** rma:dump:database ----  Permet de réaliser un dump (alias [dump])
+    - rma:dump:inspect ---- (alias [inspect]) Vous aide pour définir les configuration de vos connexions base de données. Liste vos connexions chargées et les paramètres liés
+
+    - rma:dump:database ---- (alias [dump]) Permet de réaliser un dump 
         Options :
             --one pour sauvegarder une base unique
             --i pour ouvrir l'interface d'intéractions pour les données de connexion (sinon les infos en parameters seront prises par défaut)
@@ -91,7 +96,7 @@ Les commandes mises à disposition sont préfixées par "rma:"
             Exemple sans argument : 
                 php app/console rma:dump:database
 
-    ** rma:dump:cron ---- Commande prévue spécialement pour les CRON
+    - rma:dump:cron ---- Commande prévue spécialement pour les CRON
         Permet de réaliser un dump en crontab. Si vous ne mettez pas d'argument toutes les bases de données seront sauvegardées.
         Par défaut les paramètres sont ceux définis au niveau de votre paramters.yml
         Options : 
@@ -121,7 +126,7 @@ Les commandes mises à disposition sont préfixées par "rma:"
                 php app/console rma:dump:cron 
 
 
-    ** rma:dump:clean ---- Commande prévue pour nettoyer les répertoires de dump
+    - rma:dump:clean ---- Commande prévue pour nettoyer les répertoires de dump
         Permet de supprimer des dumps
         Par défaut le répertoire à vider est celui défini au niveau du parameters.yml
         Options : 
@@ -134,17 +139,59 @@ Les commandes mises à disposition sont préfixées par "rma:"
                 php app/console rma:dump:clean --nombre=15
             Va conserver les 15 derniers dumps 
 
-    ** rma:dump:sync ---- Commande pour synchroniser les logs de dump avec les dumps effectivement présents dans le répertoire de dump
+    - rma:dump:sync ---- Commande pour synchroniser les logs de dump avec les dumps effectivement présents dans le répertoire de dump
         Permet notamment de mettre à jour le dossier des logs dans le cas où vous supprimeriez manuellement des dumps
         Par défaut le répertoire à vider est celui défini au niveau du parameters.yml
         Options :
             --dir_dump ; permet de définir un répertoire à gérer spécifique 
 
 
-    ** rma:dump:export ----  Permet de réaliser un export d'une base de données (alias [export])
+    - rma:dump:export ---- (alias [export]) Permet de réaliser un export d'une base de données 
         Options :
             --script ; le nom du fichier stocké dans le répertoire web/script pour (exemple test.sql)
             --repertoire_name ; pour définir un nom custom au répertoire d'export
             --keep_tmp ; laisse la basededonnées temporaire créée pour la migration sur le serveur database
             --name_database_temp ; permet de donner un nom custom à la database créée pour l'export (ce nom ne doit pas être porté par une database déjà existante sur le serveur)
      
+## Définition des configurations 
+
+Par défaut, *les paramètres définis pour doctrine* seront pris pour effectuer les dumps.
+
+*Nouveauté 0.6* : vous pouvez désormais définir plusieurs configurations de connexion.
+
+Si vous souhaitez modifier les configurations, vous avez accès aux paramètres suivants à mettre directement dans vos parameters.
+    
+### Configuration dump et export : 
+    - rma_connexion:
+        - { rma_driver: pdo_mysql, rma_name: Centos 6.7, rma_host: 192.154.125.154, rma_port: 3306, rma_user: ronan-user, rma_password: passwordInconnu, rma_exclude: {mysql_schema, performance_schema}}
+        - { rma_driver: pdo_mysql, rma_name: Localhost, rma_host: localhost, rma_port: 3306, rma_user: root, rma_password: none  }     
+    - rma_nb_jour:                  5
+    - rma_nombre_dump:              10
+    - rma_dir_dump:                 %kernel.root_dir%/../web/dump
+    - rma_keep_tmp:                 no ; {yes|no} 
+    - rma_script:                   script_migration.sql 
+    - rma_dir_script_migration:     %kernel.root_dir%/../web/script
+
+### Configuration FTP des dump 
+    - rma_ftp:                      no ; {yes|no} 
+    - rma_ftp_ip:                   127.0.0.1
+    - rma_ftp_username:             rma
+    - rma_ftp_password:             rma_password
+    - rma_ftp_port:                 21
+    - rma_ftp_timeout:              90
+    - rma_ftp_path:                 /home/rma/dump
+
+
+### Configuration compression des dump 
+    - rma_compress:                 gzip ; {none|gzip}
+    - rma_zip:                      no ; {yes|no} 
+    - rma_dir_zip:                  %kernel.root_dir%/../web/zip
+
+*Attention* : Pour mettre un password vide, n'oubliez pas le 'none'.
+
+*Attention* : Pour ne pas effacer de dump au fur et à mesure renseigner 'none' aux champs nb_jour et nombre_dump
+
+
+
+
+   
