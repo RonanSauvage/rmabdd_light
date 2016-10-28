@@ -26,50 +26,7 @@ Ensuite, vous pouvez lancer composer update afin configurer votre bundle.
     "incenteev/composer-parameter-handler": "~2.0",
     "ifsnop/mysqldump-php" : "~2.1"
 
-<<<<<<< HEAD
-Par défaut, les paramètres définis pour doctrine seront pris pour effectuer les dumps.
-
-Si vous souhaitez les modifier, vous avez accès aux paramètres suivants à mettre directement dans vos parameters :
-    
-    rma_driver:         pdo_mysql ; {pod_mysql, pdo_pgsql}             
-    rma_host:           127.0.0.1
-    rma_port:           3306
-    rma_user:           root
-    rma_password:       none
-    rma_name:           name_database
-    rma_compress:       gzip ; {none|gzip}
-    rma_zip:            no ; {yes|no} 
-    rma_dir_zip:        %kernel.root_dir%/../web/zip
-    rma_dir_dump:       %kernel.root_dir%/../web/dump
-    rma_nb_jour:        5
-    rma_nombre_dump:    10
-    rma_ftp:            no ; {yes|no} 
-    rma_ftp_ip:         127.0.0.1
-    rma_ftp_username:   rma
-    rma_ftp_password:   rma_password
-    rma_ftp_port:       21
-    rma_ftp_timeout:    90
-    rma_ftp_path:       /home/rma/dump
-    rma_excludes:
-        - mysql
-        - performance_schema
-    rma_keep_tmp:               no ; {yes|no} 
-    rma_script:                 script_migration.sql 
-    rma_dir_script_migration:   %kernel.root_dir%/../web/script
-
-Attention : Pour mettre un password vide, n'oubliez pas le 'none'.
-
-Attention : Pour les dir, vous devez doubler les DIRECTORY SEPARATOR. (exemple : dir_dump=C:\\Users\\rmA\\Desktop)
-
-Attention : Si vous ne souhaitez pas exclude de base de données dans vos dumps, inscrivez - none
-
-Attention : Pour ne pas effacer de dump au fur et à mesure renseigner 'none' aux champs nb_jour et nombre_dump
-
-
-### Les commandes :
-=======
 ## Les commandes :
->>>>>>> v0.5.0
 
 Pour voir les commandes mises à votre disposition rendez-vous à la racine et écrivez :
     
@@ -77,11 +34,11 @@ Pour voir les commandes mises à votre disposition rendez-vous à la racine et �
 
 *Les commandes mises à disposition sont préfixées par "rma:"*
     
-    - rma:dump:help ---- Permet d'obtenir des informations complémentaires pour l'utilisation du plugin
+    > rma:dump:help ---- Permet d'obtenir des informations complémentaires pour l'utilisation du plugin
 
-    - rma:dump:inspect ---- (alias [inspect]) Vous aide pour définir les configuration de vos connexions base de données. Liste vos connexions chargées et les paramètres liés
+    > rma:dump:inspect ---- (alias [inspect]) Vous aide pour définir les configuration de vos connexions base de données. Liste vos connexions chargées et les paramètres liés
 
-    - rma:dump:database ---- (alias [dump]) Permet de réaliser un dump 
+    > rma:dump:database ---- (alias [dump]) Permet de réaliser un dump 
         Options :
             --one pour sauvegarder une base unique
             --i pour ouvrir l'interface d'intéractions pour les données de connexion (sinon les infos en parameters seront prises par défaut)
@@ -96,7 +53,7 @@ Pour voir les commandes mises à votre disposition rendez-vous à la racine et �
             Exemple sans argument : 
                 php app/console rma:dump:database
 
-    - rma:dump:cron ---- Commande prévue spécialement pour les CRON
+    > rma:dump:cron ---- Commande prévue spécialement pour les CRON
         Permet de réaliser un dump en crontab. Si vous ne mettez pas d'argument toutes les bases de données seront sauvegardées.
         Par défaut les paramètres sont ceux définis au niveau de votre paramters.yml
         Options : 
@@ -126,7 +83,7 @@ Pour voir les commandes mises à votre disposition rendez-vous à la racine et �
                 php app/console rma:dump:cron 
 
 
-    - rma:dump:clean ---- Commande prévue pour nettoyer les répertoires de dump
+    > rma:dump:clean ---- Commande prévue pour nettoyer les répertoires de dump
         Permet de supprimer des dumps
         Par défaut le répertoire à vider est celui défini au niveau du parameters.yml
         Options : 
@@ -139,32 +96,42 @@ Pour voir les commandes mises à votre disposition rendez-vous à la racine et �
                 php app/console rma:dump:clean --nombre=15
             Va conserver les 15 derniers dumps 
 
-    - rma:dump:sync ---- Commande pour synchroniser les logs de dump avec les dumps effectivement présents dans le répertoire de dump
+    > rma:dump:sync ---- Commande pour synchroniser les logs de dump avec les dumps effectivement présents dans le répertoire de dump
         Permet notamment de mettre à jour le dossier des logs dans le cas où vous supprimeriez manuellement des dumps
         Par défaut le répertoire à vider est celui défini au niveau du parameters.yml
         Options :
             --dir_dump ; permet de définir un répertoire à gérer spécifique 
 
 
-    - rma:dump:export ---- (alias [export]) Permet de réaliser un export d'une base de données 
+    > rma:dump:export ---- (alias [export]) Permet de réaliser un export d'une base de données 
         Options :
             --script ; le nom du fichier stocké dans le répertoire web/script pour (exemple test.sql)
             --repertoire_name ; pour définir un nom custom au répertoire d'export
             --keep_tmp ; laisse la basededonnées temporaire créée pour la migration sur le serveur database
             --name_database_temp ; permet de donner un nom custom à la database créée pour l'export (ce nom ne doit pas être porté par une database déjà existante sur le serveur)
-     
+            --ftp  ; permet d'envoyer l'export en FTP selon les paramètres définis dans parameters.yml pour rma_ftp
+
 ## Définition des configurations 
 
 Par défaut, *les paramètres définis pour doctrine* seront pris pour effectuer les dumps.
 
-*Nouveauté 0.6* : vous pouvez désormais définir plusieurs configurations de connexion.
+*Nouveauté 0.5* : 
+        ** Vous pouvez désormais définir plusieurs configurations de connexion.
+        ** Vous pouvez désormais définir plusieurs configurations FTP.
 
 Si vous souhaitez modifier les configurations, vous avez accès aux paramètres suivants à mettre directement dans vos parameters.
     
+Pour vous aider dans la définition de vos configurations, vous avez accès à des commandes pour vous récapituler les configurations chargées à partir des informations saisies
+
+> php app/console inspectConnexions
+> php app/console inspectFtps
+
+Retourne un tableau avec les différentes connexions chargées et les paramètres correspondants
+
 ### Configuration dump et export : 
-    - rma_connexion:
-        - { rma_driver: pdo_mysql, rma_name: Centos 6.7, rma_host: 192.154.125.154, rma_port: 3306, rma_user: ronan-user, rma_password: passwordInconnu, rma_exclude: {mysql_schema, performance_schema}}
-        - { rma_driver: pdo_mysql, rma_name: Localhost, rma_host: localhost, rma_port: 3306, rma_user: root, rma_password: none  }     
+    - rma_connexions:
+        - { rma_name_connexion: Centos 6.7, rma_driver: pdo_mysql, rma_host: 192.154.125.154, rma_port: 3306, rma_user: ronan-user, rma_password: passwordInconnu, rma_exclude: [mysql_schema, performance_schema]}
+        - { rma_name_connexion: Localhost, rma_driver: pdo_mysql, rma_host: localhost, rma_port: 3306, rma_user: root, rma_password: none  }     
     - rma_nb_jour:                  5
     - rma_nombre_dump:              10
     - rma_dir_dump:                 %kernel.root_dir%/../web/dump
@@ -172,15 +139,22 @@ Si vous souhaitez modifier les configurations, vous avez accès aux paramètres 
     - rma_script:                   script_migration.sql 
     - rma_dir_script_migration:     %kernel.root_dir%/../web/script
 
-### Configuration FTP des dump 
-    - rma_ftp:                      no ; {yes|no} 
-    - rma_ftp_ip:                   127.0.0.1
-    - rma_ftp_username:             rma
-    - rma_ftp_password:             rma_password
-    - rma_ftp_port:                 21
-    - rma_ftp_timeout:              90
-    - rma_ftp_path:                 /home/rma/dump
+#### Ajout de paramètres aux paramètres Doctrine : 
 
+Si vous souhaitez vous servir des paramètres définis pour Doctrine afin de faire vos dump / export.
+Vous pouvez définir votre connexion à partir des informations suivantes : 
+    - database_driver: pdo_mysql
+    - database_host: localhost
+    - database_port: 3306
+    - database_user: root
+    - database_password:
+    - rma_exclude: [mysql, databaseToExclude] 
+
+### Configuration FTP des dump 
+    - rma_ftp:  no ; {yes|no} 
+    - rma_ftps:
+        - { rma_name_ftp: Serveur 1, rma_ftp_ip: 127.0.0.1, rma_ftp_username: rma, rma_ftp_password: password, rma_ftp_port: 21, rma_ftp_timeout: 120}
+        - { rma_name_ftp: Intégration, rma_ftp_ip: 127.0.0.12, rma_ftp_username: root, rma_ftp_password: secret, rma_ftp_path: /home/root/dump}     
 
 ### Configuration compression des dump 
     - rma_compress:                 gzip ; {none|gzip}
@@ -190,8 +164,3 @@ Si vous souhaitez modifier les configurations, vous avez accès aux paramètres 
 *Attention* : Pour mettre un password vide, n'oubliez pas le 'none'.
 
 *Attention* : Pour ne pas effacer de dump au fur et à mesure renseigner 'none' aux champs nb_jour et nombre_dump
-
-
-
-
-   

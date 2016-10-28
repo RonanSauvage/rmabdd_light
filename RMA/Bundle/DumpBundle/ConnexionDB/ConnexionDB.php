@@ -201,21 +201,44 @@ class ConnexionDB implements ConnexionDBInterface
     {
         return $this->driver;
     }
+    
+    /**
+     * Get xcludes
+     * 
+     * @return array
+     */
+    public function getExcludes()
+    {
+        return $this->excludes;
+    }
 
     /**
-    * Retourne les params attendus pour la connexion
-    * @return array $params
-    */
-    public function getAllParams(){
-        $params = array (
-            'name',
-            'host',
-            'user',
-            'port',
-            'password'
-        );
-        return $params;
+     * Set excludes
+     * @param array $excludes
+     */
+    public function setExcludes(Array $excludes)
+    {
+        $this->excludes = $excludes;
+
+        return $this;
     }
+    
+    /**
+    * Retourne les params attendus pour la connexion avec les values par défaut
+    * @return array $fieldss
+    */
+    public static function getFields(){
+        $fields = array(
+            'user' => 'root',
+            'password' => 'root',
+            'driver' => 'pdo_mysql',
+            'host' => 'localhost',
+            'port' => '3306',
+            'excludes' => array ('performance_schema', 'mysqld')
+        );
+        return $fields;
+    }
+    
     
     /**
      * Permet de formatter un DSN pour une ConnexionDB

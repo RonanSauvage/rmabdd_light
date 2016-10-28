@@ -21,7 +21,7 @@ class Rftp implements FtpInterface {
         $this->ftp_connect = ftp_connect($params['ftp_ip'], $params['ftp_port'], $params['ftp_timeout']);
         $this->_path = $params['ftp_path'];
         $this->_fichier = $params['repertoire_name'] . $params['extension'];
-        $this->_dir_fichier = $params['dir_zip'];
+        $this->_dir_fichier = $params['dir_fic'];
         $this->_username = $params['ftp_username'];
         $this->_password = $params['ftp_password'];
     }
@@ -49,5 +49,18 @@ class Rftp implements FtpInterface {
      */
     public function closeConnexionFTP(){
         ftp_close($this->ftp_connect);
+    }
+
+    public static function getFields()
+    {
+        return $fields = array(
+            'name_ftp'  => 'nameFTP',
+            'ftp_ip'        => '127.0.0.1',
+            'ftp_port'      => 21,
+            'ftp_timeout'   => 90,
+            'ftp_path'      => '/home/rma/dump',
+            'ftp_username'  => 'ftpUsername',
+            'ftp_password'  => 'ftpPassword',
+        );
     }
 }

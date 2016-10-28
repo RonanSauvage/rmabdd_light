@@ -25,7 +25,7 @@ class CommonCommand extends ContainerAwareCommand {
         );
         $rows = array(
             array (
-                'rma:dump:database', 
+                'rma:dump:database alias dump', 
                 'Cette commande permet de générer un dump',
                 '--one, --i, --ftp, --name', '-all',
                 '-'
@@ -52,9 +52,19 @@ class CommonCommand extends ContainerAwareCommand {
                 '--host, --port, --user, --password, --compress, --zip, --dir_dump, ... ',
                 'databases'
            ),
-            array ('rma:dump:export', 
+            array ('rma:dump:export alias export', 
                 "Cette commande permet d'automatiser des scripts sur une base de données en l'exportant",
-                '--script, --repertoire_name, --keep_tmp, --name_database_temp',
+                '--script, --repertoire_name, --keep_tmp, --name_database_temp, --ftp',
+                '-'
+           ),
+           array ('rma:dump:inspectFtps alias inspectFtps', 
+                "Cette commande permet de visualiser les différentes configurations FTP définies dans le parameters",
+                '-',
+                '-'
+           ),
+           array ('rma:dump:inspectConnexions alias inspectConnexions', 
+                "Cette commande permet de visualiser les différentes configurations de connexion aux bases de données définies dans le parameters",
+                '-',
                 '-'
            )
         );
@@ -66,7 +76,7 @@ class CommonCommand extends ContainerAwareCommand {
      * @param InputInterface $input
      * @return array $params
      */
-    public function constructParamsArray (InputInterface $input)
+    public function constructParamsArray (InputInterface $input, Array $fields = array())
     {
         $container = $this->getContainer();
         $params = array ();
@@ -76,23 +86,12 @@ class CommonCommand extends ContainerAwareCommand {
         $params['extension'] = '.zip';
         
         $parameters_enables = array (
-            'driver'                => 'pdo_mysql',
-            'host'                  => 'localhost', 
-            'port'                  => '3306', 
-            'user'                  => "root", 
-            'password'              => "none", 
             'nb_jour'               => 5, 
             'nombre_dump'           => 10, 
             'dir_dump'              => 'web/dump', 
             'dir_export'            => 'web/export',
             'dir_tmp'               => 'web/tmp',
-            'dir_script_migration'  => 'web/script',
-            'ftp_ip'                => '127.0.0.1', 
-            'ftp_port'              => '21',
-            'ftp_username'          => 'rma',
-            'ftp_password'          => 'rma_password',
-            'ftp_timeout'           => 90,
-            'ftp_path'              => '/home/rma/dump',          
+            'dir_script_migration'  => 'web/script',         
             'compress'              => "none", 
             'zip'                   => "no", 
             'ftp'                   => "no",
@@ -101,21 +100,23 @@ class CommonCommand extends ContainerAwareCommand {
             'keep_tmp'              => "no",
             'script'                => 'rma_default_file.sql'
         );
-
+  
         foreach ($parameters_enables as $parameter_enable => $default)
         {
             // On vérifie si l'utilisateur a défini un paramètre custom dans le paramters.yml pour rma
-            if($container->hasParameter('rma_'.$parameter_enable))
-            {
+            if($container->hasParameter('rma_'.$parameter_enable)) {
                 $$parameter_enable = $container->getParameter('rma_'.$parameter_enable);
             } 
-            else 
-            {
+            else  {
                 $$parameter_enable = $default;
             }
             $params[$parameter_enable] = $$parameter_enable;
         }
-        $params = $this->loadConnexions($input, $params);
+
+        foreach ($fields as $object => $fields_object){
+            $load = 'load'.$object;
+            $params = $this->$load($params,$fields_object);
+        }
         
         return $this->loadOptions($input, $params);
     }
@@ -137,7 +138,6 @@ class CommonCommand extends ContainerAwareCommand {
             {
                 $$rOption = $container->getParameter('rma_'.$rOption);
             }
-
             // On vérifie si une valeur a été transmise en option. Si c'est le cas on surcharge le parameters
             // Pour les options sans valeur, false est défini par défaut dans le container. Nos options fonctionnent avec des strings donc false correspond à pas de valeur
             if (!is_null($rvalue) && ($rvalue))
@@ -154,77 +154,77 @@ class CommonCommand extends ContainerAwareCommand {
     
     /**
      * Permet de charger les différentes connexions configurées
-     * @param InputInterface $input
      * @param array $params
+     * @param array $fields
      * @return array $params
      */
-    public function loadConnexions(InputInterface $input, Array $params){
+    public function loadConnexions(Array $params, Array $fields){
         $container = $this->getContainer();
         
-        $excludes = array('performance_schema', 'mysql');
-        
         $connexions = array();
-        $params_connexion = array(
-            'driver'    => 'pdo_mysql',
-            'host'      => 'localhost',
-            'port'      => '3306',
-            'name'      => 'ConnexionName',
-            'user'      => 'root',
-            'password'  => '' ,
-            'excludes'  => $excludes
-        );
        
         // Si une config est définie au niveau de Doctrine, on la charge 
-        $parameters_doctrine = array('driver', 'host' , 'port', 'user', 'password', 'name');
-        foreach ($parameters_doctrine as $parameter_doctrine){        
-            if ($container->hasParameter('database_'. $parameter_doctrine))
+        foreach ($fields as $field => $defaultValue){ 
+            if ($container->hasParameter('database_'. $field))
             {   
-                $connexions['Doctrine'][$parameter_doctrine] = $container->getParameter('database_'. $parameter_doctrine);
-                // règle spécifique pour le mot de passe vide
-                if ($parameter_doctrine == 'password'){
-                    $connexions['Doctrine']['password'] = 'none';
-                }
+                $connexions['Doctrine'][$field] = $container->getParameter('database_'. $field);
             }
+            elseif($container->hasParameter('rma_'.$field))
+            {
+                $connexions['Doctrine'][$field] = $container->getParameter('rma_'. $field);
+            }         
         }
         // Si il y a une connexion définie pour doctrine, on récupère les excludes définies pour la connexion
         if (isset($connexions['Doctrine'])){
             if ($container->hasParameter('rma_excludes'))
             {
-                $connexions['Doctrine']['excludes'] = array_merge($excludes, $container->getParameter('rma_excludes'));
+                $connexions['Doctrine']['excludes'] = array_merge($fields['excludes'], $container->getParameter('rma_excludes'));
             }
             else {
-                 $connexions['Doctrine']['excludes'] = $excludes;
+                 $connexions['Doctrine']['excludes'] = $fields['excludes'];
             }
         }
-        
          // On charge l'array Connexions avec les autres connexions définies en parameters
-        if ($container->hasParameter('rma_connexion')){
-            $rma_connexions = $container->getParameter('rma_connexion');
-            foreach ($rma_connexions as $rma_connexion){
-                foreach ($rma_connexion as $key => $value){
-                    $connexions[$rma_connexion['rma_name']][substr($key,4)] = $value;        
-                    if(isset($rma_connexion['rma_exclude'])){
-                        $excludes_sup = $rma_connexion['rma_exclude'];
-                        $excludes_with_sup = array_merge($excludes, $excludes_sup);
-                        $rma_connexion['rma_exclude'] = $excludes_with_sup;
-                    }
-                    else {
-                        $rma_connexion['rma_exclude'] = $excludes;
-                    }
-                }
-              
-                // On vérifie s'il manque des paramètres par rapport aux obligatoires pour une connexion
-                $params_missing = array_diff_ukey($params_connexion, $rma_connexion, array (self::class,'compareKeys')); 
-           
-                // Pour tous les paramètres manquants on définit la valeur par dé<fa></fa>ut  
-                foreach($params_missing as $param_missing => $value){
-                    $connexions[$rma_connexion['rma_name']][$param_missing] = $params_connexion[$param_missing];
-                }
-            }
-        }
-        $params['connexions'] = $connexions;
+         $params['connexions'] = $this->loadArrayToParams('connexions', $fields, $connexions);
 
         return $params;
+    }
+
+    private function loadFtps(Array $params, Array $fields){
+        $params['ftps'] = $this->loadArrayToParams('ftps', $fields);
+        return $params;
+    }
+
+    /**
+    * Permet de charger les paramètres définis au niveau du parameters sous forme d'array
+    * @param : string $object_name
+    * @param : array $fields 
+    * @param : array $results (préalablement remplie par des configurations custom supplémentaires)
+    * @return : array $results
+    */
+    public function loadArrayToParams($object_name, Array $fields, Array $results = array())
+    {
+        $object_name_with_prefix = 'rma_' . $object_name;
+        $container = $this->getContainer();
+        if ($container->hasParameter($object_name_with_prefix)){
+            $arrays_params_for_object = $container->getParameter($object_name_with_prefix);
+            if(is_array($arrays_params_for_object)){
+                foreach ($arrays_params_for_object as $array_params_for_object){
+                    foreach ($array_params_for_object as $key => $value){
+                        $results[$array_params_for_object['rma_name_'. substr($object_name, 0, -1)]][substr($key,4)] = $value;        
+                    }
+                
+                    // On vérifie s'il manque des paramètres par rapport aux obligatoires
+                    $params_missing = array_diff_ukey($fields, $array_params_for_object, array (self::class,'compareKeys')); 
+            
+                    // Pour tous les paramètres manquants on définit la valeur par défaut  
+                    foreach($params_missing as $param_missing => $value){
+                            $results[$array_params_for_object['rma_name_'. substr($object_name, 0, -1)]][$param_missing] = $fields[$param_missing]; 
+                    }
+                }
+            } 
+        }
+        return $results;
     }
     
     /**
@@ -260,42 +260,41 @@ class CommonCommand extends ContainerAwareCommand {
     }
     
     /**
-     * Permet de proposer à l'utilisateur la sélection de sa connexion s'il y en a plusieurs
-     * @param array $params
-     * @param SymfonyStyle $io
-     * @return array $params
-     * @throws \Exception
-     */
-    public function selectConnexion(array $params, SymfonyStyle $io){
-      
-        if(count($params['connexions']) == 0){
-            Throw new \Exception ('Vous devez définir au moins une configuration base de données.');
+    * Permet de sélectioner un choix selon différentes configurations
+    * @param array $choices
+    * @param array $fields
+    * @param SymfonyStyle $io
+    * @param string $name
+    * @param array $params
+    * @return array $params
+    */
+    public function selectOne(array $choices, array $fields, SymfonyStyle $io, $name, array $params){
+        if(count($choices) == 0){
+            Throw new \Exception ('Vous devez définir au moins une configuration pour ' . $name);
         }
-        else if(count($params['connexions']) > 1){
-            $connexion = array($io->choice('Sélectionnez la connexion que vous souhaitez utiliser', array_keys($params['connexions'])));
-            $connexionSelected = $params['connexions'][$connexion[0]];
-            
-            $params['password'] = $connexionSelected['password'];
-            $params['driver'] = $connexionSelected['driver'];
-            $params['host'] = $connexionSelected['host'];
-            $params['user'] = $connexionSelected['user'];
-            $params['port'] = $connexionSelected['port'];
-            if (isset($connexionSelected['excludes'])){
-                $params['excludes'] = $connexionSelected['excludes'];
+        // S'il existe plusieurs configurations on laisse choisir l'utilisateur
+        else if(count($choices) > 1){
+            $choice = array($io->choice('Sélectionnez la configuration que vous souhaitez utiliser', array_keys($choices)));
+            $choiceSelected = $choices[$choice[0]];
+            foreach ($fields as $field => $default){
+                if(isset($choiceSelected[$field])){
+                    $params[$field] = $choiceSelected[$field];
+                }
+                else {
+                    $params[$field] = $choiceSelected[$field][$default];
+                }  
             }
         }
+        // S'il n'existe qu'une configuration
         else {
-            $name =  array_keys($params['connexions']);
-            $params['password'] = $params['connexions'][$name[0]]['password'];
-            $params['driver'] = $params['connexions'][$name[0]]['driver'];
-            $params['host'] = $params['connexions'][$name[0]]['host'];
-            $params['user'] = $params['connexions'][$name[0]]['user'];
-            $params['port'] = $params['connexions'][$name[0]]['port'];
-            if (isset($params['connexions'][$name[0]]['excludes'])){
-                $params['excludes'] = $params['connexions'][$name[0]]['excludes'];
-            }
-            else {
-                $params['excludes'] = array('performance_schema', 'mysql');
+            $array_keys =  array_keys($choices);
+            foreach ($fields as $field => $value){
+                 if(isset($choices[$field])){
+                    $params[$field] = $choices[$array_keys[0]][$field];
+                 }  
+                 else {
+                    $params[$field] = $value;
+                 }            
             }
         }
         return $params;

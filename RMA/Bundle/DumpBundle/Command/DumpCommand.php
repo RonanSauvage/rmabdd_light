@@ -130,6 +130,7 @@ class DumpCommand extends CommonCommand {
             $params['password'] = '';
         }
      
+        $params['dir_fic'] = $params['dir_zip'];
         return $params;
     }
     

@@ -93,6 +93,7 @@ class ExportDatabase implements ExportDatabaseInterface {
                     $this->_params['logger']->notice('Requête importée : ' . $op_data);
                     $op_data = '';
                 } catch (\Exception $ex) {
+                    $this->_params['logger']->notice('Error lors de la requête : ' . $ex->getMessage());
                     throw new \Exception ($ex);
                 }  
             }

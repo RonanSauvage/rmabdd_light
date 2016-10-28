@@ -12,19 +12,21 @@ class InspectConnexionParamsCommand extends CommonCommand {
     
     protected function configure() {
       
-        $this->setName('rma:dump:inspect')
+        $this->setName('rma:dump:inspectConnexions')
             ->setDescription("Permet d'inspecter les paramètres définis pour les connexions DB")
-            ->setAliases(['inspect']);       
+            ->setAliases(['inspectConnexions']);       
     }
     
     protected function execute(InputInterface $input, OutputInterface $output) 
     {          
         $io = new SymfonyStyle($input, $output);
+
+        $fields = ConnexionDB::getFields();
         
         // On charge l'array params avec les options / parameters
-        $params = $this->constructParamsArray($input);
+        $params = $this->constructParamsArray($input, array('Connexions' => $fields));
         
-        $io->title('Description des connexions à partir des paramètres définis  :');
+        $io->title('Description des connexions à partir des paramètres définis : ');
 
         $headers = array (
             'Nom de la connexion', 'Host', 'Driver', 'Username', 'Password', 'Port', 'Excludes'
@@ -41,7 +43,8 @@ class InspectConnexionParamsCommand extends CommonCommand {
                 $connexion->getDriver(),
                 $connexion->getUsername(),
                 $connexion->getPassword(),
-                $connexion->getPort()
+                $connexion->getPort(),
+                implode(',', $connexion->getExcludes())
             );
             array_push($rows, $connexion_array);
         }

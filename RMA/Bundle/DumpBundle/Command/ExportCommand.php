@@ -11,6 +11,7 @@ use RMA\Bundle\DumpBundle\Factory\RDumpFactory;
 use RMA\Bundle\DumpBundle\Tools\ExportDatabase;
 use RMA\Bundle\DumpBundle\ConnexionDB\ConnexionDB;
 use RMA\Bundle\DumpBundle\Tools\Tools;
+use RMA\Bundle\DumpBundle\Ftp\Rftp;
 
 
 class ExportCommand extends CommonCommand {
@@ -23,6 +24,7 @@ class ExportCommand extends CommonCommand {
             ->addOption('repertoire_name', null, InputOption::VALUE_OPTIONAL, "Permet de donner un nom custom à l'export")
             ->addOption('keep_tmp', null, InputOption::VALUE_NONE, "Permet de ne pas effacer la base de données temporaire créée")
             ->addOption('name_database_temp', null, InputOption::VALUE_OPTIONAL, "Permet de ne pas effacer la base de données temporaire créée")
+            ->addOption('ftp', null, InputOption::VALUE_NONE, "Permet d'envoyer l'export en FTP selon les parmaètres définis")
             ->setAliases(['export']);       
     }
     
@@ -77,6 +79,7 @@ class ExportCommand extends CommonCommand {
         $io->title('Lancement du script : ' . $script);
         try {
             $exportDatabase->lauchScriptForMigration($script, $params['name_database_temp']);
+            $io->success("Le script s'est correctement executé.");
         }
         catch (\Exception $e){
             $params['logger']->error('Erreur lors du script de migration pour export. ' . $e->getMessage());
@@ -91,11 +94,16 @@ class ExportCommand extends CommonCommand {
         DumpCommand::dumpDatabases($io, array($params['name_database_temp']), $dump, $output);
         
         $this->deleteDatabase($params['name_database_temp'], $params['keep_tmp'], $exportDatabase, $io);
+
+        FtpCommand::saveDumpInFtp($io, $dump, $params);
     }
     
     public function hydrateCommand(InputInterface $input, $io)
-    {
-        $params = $this->constructParamsArray($input);
+    {   
+        $fields_connexion = ConnexionDB::getFields(); 
+        $fields_ftp = Rftp::getFields();
+
+        $params = $this->constructParamsArray($input, array ('Connexions' => $fields_connexion, 'Ftps' => $fields_ftp));
         $params['name_database_temp'] = false;
         
         if ($input->getOption('repertoire_name'))
@@ -109,12 +117,25 @@ class ExportCommand extends CommonCommand {
             $params['name_database_temp'] = Tools::cleanString($input->getOption('name_database_temp'));
         }
 
+        // On surcharge le paramètre rma_ftp défini pour les dump selon que l'option était été envoyée ou non
+        if ($input->getOption('ftp'))
+        {
+            $params['ftp'] = 'yes';
+            $params['extension'] = '.sql';
+        }
+        else {
+            $params['ftp'] = 'no';
+        }
+
         // Il s'agit ici simplement d'utiliser un dump temporaire donc on force à non les options de zip et ftp
         $params['zip'] = 'no';
-        $params['ftp'] = 'no';
         $params['dir_dump'] = $params['dir_tmp'];
-        
-        $params = $this->selectConnexion($params, $io);
+        $params['dir_fic'] = $params['dir_dump'];
+
+        $name_connexion = 'connexion base de données';   
+        $name_ftp = 'connexion au serveur ftp';   
+        $params = $this->selectOne($params['connexions'], $fields_connexion, $io, $name_connexion, $params);
+        $params = $this->selectOne($params['ftps'], $fields_ftp, $io, $name_ftp, $params);
         return $params;
     }
     
