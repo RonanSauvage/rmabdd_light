@@ -18,12 +18,25 @@ class Rftp implements FtpInterface {
      * @param Array $params
      */
     public function __construct(Array $params){
-        $this->ftp_connect = ftp_connect($params['ftp_ip'], $params['ftp_port'], $params['ftp_timeout']);
-        $this->_path = $params['ftp_path'];
-        $this->_fichier = $params['repertoire_name'] . $params['extension'];
-        $this->_dir_fichier = $params['dir_fic'];
-        $this->_username = $params['ftp_username'];
-        $this->_password = $params['ftp_password'];
+        if(isset($params['ftp_ip']) && isset($params['ftp_path']) && isset($params['ftp_port']) && isset($params['ftp_timeout']) 
+                && isset($params['repertoire_name']) && isset($params['extension']) && isset($params['dir_fic']) 
+                && isset($params['ftp_username']) && isset($params['ftp_password'])){
+            $this->ftp_connect = ftp_connect($params['ftp_ip'], $params['ftp_port'], $params['ftp_timeout']);
+            $this->_path = $params['ftp_path'];
+            $this->_fichier = $params['repertoire_name'] . $params['extension'];
+            $this->_dir_fichier = $params['dir_fic'];
+            $this->_username = $params['ftp_username'];
+            $this->_password = $params['ftp_password'];
+        }
+        else {
+            $default_value = self::getFields();
+            $this->ftp_connect = ftp_connect($default_value['ftp_ip'], $default_value['ftp_port'], $default_value['ftp_timeout']);
+            $this->_path = $default_value['ftp_path'];
+            $this->_fichier = 'defaut_path';
+            $this->_dir_fichier = 'file.txt';
+            $this->_username = $default_value['ftp_username'];
+            $this->_password = $default_value['ftp_password'];
+        }
     }
     
     /**
@@ -51,10 +64,14 @@ class Rftp implements FtpInterface {
         ftp_close($this->ftp_connect);
     }
 
+    /**
+     * Permet de retourner les paramètres définis pour une connexion FTP
+     * @return array $fields
+     */
     public static function getFields()
     {
-        return $fields = array(
-            'name_ftp'  => 'nameFTP',
+        $fields = array(
+            'name_ftp'      => 'nameFTP',
             'ftp_ip'        => '127.0.0.1',
             'ftp_port'      => 21,
             'ftp_timeout'   => 90,
@@ -62,5 +79,7 @@ class Rftp implements FtpInterface {
             'ftp_username'  => 'ftpUsername',
             'ftp_password'  => 'ftpPassword',
         );
+        
+        return $fields;
     }
 }

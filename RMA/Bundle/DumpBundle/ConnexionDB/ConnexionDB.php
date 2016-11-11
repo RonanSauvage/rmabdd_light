@@ -234,7 +234,7 @@ class ConnexionDB implements ConnexionDBInterface
             'driver' => 'pdo_mysql',
             'host' => 'localhost',
             'port' => '3306',
-            'excludes' => array ('performance_schema', 'mysqld')
+            'excludes' => array ('performance_schema', 'mysqld', 'mysql')
         );
         return $fields;
     }

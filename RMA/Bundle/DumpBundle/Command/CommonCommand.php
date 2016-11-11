@@ -190,7 +190,13 @@ class CommonCommand extends ContainerAwareCommand {
         return $params;
     }
 
-    private function loadFtps(Array $params, Array $fields){
+    /**
+     * Permet de load les paramètres pour les connexion FTPs
+     * @param array $params
+     * @param array $fields
+     * @return array $params
+     */
+    public function loadFtps(Array $params, Array $fields){
         $params['ftps'] = $this->loadArrayToParams('ftps', $fields);
         return $params;
     }
@@ -223,6 +229,9 @@ class CommonCommand extends ContainerAwareCommand {
                     }
                 }
             } 
+            else {
+                throw new \Exception("Le paramètre " . $object_name_with_prefix . ' défini dans le parameters.yml doit être une array');
+            }
         }
         return $results;
     }

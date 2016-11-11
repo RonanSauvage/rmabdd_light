@@ -12,6 +12,8 @@ use Symfony\Component\Console\Input\InputArgument;
 use RMA\Bundle\DumpBundle\Factory\RDumpFactory;
 use RMA\Bundle\DumpBundle\Tools\Tools;
 use RMA\Bundle\DumpBundle\Command\CommonCommand;
+use RMA\Bundle\DumpBundle\ConnexionDB\ConnexionDB;
+use RMA\Bundle\DumpBundle\Ftp\Rftp;
 
 class DumpCommand extends CommonCommand {
     
@@ -80,7 +82,11 @@ class DumpCommand extends CommonCommand {
     
     public function hydrateCommand(InputInterface $input, $io)
     {
-        $params = $this->constructParamsArray($input);
+        $fields_connexion = ConnexionDB::getFields(); 
+        $fields_ftp = Rftp::getFields();
+        $params = $this->constructParamsArray($input, array ('Connexions' => $fields_connexion, 'Ftps' => $fields_ftp));
+        $name_connexion = 'connexion base de données';   
+        $name_ftp = 'connexion au serveur ftp';   
   
         if ($input->getOption('repertoire_name'))
         {
@@ -113,16 +119,22 @@ class DumpCommand extends CommonCommand {
         // On charge les params pour le FTP
         if ($input->getOption('ftp')) 
         {
-            $params['ftp'] = 'yes';
-            $params = $this->rmaAskQuestions($input, $params, $parametres_ftp, $io);        
+            $params['ftp'] = 'yes';   
         }
 
-        // On charge les params pour le FTP
+        
+        // Si l'utilisateur souhaité pouvoir saisir directement en ligne de commande ses identifiants
         if ($input->getOption('i')) {
-            $params = $this->rmaAskQuestions($input, $params, $parametres, $io);     
+            $params = $this->rmaAskQuestions($input, $params, $parametres, $io); 
+            if($input->getOption('ftp')){
+                $params = $this->rmaAskQuestions($input, $params, $parametres_ftp, $io);
+            }
         }
         else {
-           $params = $this->selectConnexion($params, $io);
+            $params = $this->selectOne($params['connexions'], $fields_connexion, $io, $name_connexion, $params);
+            if($input->getOption('ftp')){
+               $params = $this->selectOne($params['ftps'], $fields_ftp, $io, $name_ftp, $params);  
+            }
         }
      
         if (isset($params['password']) && $params['password'] == 'none')
