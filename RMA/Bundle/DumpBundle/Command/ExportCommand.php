@@ -100,42 +100,33 @@ class ExportCommand extends CommonCommand {
     
     public function hydrateCommand(InputInterface $input, $io)
     {   
-        $fields_connexion = ConnexionDB::getFields(); 
-        $fields_ftp = Rftp::getFields();
-
-        $params = $this->constructParamsArray($input, array ('Connexions' => $fields_connexion, 'Ftps' => $fields_ftp));
+        $response = $this->loadOptionsAndParameters($input);
+        $params = $response['params'];
         $params['name_database_temp'] = false;
         
-        if ($input->getOption('repertoire_name'))
-        {
-            $name_rep =  Tools::cleanString($input->getOption('repertoire_name')) ;
-            $params['repertoire_name'] = $name_rep . '__' . uniqid();
-        }
+        // Il s'agit ici simplement d'utiliser un dump temporaire donc on force à non les options de zip et ftp
+        $params['zip'] = 'no';
+        $params['dir_dump'] = $params['dir_tmp'];
+        $params['dir_fic'] = $params['dir_dump'];
   
         if ($input->getOption('name_database_temp'))
         {
             $params['name_database_temp'] = Tools::cleanString($input->getOption('name_database_temp'));
         }
 
+        $params = $this->selectOne($params['connexions'], $response['fields_connexion'], $io, $response['name_connexion'], $params);
+
         // On surcharge le paramètre rma_ftp défini pour les dump selon que l'option était été envoyée ou non
         if ($input->getOption('ftp'))
         {
             $params['ftp'] = 'yes';
             $params['extension'] = '.sql';
+            $params = $this->selectOne($params['ftps'], $response['fields_ftp'], $io, $response['name_ftp'], $params);
         }
         else {
             $params['ftp'] = 'no';
         }
 
-        // Il s'agit ici simplement d'utiliser un dump temporaire donc on force à non les options de zip et ftp
-        $params['zip'] = 'no';
-        $params['dir_dump'] = $params['dir_tmp'];
-        $params['dir_fic'] = $params['dir_dump'];
-
-        $name_connexion = 'connexion base de données';   
-        $name_ftp = 'connexion au serveur ftp';   
-        $params = $this->selectOne($params['connexions'], $fields_connexion, $io, $name_connexion, $params);
-        $params = $this->selectOne($params['ftps'], $fields_ftp, $io, $name_ftp, $params);
         return $params;
     }
     

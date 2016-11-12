@@ -10,10 +10,7 @@ use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Console\Input\InputArgument;
 
 use RMA\Bundle\DumpBundle\Factory\RDumpFactory;
-use RMA\Bundle\DumpBundle\Tools\Tools;
 use RMA\Bundle\DumpBundle\Command\CommonCommand;
-use RMA\Bundle\DumpBundle\ConnexionDB\ConnexionDB;
-use RMA\Bundle\DumpBundle\Ftp\Rftp;
 
 class DumpCommand extends CommonCommand {
     
@@ -82,17 +79,8 @@ class DumpCommand extends CommonCommand {
     
     public function hydrateCommand(InputInterface $input, $io)
     {
-        $fields_connexion = ConnexionDB::getFields(); 
-        $fields_ftp = Rftp::getFields();
-        $params = $this->constructParamsArray($input, array ('Connexions' => $fields_connexion, 'Ftps' => $fields_ftp));
-        $name_connexion = 'connexion base de données';   
-        $name_ftp = 'connexion au serveur ftp';   
-  
-        if ($input->getOption('repertoire_name'))
-        {
-            $name_rep =  Tools::cleanString($input->getOption('repertoire_name')) ;
-            $params['repertoire_name'] = $name_rep . '__' . uniqid();
-        }
+        $response = $this->loadOptionsAndParameters($input);
+        $params = $response['params'];
 
         // On charge les paramètres et les questions correspondantes dans le cas où l'utilisateur demande de l'intéraction
         $parametres = array(
@@ -116,13 +104,6 @@ class DumpCommand extends CommonCommand {
             'ftp_path'      => 'Veuillez renseigner le path du ftp utilisé : '
         );
         
-        // On charge les params pour le FTP
-        if ($input->getOption('ftp')) 
-        {
-            $params['ftp'] = 'yes';   
-        }
-
-        
         // Si l'utilisateur souhaité pouvoir saisir directement en ligne de commande ses identifiants
         if ($input->getOption('i')) {
             $params = $this->rmaAskQuestions($input, $params, $parametres, $io); 
@@ -131,9 +112,9 @@ class DumpCommand extends CommonCommand {
             }
         }
         else {
-            $params = $this->selectOne($params['connexions'], $fields_connexion, $io, $name_connexion, $params);
+            $params = $this->selectOne($params['connexions'], $response['fields_connexion'], $io, $response['name_connexion'], $params);
             if($input->getOption('ftp')){
-               $params = $this->selectOne($params['ftps'], $fields_ftp, $io, $name_ftp, $params);  
+                $params = $this->selectOne($params['ftps'], $response['fields_ftp'], $io, $response['name_ftp'], $params);            
             }
         }
      

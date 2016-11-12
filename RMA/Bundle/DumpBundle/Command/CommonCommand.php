@@ -6,6 +6,9 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Style\SymfonyStyle;
+use RMA\Bundle\DumpBundle\ConnexionDB\ConnexionDB;
+use RMA\Bundle\DumpBundle\Ftp\Rftp;
+use RMA\Bundle\DumpBundle\Tools\Tools;
 
 class CommonCommand extends ContainerAwareCommand {
     
@@ -321,5 +324,39 @@ class CommonCommand extends ContainerAwareCommand {
             return -1;
         }
         return 0;
+    }
+    
+    /**
+     * Permet d'hydrater les commandes
+     * @param InputInterface $input
+     * @return array $response
+     */
+    public function loadOptionsAndParameters(InputInterface $input){
+        $fields = array();
+        $fields['Ftps'] = array();
+        $fields['Connexions']  = ConnexionDB::getFields();   
+        
+        if($input->getOption('ftp')){
+             $fields['Ftps'] = Rftp::getFields();
+             $params['ftp'] = 'yes'; 
+        }        
+        
+        $params = $this->constructParamsArray($input, $fields);
+        $name_connexion = 'connexion base de données';   
+        $name_ftp = 'connexion au serveur ftp';  
+        
+        if ($input->getOption('repertoire_name')) {
+            $name_rep =  Tools::cleanString($input->getOption('repertoire_name')) ;
+            $params['repertoire_name'] = $name_rep . '__' . uniqid();
+        }
+        
+        $response = array(
+            'params'            => $params, 
+            'name_connexion'    => $name_connexion, 
+            'name_ftp'          => $name_ftp,
+            'fields_connexion'  => $fields['Connexions'],
+            'fields_ftp'        => $fields['Ftps']
+        );
+        return $response;
     }
 }
