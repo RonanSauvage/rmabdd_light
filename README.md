@@ -124,6 +124,7 @@ Si vous souhaitez modifier les configurations, vous avez accès aux paramètres 
 Pour vous aider dans la définition de vos configurations, vous avez accès à des commandes pour vous récapituler les configurations chargées à partir des informations saisies
 
 > php app/console inspectConnexions
+
 > php app/console inspectFtps
 
 Retourne un tableau avec les différentes connexions chargées et les paramètres correspondants
@@ -143,12 +144,19 @@ Retourne un tableau avec les différentes connexions chargées et les paramètre
 
 Si vous souhaitez vous servir des paramètres définis pour Doctrine afin de faire vos dump / export.
 Vous pouvez définir votre connexion à partir des informations suivantes : 
+
     - database_driver: pdo_mysql
+
     - database_host: localhost
+
     - database_port: 3306
+
     - database_user: root
+
     - database_password:
-    - rma_exclude: [mysql, databaseToExclude] 
+
+    - rma_excludes: [mysql, databaseToExclude] 
+
 
 ### Configuration FTP des dump 
     - rma_ftp:  no ; {yes|no} 
