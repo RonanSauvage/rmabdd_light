@@ -11,8 +11,6 @@ use RMA\Bundle\DumpBundle\Factory\RDumpFactory;
 use RMA\Bundle\DumpBundle\Tools\ExportDatabase;
 use RMA\Bundle\DumpBundle\ConnexionDB\ConnexionDB;
 use RMA\Bundle\DumpBundle\Tools\Tools;
-use RMA\Bundle\DumpBundle\Ftp\Rftp;
-
 
 class ExportCommand extends CommonCommand {
 

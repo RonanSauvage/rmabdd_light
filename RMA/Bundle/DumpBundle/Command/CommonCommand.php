@@ -187,6 +187,7 @@ class CommonCommand extends ContainerAwareCommand {
                  $connexions['Doctrine']['excludes'] = $fields['excludes'];
             }
         }
+
          // On charge l'array Connexions avec les autres connexions définies en parameters
          $params['connexions'] = $this->loadArrayToParams('connexions', $fields, $connexions);
 
@@ -301,7 +302,7 @@ class CommonCommand extends ContainerAwareCommand {
         else {
             $array_keys =  array_keys($choices);
             foreach ($fields as $field => $value){
-                 if(isset($choices[$field])){
+                 if(isset($choices[$array_keys[0]][$field]) || is_null($choices[$array_keys[0]][$field])){
                     $params[$field] = $choices[$array_keys[0]][$field];
                  }  
                  else {
