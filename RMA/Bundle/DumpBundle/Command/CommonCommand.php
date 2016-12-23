@@ -118,7 +118,7 @@ class CommonCommand extends ContainerAwareCommand {
 
         foreach ($fields as $object => $fields_object){
             $load = 'load'.$object;
-            $params = $this->$load($params,$fields_object);
+            $params = $this->$load($params, $fields_object);
         }
         
         return $this->loadOptions($input, $params);
@@ -187,10 +187,9 @@ class CommonCommand extends ContainerAwareCommand {
                  $connexions['Doctrine']['excludes'] = $fields['excludes'];
             }
         }
-
-         // On charge l'array Connexions avec les autres connexions définies en parameters
-         $params['connexions'] = $this->loadArrayToParams('connexions', $fields, $connexions);
-
+        
+        $params['connexions'] = $this->loadArrayToParams('connexions', $fields, $connexions);
+         
         return $params;
     }
 
@@ -346,7 +345,7 @@ class CommonCommand extends ContainerAwareCommand {
         $name_connexion = 'connexion base de données';   
         $name_ftp = 'connexion au serveur ftp';  
         
-        if ($input->getOption('repertoire_name')) {
+        if ($input->hasOption('repertoire_name') && $input->getOption('repertoire_name')) {
             $name_rep =  Tools::cleanString($input->getOption('repertoire_name')) ;
             $params['repertoire_name'] = $name_rep . '__' . uniqid();
         }

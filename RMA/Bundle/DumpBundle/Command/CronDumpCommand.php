@@ -37,9 +37,26 @@ class CronDumpCommand extends CommonCommand {
     }
     
     protected function execute(InputInterface $input, OutputInterface $output) 
-    {        
-        $params = $this->constructParamsArray($input);
+    {       
         $io = new SymfonyStyle($input, $output);
+        $container = $this->getContainer();
+        
+        $response = $this->loadOptionsAndParameters($input);
+        $params = $response['params'];
+        
+        if(isset($params['connexions']['Doctrine'])){
+            $doctrineConnexion = $params['connexions']['Doctrine'];
+            $params['connexions'] = array();
+            $params['connexions'][0] = $doctrineConnexion;
+        }
+        
+        $params = $this->selectOne($params['connexions'], $response['fields_connexion'], $io, $response['name_connexion'], $params);
+        
+        if (isset($params['password']) && $params['password'] == 'none')
+        {
+            $params['password'] = '';
+        }
+        $params['dir_fic'] = $params['dir_zip'];
         
         // On gère le mot de passe pouvant être vide 
         if(($input->getOption('password'))== 'none' || $params['password'] == 'none')
@@ -50,21 +67,29 @@ class CronDumpCommand extends CommonCommand {
         SyncDumpCommand::syncCommand($io, $params);
         
         $dump = RDumpFactory::create($params);
- 
+     
+        $allDatabases = $dump->rmaDumpGetListDatabases();
         // Si l'option all est spécifiée, on lance l'export de toutes les bases
         if($input->getOption('all'))
         {
-            $databases = $dump->rmaDumpGetListDatabases();
+            $databases = $allDatabases;
         }
         // On gère les bases fournies en paramètres
-        else if ($input->getArgument('databases') && !$input->getOption('one'))
+        else if ($input->getArgument('databases'))
         {
             $databases = $input->getArgument('databases');
         }
-        // On gère le parameters défini au niveau du database_name de Doctrine
-        else if ($params['name'] && $params['name'] != "name_database")
-        {
-            $databases = array($params['name']);
+        elseif ($container->hasParameter('database_name')){
+            $database = $container->getParameter('database_name');
+            if(in_array($database, $allDatabases)){
+                $databases = array($database);
+            }
+            else {
+                throw new \Exception('La base de données enregistré dans les paramètres Doctrine '. $database . "n'est pas disponible");
+            }
+        }
+        else {
+            throw new \Exception('La base de données à dump doit être spécifiée pour la commande CRON.');
         }
         
         DumpCommand::dumpDatabases($io, $databases, $dump, $output);

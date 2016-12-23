@@ -71,6 +71,7 @@ Pour voir les commandes mises à votre disposition rendez-vous à la racine et �
             --ftp_port
             --ftp_timeout
             --ftp_path
+            --all
 
             Exemple :
                 php app/console rma:dump:cron --host=127.0.0.1 --password=none --username=root --dir_zip=C:\\Users\\rmA\\Desktop\\Save
