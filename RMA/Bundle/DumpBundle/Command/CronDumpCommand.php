@@ -33,13 +33,45 @@ class CronDumpCommand extends CommonCommand {
                 ->addOption('ftp_timeout', '', InputOption::VALUE_REQUIRED, 'Le timeout paramétré pour le FTP')
                 ->addOption('ftp_path','',InputOption::VALUE_REQUIRED,'Le path pour la sauvegarde sur le FTP')
                 ->addOption('all', '',InputOption::VALUE_NONE,'Permet de sauvegarder toutes les bases de données')
+                ->addOption('connexion', '', InputOption::VALUE_REQUIRED,'Permet de spécifier une connexion spécifique')
                 ->addArgument('databases',InputArgument::IS_ARRAY,'Les bases de données à sauvegarder séparées par des espaces.');       
     }
     
     protected function execute(InputInterface $input, OutputInterface $output) 
-    {        
-        $params = $this->constructParamsArray($input);
+    {       
         $io = new SymfonyStyle($input, $output);
+        $container = $this->getContainer();
+        
+        $response = $this->loadOptionsAndParameters($input);
+        $params = $response['params'];
+        
+        if($input->hasOption('connexion') && $input->getOption('connexion') != ''){
+            $nameConnexion = $input->getOption('connexion');
+            if(isset($params['connexions'][$nameConnexion])){
+                $connexion = $params['connexions'][$nameConnexion];
+                $params['connexions'] = array();
+                $params['connexions'][0] = $connexion;
+            }
+            else {
+                throw new \exception("La connexion envoyée en option " . $nameConnexion . " est introuvable");
+            }
+        }
+        else if(isset($params['connexions']['Doctrine'])){
+            $doctrineConnexion = $params['connexions']['Doctrine'];
+            $params['connexions'] = array();
+            $params['connexions'][0] = $doctrineConnexion;
+        }
+        else {
+            throw new \Exception("Vous devez définir une connexion custom ou insérer dans votre parameters les paramètres de Doctrine");
+        }
+        
+        $params = $this->selectOne($params['connexions'], $response['fields_connexion'], $io, $response['name_connexion'], $params);
+        
+        if (isset($params['password']) && $params['password'] == 'none')
+        {
+            $params['password'] = '';
+        }
+        $params['dir_fic'] = $params['dir_zip'];
         
         // On gère le mot de passe pouvant être vide 
         if(($input->getOption('password'))== 'none' || $params['password'] == 'none')
@@ -50,21 +82,29 @@ class CronDumpCommand extends CommonCommand {
         SyncDumpCommand::syncCommand($io, $params);
         
         $dump = RDumpFactory::create($params);
- 
+     
+        $allDatabases = $dump->rmaDumpGetListDatabases();
         // Si l'option all est spécifiée, on lance l'export de toutes les bases
         if($input->getOption('all'))
         {
-            $databases = $dump->rmaDumpGetListDatabases();
+            $databases = $allDatabases;
         }
         // On gère les bases fournies en paramètres
-        else if ($input->getArgument('databases') && !$input->getOption('one'))
+        else if ($input->getArgument('databases'))
         {
             $databases = $input->getArgument('databases');
         }
-        // On gère le parameters défini au niveau du database_name de Doctrine
-        else if ($params['name'] && $params['name'] != "name_database")
-        {
-            $databases = array($params['name']);
+        elseif ($container->hasParameter('database_name')){
+            $database = $container->getParameter('database_name');
+            if(in_array($database, $allDatabases)){
+                $databases = array($database);
+            }
+            else {
+                throw new \Exception('La base de données enregistré dans les paramètres Doctrine '. $database . "n'est pas disponible");
+            }
+        }
+        else {
+            throw new \Exception('La base de données à dump doit être spécifiée pour la commande CRON.');
         }
         
         DumpCommand::dumpDatabases($io, $databases, $dump, $output);

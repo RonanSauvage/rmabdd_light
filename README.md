@@ -71,6 +71,7 @@ Pour voir les commandes mises à votre disposition rendez-vous à la racine et �
             --ftp_port
             --ftp_timeout
             --ftp_path
+            --all
 
             Exemple :
                 php app/console rma:dump:cron --host=127.0.0.1 --password=none --username=root --dir_zip=C:\\Users\\rmA\\Desktop\\Save
@@ -139,6 +140,8 @@ Retourne un tableau avec les différentes connexions chargées et les paramètre
     - rma_keep_tmp:                 no ; {yes|no} 
     - rma_script:                   script_migration.sql 
     - rma_dir_script_migration:     %kernel.root_dir%/../web/script
+
+ATTENTION : Si vous souhaitez utiliser votre rma_name_connexion lors de l'execution d'une commandre cron, vous ne devez pas mettre de caractères spéciaux (%, espace, ^)
 
 #### Ajout de paramètres aux paramètres Doctrine : 
 
