@@ -141,6 +141,8 @@ Retourne un tableau avec les différentes connexions chargées et les paramètre
     - rma_script:                   script_migration.sql 
     - rma_dir_script_migration:     %kernel.root_dir%/../web/script
 
+ATTENTION : Si vous souhaitez utiliser votre rma_name_connexion lors de l'execution d'une commandre cron, vous ne devez pas mettre de caractères spéciaux (%, espace, ^)
+
 #### Ajout de paramètres aux paramètres Doctrine : 
 
 Si vous souhaitez vous servir des paramètres définis pour Doctrine afin de faire vos dump / export.
