@@ -2,7 +2,7 @@
 
 namespace RMA\Bundle\DumpBundle\Zip;
 
-use RMA\Bundle\DumpBundle\Zip\ZipInterface;
+use RMA\Bundle\DumpBundle\Interfaces\ZipInterface;
 
 /**
  * Description of RZip

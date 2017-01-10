@@ -3,7 +3,7 @@
 namespace RMA\Bundle\DumpBundle\Tools;
 
 use RMA\Bundle\DumpBundle\Tools\WriteDump;
-use RMA\Bundle\DumpBundle\Tools\SyncDumpInterface;
+use RMA\Bundle\DumpBundle\Interfaces\SyncDumpInterface;
 
 /**
  * Description of SyncDump

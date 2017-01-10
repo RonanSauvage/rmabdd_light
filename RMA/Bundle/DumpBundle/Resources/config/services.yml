@@ -1,0 +1,13 @@
+services:   
+       
+    rma.database.manager:
+        class: RMA\Bundle\DumpBundle\Tools\DatabaseManager
+        arguments : [@logger]
+       
+    rma.export.manager:
+        class: RMA\Bundle\DumpBundle\Tools\ExportManager
+        arguments : [@logger, @rma.database.manager]
+                    
+    rma.restaure.manager:
+        class: RMA\Bundle\DumpBundle\Tools\RestaureManager
+        arguments : [@logger, @rma.database.manager, @rma.export.manager]

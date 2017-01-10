@@ -4,7 +4,7 @@ namespace RMA\Bundle\DumpBundle\Dump;
 
 use Ifsnop\Mysqldump\Mysqldump as IfsnopMysqldump;
 use RMA\Bundle\DumpBundle\ConnexionDB\ConnexionDB;
-use RMA\Bundle\DumpBundle\Dump\DumpInterface;
+use RMA\Bundle\DumpBundle\Interfaces\DumpInterface;
 
 /**
  * Description of DumpMysql

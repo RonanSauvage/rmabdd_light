@@ -34,7 +34,7 @@ class CleanDumpCommand extends CommonCommand {
      * @param SymfonyStyle $io
      * @param Array $params
      */
-    public static function cleanCommand($io, $params)
+    public static function cleanCommand(SymfonyStyle $io, $params)
     {
         $tools = RToolsFactory::create($params);
      

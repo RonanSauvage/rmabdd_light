@@ -2,11 +2,11 @@
 
 namespace RMA\Bundle\DumpBundle\Dump;
 
-use RMA\Bundle\DumpBundle\Ftp\FtpInterface;
-use RMA\Bundle\DumpBundle\ConnexionDB\ConnexionDBInterface;
-use RMA\Bundle\DumpBundle\Dump\DumpInterface;
-use RMA\Bundle\DumpBundle\Zip\ZipInterface;
-use RMA\Bundle\DumpBundle\Tools\WriteDumpInterface;
+use RMA\Bundle\DumpBundle\Interfaces\FtpInterface;
+use RMA\Bundle\DumpBundle\Interfaces\ConnexionDBInterface;
+use RMA\Bundle\DumpBundle\Interfaces\DumpInterface;
+use RMA\Bundle\DumpBundle\Interfaces\ZipInterface;
+use RMA\Bundle\DumpBundle\Interfaces\WriteDumpInterface;
 
 /**
  * Description of RMADump

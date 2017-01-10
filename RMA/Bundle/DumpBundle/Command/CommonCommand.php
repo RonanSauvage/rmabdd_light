@@ -69,6 +69,11 @@ class CommonCommand extends ContainerAwareCommand {
                 "Cette commande permet de visualiser les différentes configurations de connexion aux bases de données définies dans le parameters",
                 '-',
                 '-'
+           ),
+           array ('rma:restaure:database alias restaure', 
+                "Cette commande permet de restaurer une base de données à partir d'un script SQL",
+                '--new_database_name, --script_sql',
+                '-'
            )
         );
         $io->table($headers, $rows);
@@ -336,7 +341,7 @@ class CommonCommand extends ContainerAwareCommand {
         $fields['Ftps'] = array();
         $fields['Connexions']  = ConnexionDB::getFields();   
         
-        if($input->getOption('ftp')){
+        if($input->hasOption('ftp') && $input->getOption('ftp')){
              $fields['Ftps'] = Rftp::getFields();
              $params['ftp'] = 'yes'; 
         }        

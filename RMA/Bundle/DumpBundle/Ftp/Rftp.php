@@ -2,8 +2,8 @@
 
 namespace RMA\Bundle\DumpBundle\Ftp;
 
-use \Exception;
-use RMA\Bundle\DumpBundle\Ftp\FtpInterface;
+use Exception;
+use RMA\Bundle\DumpBundle\Interfaces\FtpInterface;
 
 class Rftp implements FtpInterface {
     

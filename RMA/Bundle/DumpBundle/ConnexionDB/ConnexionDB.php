@@ -5,7 +5,7 @@ namespace RMA\Bundle\DumpBundle\ConnexionDB;
 use Symfony\Component\Validator\Constraint as Assert;
 use Doctrine\DBAL\DriverManager;
 
-use RMA\Bundle\DumpBundle\ConnexionDB\ConnexionDBInterface;
+use RMA\Bundle\DumpBundle\Interfaces\ConnexionDBInterface;
 
 /**
  * ConnexionDB

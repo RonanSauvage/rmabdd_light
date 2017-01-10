@@ -2,6 +2,7 @@
 
 namespace RMA\Bundle\DumpBundle\Tools;
 
+use RMA\Bundle\DumpBundle\Interfaces\ToolsInterface;
 
 /**
  * Description of Tools

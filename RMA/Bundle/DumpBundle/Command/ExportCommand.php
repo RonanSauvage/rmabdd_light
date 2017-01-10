@@ -8,9 +8,9 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\Console\Input\InputOption;
 
 use RMA\Bundle\DumpBundle\Factory\RDumpFactory;
-use RMA\Bundle\DumpBundle\Tools\ExportDatabase;
 use RMA\Bundle\DumpBundle\ConnexionDB\ConnexionDB;
 use RMA\Bundle\DumpBundle\Tools\Tools;
+use RMA\Bundle\DumpBundle\Interfaces\ConnexionDBInterface;
 
 class ExportCommand extends CommonCommand {
 
@@ -61,12 +61,14 @@ class ExportCommand extends CommonCommand {
         DumpCommand::dumpDatabases($io, $databases, $dump, $output);
 
         $connexiondb = new ConnexionDB($params);
-        $exportDatabase = new ExportDatabase($connexiondb, $params);
+        
+        $rmaExportManager = $this->getContainer()->get('rma.export.manager');        
+        
         $dir = $params['dir_dump'] . DIRECTORY_SEPARATOR .  $params['repertoire_name'] . DIRECTORY_SEPARATOR . $databases[0] .'.sql' ; 
 
         $io->title('Création de la base de données temporaire : ');
         try {
-            $exportDatabase->createDatabaseWithSqlFic($dir, $params['name_database_temp']);
+            $rmaExportManager->createDatabaseWithSqlFic($dir, $params['name_database_temp'], $connexiondb);
             $io->success('Base de données ' . $params['name_database_temp'] .' correctement créée.');
         }
         catch (\Exception $e){
@@ -76,12 +78,12 @@ class ExportCommand extends CommonCommand {
       
         $io->title('Lancement du script : ' . $script);
         try {
-            $exportDatabase->lauchScriptForMigration($script, $params['name_database_temp']);
+            $rmaExportManager->lauchScriptForMigration($script, $params['name_database_temp'], $connexiondb);
             $io->success("Le script s'est correctement executé.");
         }
         catch (\Exception $e){
             $params['logger']->error('Erreur lors du script de migration pour export. ' . $e->getMessage());
-            $this->deleteDatabase($params['name_database_temp'], $params['keep_tmp'], $exportDatabase, $io);
+            $this->deleteDatabase($params['name_database_temp'], 'no', $connexiondb, $io);
             throw new \Exception('Erreur lors du lancement du script de migration. ' . $e->getMessage());
         }
     
@@ -91,12 +93,12 @@ class ExportCommand extends CommonCommand {
 
         DumpCommand::dumpDatabases($io, array($params['name_database_temp']), $dump, $output);
         
-        $this->deleteDatabase($params['name_database_temp'], $params['keep_tmp'], $exportDatabase, $io);
+        $this->deleteDatabase($params['name_database_temp'], $params['keep_tmp'], $connexiondb, $io);
 
         FtpCommand::saveDumpInFtp($io, $dump, $params);
     }
     
-    public function hydrateCommand(InputInterface $input, $io)
+    public function hydrateCommand(InputInterface $input, SymfonyStyle $io)
     {   
         $response = $this->loadOptionsAndParameters($input);
         $params = $response['params'];
@@ -132,14 +134,14 @@ class ExportCommand extends CommonCommand {
      * Permet de delete la database définie
      * @param string $nameDatabase
      * @param string $keepTmp {yes | no}
-     * @param ExportDatabase $exportDatabase
+     * @param ConnexionDBInterface $connexionDB
      * @param SymfonyStyle $io
      */
-    public function deleteDatabase($nameDatabase, $keepTmp, ExportDatabase $exportDatabase, SymfonyStyle $io){
+    public function deleteDatabase($nameDatabase, $keepTmp, ConnexionDBInterface $connexionDB, SymfonyStyle $io){
         $io->title('Gestion de la base de données temporaire : ');
         if($keepTmp != "yes" ) {
-
-           $exportDatabase->deleteDB($nameDatabase);
+           $rmaDatabaseManager = $this->getContainer()->get('rma.database.manager');
+           $rmaDatabaseManager->deleteOneDatabase($connexionDB, $nameDatabase);
            $io->success('La base temporaire '. $nameDatabase . ' a été correctement effacée.');
        }  
        else {

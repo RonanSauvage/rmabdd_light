@@ -2,9 +2,9 @@
 
 namespace RMA\Bundle\DumpBundle\Tools;
 
-use RMA\Bundle\DumpBundle\Tools\SyncDumpInterface;
-use RMA\Bundle\DumpBundle\Tools\WriteDumpInterface;
-use RMA\Bundle\DumpBundle\Tools\ToolsInterface;
+use RMA\Bundle\DumpBundle\Interfaces\SyncDumpInterface;
+use RMA\Bundle\DumpBundle\Interfaces\WriteDumpInterface;
+use RMA\Bundle\DumpBundle\Interfaces\ToolsInterface;
 
 
 /**

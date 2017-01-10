@@ -112,6 +112,11 @@ Pour voir les commandes mises à votre disposition rendez-vous à la racine et �
             --name_database_temp ; permet de donner un nom custom à la database créée pour l'export (ce nom ne doit pas être porté par une database déjà existante sur le serveur)
             --ftp  ; permet d'envoyer l'export en FTP selon les paramètres définis dans parameters.yml pour rma_ftp
 
+    > rma:restaure:database ---- (alias [restaure]) Permet de restaurer une base à partir d'un script SQL
+        Options : 
+            --new_database_name ; le nom à donner à la base de données restaurée
+            --script_sql ; le nom du fichier (.sql) à importer
+
 ## Définition des configurations 
 
 Par défaut, *les paramètres définis pour doctrine* seront pris pour effectuer les dumps.
