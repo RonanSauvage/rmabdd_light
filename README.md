@@ -141,10 +141,10 @@ Retourne un tableau avec les différentes connexions chargées et les paramètre
         - { rma_name_connexion: Localhost, rma_driver: pdo_mysql, rma_host: localhost, rma_port: 3306, rma_user: root, rma_password: none  }     
     - rma_nb_jour:                  5
     - rma_nombre_dump:              10
-    - rma_dir_dump:                 %kernel.root_dir%/../web/dump
+    - rma_dir_dump:                 %kernel.root_dir%/../../rmabundle/dump
     - rma_keep_tmp:                 no ; {yes|no} 
     - rma_script:                   script_migration.sql 
-    - rma_dir_script_migration:     %kernel.root_dir%/../web/script
+    - rma_dir_script_migration:     %kernel.root_dir%/../../rmabundle/script
 
 ATTENTION : Si vous souhaitez utiliser votre rma_name_connexion lors de l'execution d'une commandre cron, vous ne devez pas mettre de caractères spéciaux (%, espace, ^)
 

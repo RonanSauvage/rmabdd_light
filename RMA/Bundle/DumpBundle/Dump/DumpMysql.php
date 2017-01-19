@@ -29,8 +29,8 @@ class DumpMysql implements DumpInterface{
         $this->_connexiondb = $connexiondb;
         $this->_mysqlDump = $this->newMysqlDump($connexiondb, $params['compress']);
         if (!file_exists($params['dir_dump'])){
-            mkdir($params['dir_dump']);
-        }      
+            mkdir($params['dir_dump'], 0777, true);
+        }             
         $this->_pathDumps = $params['dir_dump'];
         $this->_repertoire_name = $params['repertoire_name'];
         $this->_extension = $this->setExtension($params['compress']);
@@ -77,7 +77,7 @@ class DumpMysql implements DumpInterface{
             $path = $this->getPathDumpsWithDir();
         }
         if (!file_exists($path)){
-            mkdir($path);
+            mkdir($path, 0777, true);
         }   
         $mysqlDump = $this->newMysqlDump($this->_connexiondb, $this->_params['compress'], $name_database);
         $name = $name_database . '.' . $this->_extension;

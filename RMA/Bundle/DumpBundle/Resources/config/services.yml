@@ -11,3 +11,4 @@ services:
     rma.restaure.manager:
         class: RMA\Bundle\DumpBundle\Tools\RestaureManager
         arguments : [@logger, @rma.database.manager, @rma.export.manager]
+        

@@ -11,7 +11,6 @@ use RMA\Bundle\DumpBundle\Command\CommonCommand;
 use RMA\Bundle\DumpBundle\Tools\Tools;
 use RMA\Bundle\DumpBundle\Factory\RDumpFactory;
 use RMA\Bundle\DumpBundle\ConnexionDB\ConnexionDB;
-use RMA\Bundle\DumpBundle\Tools\ExportDatabase;
 
 class RestaureCommand extends CommonCommand {
     
