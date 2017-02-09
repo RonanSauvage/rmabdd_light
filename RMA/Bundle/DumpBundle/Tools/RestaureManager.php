@@ -15,6 +15,12 @@ class RestaureManager {
     
     protected $exportManager;
     
+    /**
+     * 
+     * @param LoggerInterface $logger
+     * @param DatabaseManager $databaseManager
+     * @param ExportManagerInterface $exportManager
+     */
     public function __construct(LoggerInterface $logger, DatabaseManager $databaseManager, ExportManagerInterface $exportManager)
     {
         $this->logger = $logger;

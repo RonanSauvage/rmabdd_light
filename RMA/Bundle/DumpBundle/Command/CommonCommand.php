@@ -92,35 +92,33 @@ class CommonCommand extends ContainerAwareCommand {
         $params['repertoire_name'] = $params['date'] . '__' . uniqid();
         $params['logger'] = $container->get('logger');
         $params['extension'] = '.zip';
-        
         $parameters_enables = array (
-            'nb_jour'               => 5, 
-            'nombre_dump'           => 10, 
-            'dir_dump'              => 'rmabundle/dump', 
-            'dir_export'            => 'rmabundle/export',
-            'dir_tmp'               => 'rmabundle/tmp',
-            'dir_script_migration'  => 'rmabundle/script',         
-            'compress'              => "none", 
-            'zip'                   => "no", 
-            'ftp'                   => "no",
-            'dir_zip'               => "web/zip",
-            'name'                  => "name_database",
-            'keep_tmp'              => "no",
-            'script'                => 'rma_default_file.sql'
+            'nb_jour',               
+            'nombre_dump',          
+            'dir_dump',             
+            'dir_export',           
+            'dir_tmp',              
+            'dir_script_migration',          
+            'compress',              
+            'zip',                  
+            'ftp',                   
+            'dir_zip',                            
+            'keep_tmp',             
+            'script'                
         );
   
-        foreach ($parameters_enables as $parameter_enable => $default)
+        foreach ($parameters_enables as $parameter_enable)
         {
             // On vérifie si l'utilisateur a défini un paramètre custom dans le paramters.yml pour rma
             if($container->hasParameter('rma_'.$parameter_enable)) {
                 $$parameter_enable = $container->getParameter('rma_'.$parameter_enable);
             } 
-            else  {
-                $$parameter_enable = $default;
-            }
             $params[$parameter_enable] = $$parameter_enable;
         }
 
+        
+        $params['name'] = "name_database";
+        
         foreach ($fields as $object => $fields_object){
             $load = 'load'.$object;
             $params = $this->$load($params, $fields_object);

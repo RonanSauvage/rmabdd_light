@@ -16,180 +16,49 @@ class RMAConfiguration implements ConfigurationInterface
         $rootNode = $treeBuilder->root('rma_dump');
 
         $rootNode
-            ->children()
-                ->arrayNode('rma_connexions')
-                ->prototype('array')
-                ->children()
-                    ->scalarNode('rma_name')
-                        ->defaultValue('my_connexion')
-                        ->info('This value is used to identify your connexion. She can be empty')
-                    ->end()
-                    ->scalarNode('rma_driver')
-                        ->defaultValue('pdo_mysql')
-                        ->info('This value is used to connect database. She can be empty')
-                    ->end()
-                    ->scalarNode('rma_host')
-                        ->defaultValue('127.0.0.1')
-                        ->info('This value is used to connect database. She can be empty')
-                    ->end()
-                    ->integerNode('rma_port')
-                        ->defaultValue('3306')
-                        ->info('This value is the port & is used to connect database. She can be empty')
-                    ->end()
-                    ->scalarNode('rma_user')
-                        ->defaultValue('root')
-                        ->info('This value is the username & is used to connect database. She can be empty')
-                    ->end()
-                    ->scalarNode('rma_password')
-                        ->defaultValue('')
-                        ->info('This value is the password & is used to connect database. She can be empty')
-                    ->end() 
-                    ->arrayNode('rma_excludes')
-                        ->prototype('scalar')->end()
-                        ->info('This value is an array. She is used to exclude databases')
+            ->children()       
+                ->enumNode('rma_compress')->values(array('none', 'gzip', 'bzip2'))->defaultValue('none')->end()
+                ->enumNode('rma_zip')->values(array('yes', 'no'))->defaultValue('no')->end()
+                ->enumNode('rma_keep_tmp')->values(array('yes', 'no'))->defaultValue('no')->end()
+                ->scalarNode('rma_dir_zip')->defaultValue('rmabundle/zip')->end()
+                ->scalarNode('rma_dir_dump')->defaultValue('rmabundle/dump')->end()
+                ->scalarNode('rma_dir_tmp')->defaultValue('rmabundle/tmp')->end()
+                ->scalarNode('rma_dir_export')->defaultValue('rmabundle/export')->end()
+                ->scalarNode('rma_dir_script_migration')->defaultValue('rmabundle/script')->end()
+                ->scalarNode('rma_nb_jour')->defaultValue(7)->end()
+                ->scalarNode('rma_keep_tmp')->defaultValue('nod')->end()
+                ->integerNode('rma_nombre_dump')->defaultValue(8)->min(0)->end()
+                ->scalarNode('rma_script')->defaultValue('defaultScript.sql')->end()
+                ->enumNode('rma_ftp')->values(array('yes', 'no'))->defaultValue('no')->end()
+                ->arrayNode('rma_ftps')
+                    ->useAttributeAsKey('rma_name_ftp')
+                    ->prototype('array')
+                        ->children()
+                            ->scalarNode('rma_name_ftp')->defaultValue('my_connexion')->end()
+                            ->scalarNode('rma_ftp_ip')->defaultValue('127.0.0.1')->end()
+                            ->scalarNode('rma_ftp_username')->defaultValue('rmausername')->end()
+                            ->scalarNode('rma_ftp_password')->defaultValue('rmapassword')->end()
+                            ->booleanNode('rma_ftp_port')->defaultValue('21')->end()
+                            ->booleanNode('rma_ftp_timeout')->defaultValue('90')->end()
+                            ->scalarNode('rma_ftp_path')->defaultValue('/home/rma/dump')->end()
+                        ->end()
                     ->end()
                 ->end()
-                ->append($this->addParametersNode())
-                ->append($this->addParametersNodeFTP())
-                ->append($this->addParametersNodeClass())
+                ->arrayNode('rma_connexions')
+                    ->requiresAtLeastOneElement()
+                    ->prototype('array')
+                        ->children()
+                            ->scalarNode('rma_name')->defaultValue('my_connexion')->end()
+                            ->scalarNode('rma_driver')->defaultValue('pdo_mysql')->end()
+                            ->scalarNode('rma_host')->defaultValue('127.0.0.1')->end()
+                            ->integerNode('rma_port')->defaultValue('3306')->end()
+                            ->scalarNode('rma_user')->defaultValue('root')->end()
+                            ->scalarNode('rma_password')->defaultValue('')->end() 
+                        ->end()
+                    ->end()
+                ->end() 
             ->end();
         return $treeBuilder;
     }
-    
-    /**
-     * Permet de configurer la partie Others du fichier de config
-     * @return TreeBuilder
-     */
-    public function addParametersNode()
-    {
-        $builder = new TreeBuilder();
-        $node = $builder->root('others');
-
-        $node
-            ->canBeEnabled()
-            ->children()
-                ->enumNode('rma_compress')
-                    ->values(array('none', 'gzip', 'bzip2'))
-                    ->defaultValue('none')
-                ->end()
-                ->enumNode('rma_zip')
-                    ->values(array('yes', 'no'))
-                    ->defaultValue('no')
-                ->end()
-                ->enumNode('rma_keep_tmp')
-                    ->values(array('yes', 'no'))
-                    ->defaultValue('no')
-                ->end()
-                ->scalarNode('rma_dir_zip')
-                    ->defaultValue('')
-                ->end()
-                ->scalarNode('rma_dir_dump')
-                    ->defaultValue('')
-                ->end()
-                ->scalarNode('rma_dir_tmp')
-                    ->defaultValue('')
-                ->end()
-                ->scalarNode('rma_dir_export')
-                    ->defaultValue('')
-                ->end()
-                ->scalarNode('rma_dir_script_migration')
-                    ->defaultValue('')
-                ->end()
-                ->scalarNode('rma_dir_dump')
-                    ->defaultValue('')
-                ->end()
-                ->scalarNode('rma_nb_jour')
-                    ->defaultValue(7)
-                ->end()
-                ->integerNode('rma_nombre_dump')
-                    ->defaultValue(10)
-                    ->min(0)
-                ->end()
-            ->end()
-        ;
-
-        return $node;
-    }
-    
-    /**
-     * Permet de configurer la partie ftp
-     * @return TreeBuilder
-     */
-    public function addParametersNodeFTP()
-    {
-        $builder = new TreeBuilder();
-        $node = $builder->root('ftp');
-
-        $node
-            ->canBeEnabled()
-            ->children()
-            ->enumNode('rma_ftp')
-                    ->values(array('yes', 'no'))
-                    ->defaultValue('no')
-            ->end()
-            ->arrayNode('rma_ftps')
-            ->prototype('array')
-                ->children()
-                 ->scalarNode('rma_name_ftp')
-                    ->defaultValue('my_connexion')
-                    ->info('This value is used to identify your connexion. She can be empty')
-                ->end()
-                ->scalarNode('rma_ftp_ip')
-                    ->defaultValue('127.0.0.1')
-                ->end()
-                ->scalarNode('rma_ftp_username')
-                    ->defaultValue('rmausername')
-                ->end()
-                ->scalarNode('rma_ftp_password')
-                    ->defaultValue('rmapassword')
-                ->end()
-                ->booleanNode('rma_ftp_port')
-                    ->defaultValue('21')
-                ->end()
-                ->booleanNode('rma_ftp_timeout')
-                    ->defaultValue('90')
-                ->end()
-                ->scalarNode('rma_ftp_path')
-                    ->defaultValue('/home/rma/dump')
-                ->end()
-            ->end()
-        ;
-        return $node;
-    }
-    
-    /**
-     * Permet de configurer les classes d'accès
-     * @return TreeBuilder
-     */
-    public function addParametersNodeClass()
-    {
-        $builder = new TreeBuilder();
-        $node = $builder->root('classes');
-
-        $node
-            ->children()
-                ->scalarNode('rma_connexiondb')
-                    ->defaultValue('RMA\Bundle\DumpBundle\ConnexionDB\ConnexionDB')
-                    ->cannotBeEmpty()
-                ->end()
-                ->scalarNode('rma_ftp')
-                    ->defaultValue('RMA\Bundle\DumpBundle\Ftp\Rftp')
-                    ->cannotBeEmpty()
-                ->end()
-                ->scalarNode('rma_zip')
-                    ->defaultValue('RMA\Bundle\DumpBundle\Zip\Rzip')
-                    ->cannotBeEmpty()
-                ->end()
-                ->booleanNode('rma_dump')
-                    ->defaultValue('RMA\Bundle\DumpBundle\Dump\RMADump')
-                    ->cannotBeEmpty()
-                ->end()
-                ->booleanNode('rma_dump_mysql')
-                    ->defaultValue('RMA\Bundle\DumpBundle\Dump\DumpMysql')
-                    ->cannotBeEmpty()
-                ->end()
-            ->end()
-        ;
-        return $node;
-    }
 }
+    

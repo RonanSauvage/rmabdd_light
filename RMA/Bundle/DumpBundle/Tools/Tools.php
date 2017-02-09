@@ -98,33 +98,28 @@ class Tools implements ToolsInterface{
     /**
      * Permet de scanner un répertoire
      * @param string $Directory
+     * @return array $r
      * @throws \Exception
      */
-    public static function scanDirectory($Directory)
+    public function scanDirectory($Directory)
     {
-        if (opendir($Directory))
-        {
-            $MyDirectory = opendir($Directory);
-        }
-        else 
-        {
-            throw new \Exception("Impossible d'ouvrir le répertoire " . $Directory);
-        }
-        $myarray = array();
-        while($Entry = readdir($MyDirectory)) {
-            if(is_dir($Directory.'/'.$Entry)&& $Entry != '.' && $Entry != '..') {
-                $myarray[$Entry] =  array();
-                self::scanDirectory($Directory.'/'.$Entry);
-            }
-            else {
-                if ($Entry != '.' && $Entry != '..')
-                {
-                    $myarray[$Entry] = $Entry;
-                }
-            }
-        }
-        closedir($MyDirectory);
-        return $myarray;
+        $ritit = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($Directory), \RecursiveIteratorIterator::CHILD_FIRST); 
+        $r = array(); 
+        foreach ($ritit as $splFileInfo) { 
+           if($splFileInfo->getFilename() == '.' || $splFileInfo->getFilename() == '..'){
+               continue;
+           }
+           $path = $splFileInfo->isDir() 
+                 ? array($splFileInfo->getFilename() => array()) 
+                 : array($splFileInfo->getFilename()); 
+
+           for ($depth = $ritit->getDepth() - 1; $depth >= 0; $depth--) { 
+               $path = array($ritit->getSubIterator($depth)->current()->getFilename() => $path); 
+           } 
+           $r = array_merge_recursive($r, $path); 
+        } 
+
+        return $r;
     }  
     
     /**

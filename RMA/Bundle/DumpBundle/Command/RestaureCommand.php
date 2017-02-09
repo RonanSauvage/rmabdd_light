@@ -29,33 +29,39 @@ class RestaureCommand extends CommonCommand {
         
         // On charge l'array params avec les options / parameters
         $params = $this->hydrateCommand($input, $io); 
-        
         $rmaRestaureManager = $this->getContainer()->get('rma.restaure.manager');
         
         // On charge l'objet dump pour gérer toutes les fonctionnalités 
         $dump = RDumpFactory::create($params);
         
         $databases = $dump->rmaDumpGetListDatabases();
-        
-        $script = Tools::formatDirWithFile($params['dir_script_migration'], $params['script_sql']);
-        
+
         // On vérifie qu'il n'existe pas déjà une base de données avec ce nom
-        if(in_array($params['new_database_name'], $databases)){
+        if(in_array(strtolower($params['new_database_name']), $databases)){
            throw new \Exception ('Il existe déjà une base de données avec le nom ' . $params['new_database_name']);
         }
         
-         // On vérifie que le fichier de script est disponible
-        if(!file_exists($script)){
-            throw new \Exception ('Le fichier de restauration est introuvable : ' . $script); 
+        $params = $this->loadScript($input, $io, $params); 
+        
+        // On vérifie que le fichier de script est disponible
+        if(!file_exists($params['script_sql'])){
+            throw new \Exception ('Le fichier de restauration est introuvable : ' . $params['script_sql']); 
         }
         
         $connexionDB = new ConnexionDB($params);
  
         $io->title('Lancement de la restauration de la base. Le nom de la base sera : ' . $params['new_database_name']);
-        $rmaRestaureManager->restaureOneDatabase($connexionDB, $params['new_database_name'], $script);
+        $rmaRestaureManager->restaureOneDatabase($connexionDB, $params['new_database_name'], $params['script_sql']);
         $io->success("La base de données a été correctement crée : " . $params['new_database_name']);    
     }
     
+    /**
+     * Permet de changer l'array $params
+     * @param InputInterface $input
+     * @param SymfonyStyle $io
+     * @return array $params
+     * @throws \Exception
+     */
     public function hydrateCommand(InputInterface $input, SymfonyStyle $io)
     {   
         $response = $this->loadOptionsAndParameters($input);
@@ -71,14 +77,66 @@ class RestaureCommand extends CommonCommand {
         {
             $params['new_database_name'] = Tools::cleanString($input->getOption('new_database_name'));
         }
-        
-        if ($input->getOption('script_sql'))
+        else 
         {
-            $params['script_sql'] = $input->getOption('script_sql');
+            throw new \Exception ("Vous devez définir un nom pour la base de données créée à partir de la restauration");
         }
 
         $params = $this->selectOne($params['connexions'], $response['fields_connexion'], $io, $response['name_connexion'], $params);
 
+        return $params;
+    }
+    
+    /**
+     * Permet de définir le script SQL envoyé en param
+     * Ou de naviguer dans les répertoires de dump s'il n'y en a pas précisé en option
+     * @param InputInterface $input
+     * @param SymfonyStyle $io
+     * @param array $params
+     * @return array $params
+     * @throws \Exception
+     */
+    private function loadScript(InputInterface $input, SymfonyStyle $io, array $params)
+    {
+        // Si le script SQL est envoyé en paramètre on le traite directement
+        if ($input->getOption('script_sql'))
+        {
+            $params['script_sql'] = Tools::formatDirWithFile($params['dir_script_migration'], $input->getOption('script_sql'));
+        }
+        // Sinon on propose à l'utilisateur de le sélectionner à partir du répertoire de son choix
+        else 
+        {
+            $tools = $this->getContainer()->get('rma.tools');
+            $dir = $io->ask("Quel est le répertoire à partir duquel vous souhaitez restaurer une base de données ?" , $params['dir_dump']);
+            $dumps = $tools->scanDirectory($dir);
+            // Tant que Dumps est une array c'est que l'élément sélectionné est un répertoire 
+            while (is_array($dumps)){
+                $resuls = array();
+                foreach ($dumps as $dump => $value){
+                    // Si c'est à nouveau un folder
+                    if (is_array($value)){
+                        array_push($resuls, $dump);
+                    }
+                    else {
+                        array_push($resuls, $value);
+                    }
+                }
+                $choice = $io->choice("Quel script voulez-vous executer ou dans quel répertoire souhaitez-vous vous rendre ?" , $resuls);
+                $dir = $dir . DIRECTORY_SEPARATOR . $choice;
+                if (is_dir($dir)){
+                    $dumps = $tools->scanDirectory($dir);
+                }
+                else {
+                    $dumps = $dir;
+                    $params['script_sql'] = $dir;
+                }
+            }
+        }
+        
+        if(is_dir($params['script_sql'])){
+            throw new \Exception ("Le script pour la restauration de la base de données ne peut pas être un répertoire");
+        }
+        
         return $params;
     }
 }

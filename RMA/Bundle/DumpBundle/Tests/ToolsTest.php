@@ -30,23 +30,6 @@ class ToolsTests extends \PHPUnit_Framework_TestCase
       
     }
     
-     /**
-     * @expectedException InvalidArgumentException
-     */
-    public function testrrMdirException()
-    {
-        $tools = new Tools;
-        $dir_test = __DIR__ .'/dossier_test';
-        mkdir($dir_test);
-        mkdir($dir_test . '/test1');
-        mkdir($dir_test . '/test1/test2');
-        fopen($dir_test . '/test1/test2/text.txt', 'w+'); 
-        
-        $tools->rrMdir($dir_test.'/test1/test2/');
-        $tools->rrMdir($dir_test.'/test1/test2/');
-
-    }
-    
     public function testScanDirectory()
     {
         $tools = new Tools;

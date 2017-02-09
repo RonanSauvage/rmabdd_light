@@ -3,12 +3,28 @@ services:
     rma.database.manager:
         class: RMA\Bundle\DumpBundle\Tools\DatabaseManager
         arguments : [@logger]
+        tags:
+            - { name: monolog.logger, channel: rma_bdd }
        
     rma.export.manager:
         class: RMA\Bundle\DumpBundle\Tools\ExportManager
         arguments : [@logger, @rma.database.manager]
+        tags:
+            - { name: monolog.logger, channel: rma_bdd }
                     
     rma.restaure.manager:
         class: RMA\Bundle\DumpBundle\Tools\RestaureManager
         arguments : [@logger, @rma.database.manager, @rma.export.manager]
+        tags:
+            - { name: monolog.logger, channel: rma_bdd }
+                       
+    rma.dump.manager:
+        class: RMA\Bundle\DumpBundle\Tools\DumpManager
+        arguments: [@logger]
+        tags:
+            - { name: monolog.logger, channel: rma_bdd }
+            
+    rma.tools:
+        class: RMA\Bundle\DumpBundle\Tools\Tools
+
         

@@ -20,19 +20,26 @@ class RMADumpExtension extends Extension
     public function load(array $configs, ContainerBuilder $container)
     {
         $configuration = new RMAConfiguration();
-        $this->processConfiguration($configuration, $configs);
+        $configsMerged = $this->processConfiguration($configuration, $configs);
       
         $loader = new Loader\YamlFileLoader($container, new FileLocator(__DIR__.'/../Resources/config'));
         $loader->load('services.yml'); 
         $loader->load('config.yml'); 
        
+        foreach($configsMerged as $configMerged => $value)
+        {
+            if(!is_array($configMerged)){
+                $container->setParameter($configMerged, $value);
+            }
+        }
+        
         $this->addClassesToCompile(array(
             'RMA\\Bundle\\DumpBundle\\Tools\\SyncDump',
             'RMA\\Bundle\\DumpBundle\\Tools\\WriteDump',
             'RMA\\Bundle\\DumpBundle\\Tools\\SyncZip', 
             'RMA\\Bundle\\DumpBundle\\Tools\\Tools',
             'RMA\\Bundle\\DumpBundle\\Tools\\RTools',
-            'RMA\\Bundle\\DumpBundle\\Tools\\ExportDatabase',
+            'RMA\\Bundle\\DumpBundle\\Tools\\DatabaseManager',
             'RMA\\Bundle\\DumpBundle\\Ftp\\Rftp',
             'RMA\\Bundle\\DumpBundle\\Factory\\RDumpFactory',
             'RMA\\Bundle\\DumpBundle\\Factory\\RToolsFactory',
