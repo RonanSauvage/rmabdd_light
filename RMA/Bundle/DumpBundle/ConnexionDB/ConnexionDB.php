@@ -14,11 +14,6 @@ use RMA\Bundle\DumpBundle\Interfaces\ConnexionDBInterface;
 class ConnexionDB implements ConnexionDBInterface
 {
     /**
-     * 
-     */
-    private $name;
-    
-    /**
      * @Assert\Type(type="integer", message="Le port doit etre un entier")
      */
     private $port;
@@ -44,12 +39,6 @@ class ConnexionDB implements ConnexionDBInterface
     private $driver;
     
     /**
-     *
-     * @var type array
-     */
-    private $excludes;
-    
-    /**
      * Construct pour la classe ConnexionDB
      * @param array $params
      */
@@ -60,7 +49,6 @@ class ConnexionDB implements ConnexionDBInterface
         $this->username = $params['user'];
         $this->password = $params['password'];
         $this->driver = $params['driver'];
-        $this->excludes = $params['excludes'];
     }
     
     public function getUsername(){
@@ -86,7 +74,6 @@ class ConnexionDB implements ConnexionDBInterface
         );
         return $fields;
     }
-    
     
     /**
      * Permet de formatter un DSN pour une ConnexionDB

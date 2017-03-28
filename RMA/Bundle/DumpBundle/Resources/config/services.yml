@@ -26,5 +26,4 @@ services:
             
     rma.tools:
         class: RMA\Bundle\DumpBundle\Tools\Tools
-
         

@@ -14,21 +14,20 @@ use Symfony\Bundle\FrameworkBundle\Kernel;
  *
  * @author rmA
  */
-Class DumpCommandTest extends \PHPUnit_Framework_TestCase
+Class DumpCommandTest extends KernelTestCase
 {
     public function testExecute()
     {
-        $kernel = $this->getMockKernel();
-        $kernel->expects($this->once());
-        
+        $kernel = $this->createKernel();
+        $kernel->boot();
+
         $app = new Application($kernel);
-        $app->add(new DumpCommand($kernel));
+        
+        $app->add(new DumpCommand());
         
         $command = $app->find('rma:dump:database');
-
         $tester = new CommandTester($command);
-        $tester->execute(array(''));
-
+        $tester->execute(array('command' => $command->getName()));
         $this->assertRegexp('mis à disposition', $tester->getDisplay());
     }
     

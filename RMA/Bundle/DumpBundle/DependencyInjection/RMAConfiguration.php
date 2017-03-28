@@ -61,4 +61,3 @@ class RMAConfiguration implements ConfigurationInterface
         return $treeBuilder;
     }
 }
-    
