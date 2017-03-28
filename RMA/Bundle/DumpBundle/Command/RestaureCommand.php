@@ -26,7 +26,7 @@ class RestaureCommand extends CommonCommand {
     protected function execute(InputInterface $input, OutputInterface $output) 
     {   
         $io = new SymfonyStyle($input, $output);
-        
+
         // On charge l'array params avec les options / parameters
         $params = $this->hydrateCommand($input, $io); 
         $rmaRestaureManager = $this->getContainer()->get('rma.restaure.manager');
@@ -52,7 +52,7 @@ class RestaureCommand extends CommonCommand {
  
         $io->title('Lancement de la restauration de la base. Le nom de la base sera : ' . $params['new_database_name']);
         $rmaRestaureManager->restaureOneDatabase($connexionDB, $params['new_database_name'], $params['script_sql']);
-        $io->success("La base de données a été correctement crée : " . $params['new_database_name']);    
+        $io->success("La base de données a été correctement restaurée : " . $params['new_database_name']);    
     }
     
     /**
@@ -64,6 +64,15 @@ class RestaureCommand extends CommonCommand {
      */
     public function hydrateCommand(InputInterface $input, SymfonyStyle $io)
     {   
+        if ($input->getOption('new_database_name'))
+        {
+            $new_name_database = $input->getOption('new_database_name');
+        }
+        else 
+        {
+            $new_name_database = $io->ask('Vous devez définir un nom pour la base de données que vous allez restaurer.');
+        }
+        
         $response = $this->loadOptionsAndParameters($input);
         $params = $response['params'];
         $params['database_name'] = false;
@@ -72,15 +81,7 @@ class RestaureCommand extends CommonCommand {
         $params['zip'] = 'no';
         $params['dir_dump'] = $params['dir_tmp'];
         $params['dir_fic'] = $params['dir_dump'];
-  
-        if ($input->getOption('new_database_name'))
-        {
-            $params['new_database_name'] = Tools::cleanString($input->getOption('new_database_name'));
-        }
-        else 
-        {
-            throw new \Exception ("Vous devez définir un nom pour la base de données créée à partir de la restauration");
-        }
+        $params['new_database_name'] = Tools::cleanString($new_name_database);
 
         $params = $this->selectOne($params['connexions'], $response['fields_connexion'], $io, $response['name_connexion'], $params);
 
@@ -108,8 +109,12 @@ class RestaureCommand extends CommonCommand {
         {
             $tools = $this->getContainer()->get('rma.tools');
             $dir = $io->ask("Quel est le répertoire à partir duquel vous souhaitez restaurer une base de données ?" , $params['dir_dump']);
-            $dumps = $tools->scanDirectory($dir);
-            // Tant que Dumps est une array c'est que l'élément sélectionné est un répertoire 
+            $dumps = $tools->scanDirectory($dir);  
+            // Tant que Dumps est une array c'est que l'élément sélectionné est un répertoire        
+            if(count($dumps) == 0){
+                throw new \Exception("Le répertoire : ". $dir ." est vide");
+            }
+            
             while (is_array($dumps)){
                 $resuls = array();
                 foreach ($dumps as $dump => $value){
@@ -125,6 +130,10 @@ class RestaureCommand extends CommonCommand {
                 $dir = $dir . DIRECTORY_SEPARATOR . $choice;
                 if (is_dir($dir)){
                     $dumps = $tools->scanDirectory($dir);
+                    // Tant que Dumps est une array c'est que l'élément sélectionné est un répertoire        
+                    if(count($dumps) == 0){
+                        throw new \Exception("Le répertoire : ". $dir ." est vide");
+                    }
                 }
                 else {
                     $dumps = $dir;

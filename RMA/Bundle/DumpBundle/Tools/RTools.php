@@ -39,7 +39,7 @@ class RTools {
         {
             $this->_params['logger']->notice('Aucun clean n\'est prévu avec cette configuration');
         }
-        elseif (!is_int($this->_params['nb_jour'])) {
+        elseif (!is_numeric($this->_params['nb_jour'])) {
             $this->_params['logger']->notice('La valeur pour le nombre de jours n\'est pas correcte : '. $this->_params['nb_jour']);
         }
         else {

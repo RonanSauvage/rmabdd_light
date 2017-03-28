@@ -7,11 +7,17 @@
     $ composer require rma/rmabdd_light:~{last_version_stable}*
 ```
 
-> Via le fichier json :
+Via le fichier json :
 ```
     "require": {
         "rma/rmabdd_light":"~{last_version_stable}*"
     }
+```
+
+Activer dans votre app/AppKernel.php le bundle : 
+
+```
+    new RMA\Bundle\DumpBundle\RMADumpBundle()
 ```
 
 Ensuite, vous pouvez lancer composer update afin configurer votre bundle.
@@ -43,7 +49,7 @@ Pour voir les commandes mises à votre disposition rendez-vous à la racine et �
             --one pour sauvegarder une base unique
             --i pour ouvrir l'interface d'intéractions pour les données de connexion (sinon les infos en parameters seront prises par défaut)
             --ftp permet de sauvegarder le dump en FTP. Ne fonctionne actuellement que pour une archive zippée. 
-            --name permet de définir un nom custom pour le dump
+            --repertoire_name permet de définir un nom custom pour le dump
             --all permet de dump toutes les bases disponibles avec les parameters fournis (annule l'option -one et les bases de données en argument)
             
         Arguments :
@@ -114,8 +120,8 @@ Pour voir les commandes mises à votre disposition rendez-vous à la racine et �
 
     > rma:restaure:database ---- (alias [restaure]) Permet de restaurer une base à partir d'un script SQL
         Options : 
-            --new_database_name ; le nom à donner à la base de données restaurée
-            --script_sql ; le nom du fichier (.sql) à importer
+            --new_database_name ; le nom à donner à la base de données restaurée - Obligatoire
+            --script_sql ; le nom du fichier (.sql) à importer - Optionnel
 
 ## Définition des configurations 
 

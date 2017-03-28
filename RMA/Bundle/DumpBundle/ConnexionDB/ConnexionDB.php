@@ -62,165 +62,13 @@ class ConnexionDB implements ConnexionDBInterface
         $this->driver = $params['driver'];
         $this->excludes = $params['excludes'];
     }
-
-    /**
-    * Set name
-    *
-    * @param string $name
-    *
-    * @return ConnexionDB
-    */
-    public function setName($name)
-    {
-        $this->name = $name;
-
-        return $this;
-    }
-
-    /**
-     * Get name
-     *
-     * @return string
-     */
-    public function getName()
-    {
-        return $this->name;
-    }
-
-    /**
-     * Set port
-     *
-     * @param integer $port
-     * @return ConnexionDB
-     */
-    public function setPort($port)
-    {
-        $this->port = $port;
-
-        return $this;
-    }
-
-    /**
-     * Get port
-     *
-     * @return integer 
-     */
-    public function getPort()
-    {
-        return $this->port;
-    }
-
-    /**
-     * Set username
-     *
-     * @param string $username
-     * @return ConnexionDB
-     */
-    public function setUsername($username)
-    {
-        $this->username = $username;
-
-        return $this;
-    }
-
-    /**
-     * Get username
-     *
-     * @return string 
-     */
-    public function getUsername()
-    {
+    
+    public function getUsername(){
         return $this->username;
     }
-
-    /**
-     * Set password
-     *
-     * @param string $password
-     * @return ConnexionDB
-     */
-    public function setPassword($password)
-    {
-        $this->password = $password;
-
-        return $this;
-    }
-
-    /**
-     * Get password
-     *
-     * @return string 
-     */
-    public function getPassword()
-    {
+    
+    public function getPassword(){
         return $this->password;
-    }
-
-    /**
-     * Set host
-     *
-     * @param string $host
-     * @return ConnexionDB
-     */
-    public function setHost($host)
-    {
-        $this->host = $host;
-
-        return $this;
-    }
-
-    /**
-     * Get host
-     *
-     * @return string 
-     */
-    public function getHost()
-    {
-        return $this->host;
-    }
-    
-    /**
-     * Set driver
-     *
-     * @param string $driver
-     * @return ConnexionDB
-     */
-    public function setDriver($driver)
-    {
-        $this->driver = $driver;
-
-        return $this;
-    }
-    
-    /**
-     * Get driver
-     *
-     * @return string 
-     */
-    public function getDriver()
-    {
-        return $this->driver;
-    }
-    
-    /**
-     * Get xcludes
-     * 
-     * @return array
-     */
-    public function getExcludes()
-    {
-        return $this->excludes;
-    }
-
-    /**
-     * Set excludes
-     * @param array $excludes
-     */
-    public function setExcludes(Array $excludes)
-    {
-        $this->excludes = $excludes;
-
-        return $this;
     }
     
     /**
@@ -249,10 +97,10 @@ class ConnexionDB implements ConnexionDBInterface
     {
         if (is_null($dbname))
         {
-            return substr($this->driver, 4) .':host=' . $this->getHost() .';port=' . $this->getPort(); 
+            return substr($this->driver, 4) .':host=' . $this->host .';port=' . $this->port; 
         }
         else {
-            return substr($this->driver, 4) .':dbname='.$dbname .';host=' . $this->getHost() .';port=' . $this->getPort(); 
+            return substr($this->driver, 4) .':dbname='.$dbname .';host=' . $this->host .';port=' . $this->port; 
         }
     }
     
@@ -274,7 +122,7 @@ class ConnexionDB implements ConnexionDBInterface
                  \PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8',
             );
         }
-        return new \PDO ($dsn, $this->getUsername(), $this->getPassword(), $options);
+        return new \PDO ($dsn, $this->username, $this->password, $options);
     }
     
     /**

@@ -3,8 +3,8 @@
 namespace RMA\Bundle\DumpBundle\Dump;
 
 use Ifsnop\Mysqldump\Mysqldump as IfsnopMysqldump;
-use RMA\Bundle\DumpBundle\ConnexionDB\ConnexionDB;
 use RMA\Bundle\DumpBundle\Interfaces\DumpInterface;
+use RMA\Bundle\DumpBundle\Interfaces\ConnexionDBInterface;
 
 /**
  * Description of DumpMysql
@@ -21,10 +21,10 @@ class DumpMysql implements DumpInterface{
     
     /**
      * Constructeur de l'object MySQLDump
-     * @param ConnexionDB $connexiondb
+     * @param ConnexionDBInterface $connexiondb
      * @param Array $params
      */
-    public function __construct(ConnexionDB $connexiondb, Array $params)
+    public function __construct(ConnexionDBInterface $connexiondb, Array $params)
     {
         $this->_connexiondb = $connexiondb;
         $this->_mysqlDump = $this->newMysqlDump($connexiondb, $params['compress']);
@@ -37,7 +37,14 @@ class DumpMysql implements DumpInterface{
         $this->_params = $params;
     }
     
-    public function newMysqlDump(ConnexionDB $connexiondb, $compress, $database = null)
+    /**
+     * Permet d'initialiser un objet de dump
+     * @param ConnexionDBInterface $connexiondb
+     * @param string $compress
+     * @param string $database
+     * @return IfsnopMysqldump
+     */
+    public function newMysqlDump(ConnexionDBInterface $connexiondb, $compress, $database = null)
     {
         if(is_null($database))
         {
