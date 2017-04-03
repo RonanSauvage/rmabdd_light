@@ -75,9 +75,10 @@ class Tools implements ToolsInterface{
     /**
      * Permet de nettoyer une chaine des caractères spéciaux
      * @param string $chaine
+     * @param boolean $acceptUnderscore
      * @return string
      */
-    public static function cleanString($chaine)
+    public static function cleanString($chaine, $acceptUnderscore = false)
     {
         $caracteres = array(
             'a', 'Á' => 'a', 'Â' => 'a', 'Ä' => 'a', 'à' => 'a', 'á' => 'a', 'â' => 'a', 'ä' => 'a', '@' => 'a',
@@ -90,7 +91,9 @@ class Tools implements ToolsInterface{
         );
 
         $chaine = strtr($chaine, $caracteres);
-        $chaine = preg_replace('#[^A-Za-z0-9]+#', '-', $chaine);
+        if(!$acceptUnderscore){
+            $chaine = preg_replace('#[^A-Za-z0-9]+#', '-', $chaine);
+        }
         return trim($chaine, '-');
     }
 

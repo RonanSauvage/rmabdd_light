@@ -81,7 +81,7 @@ class RestaureCommand extends CommonCommand {
         $params['zip'] = 'no';
         $params['dir_dump'] = $params['dir_tmp'];
         $params['dir_fic'] = $params['dir_dump'];
-        $params['new_database_name'] = Tools::cleanString($new_name_database);
+        $params['new_database_name'] = Tools::cleanString($new_name_database, true);
 
         $params = $this->selectOne($params['connexions'], $response['fields_connexion'], $io, $response['name_connexion'], $params);
 
