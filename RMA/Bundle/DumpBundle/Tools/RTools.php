@@ -76,6 +76,15 @@ class RTools {
     }
     
     /**
+     * Permet de vérifier si le fichier de synchronisation est disponible
+     * @return boolean
+     */
+    public function rmaTryToAccessDumpIni()
+    {
+        return $this->_syncdump->tryToAcessDumpIni($this->_params['dir_dump']);
+    }
+    
+    /**
      * Synchronise le fichier de sauvegarde selon les dumps encore présents dans le répertoire
      */
     public function rmaSyncRep()

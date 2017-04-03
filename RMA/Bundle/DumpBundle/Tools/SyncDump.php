@@ -25,8 +25,13 @@ class SyncDump implements SyncDumpInterface {
         $content = $this->recupData($dir_rep);  
         $count_initial = count($content);
        
-        // On récupère tous les répertoires de  dump dans le répertoire envoyé en paramètre
-        $contenu_content_rep = array_values(array_diff(scandir($dir_rep), array('..', '.', self::NAME_DUMP)));
+        if (file_exists($dir_rep)){
+             // On récupère tous les répertoires de  dump dans le répertoire envoyé en paramètre
+            $contenu_content_rep = array_values(array_diff(scandir($dir_rep), array('..', '.', self::NAME_DUMP)));
+        } 
+        else {
+           $contenu_content_rep = array();  
+        }
         
         $my_array = array ();       
         foreach ($content as $name_dump => $data_dump)
@@ -157,6 +162,20 @@ class SyncDump implements SyncDumpInterface {
             "supprimes" => $a
         );
         return  $resultats;
+    }
+    
+    /**
+     * Permet de savoir si nous pouvons synchroniser le répertoire envoyé en paramètre
+     * @param string $path
+     * @return boolean
+     */
+    public function tryToAcessDumpIni($path){
+        if (file_exists(Tools::formatDirWithFile($path, self::NAME_DUMP))){
+            return true;
+        } 
+        else {
+            return false;
+        }
     }
    
 }
