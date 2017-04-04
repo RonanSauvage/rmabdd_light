@@ -20,7 +20,7 @@ class Tools implements ToolsInterface{
        // On vérifie si l'utilisateur a saisi un slash de fin du chemin
         if (substr($path, -1) != "/" && substr($path, -1) != "\\" )
         {
-            $path .= DIRECTORY_SEPARATOR;
+            $path .= '/';
         }
         return $path . $fichier;
     }
@@ -104,7 +104,7 @@ class Tools implements ToolsInterface{
      * @return array $r
      * @throws \Exception
      */
-    public function scanDirectory($Directory)
+    public function scanDirectory($Directory, array $excludes = array())
     {
         $ritit = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($Directory), \RecursiveIteratorIterator::CHILD_FIRST); 
         $r = array(); 
@@ -121,7 +121,7 @@ class Tools implements ToolsInterface{
            } 
            $r = array_merge_recursive($r, $path); 
         } 
-
+        
         return $r;
     }  
     
@@ -139,4 +139,3 @@ class Tools implements ToolsInterface{
         return array_values($dirs);
     }
 }
-
