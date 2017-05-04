@@ -103,7 +103,7 @@ class DumpCommand extends CommonCommand {
             'ftp_timeout'   => 'Veuillez renseigner le timeout du ftp utilisé : ',
             'ftp_path'      => 'Veuillez renseigner le path du ftp utilisé : '
         );
-        
+
         // Si l'utilisateur souhaité pouvoir saisir directement en ligne de commande ses identifiants
         if ($input->getOption('i')) {
             $params = $this->rmaAskQuestions($input, $params, $parametres, $io); 
@@ -112,9 +112,9 @@ class DumpCommand extends CommonCommand {
             }
         }
         else {
-            $params = $this->selectOne($params['connexions'], $response['fields_connexion'], $io, $response['name_connexion'], $params);
+            $params = $this->selectOne($params['connexions'], $response['fields_connexion'], $io, $response['name_connexion'], self::INDEX_CONNEXION_DB, $params);
             if($input->getOption('ftp')){
-                $params = $this->selectOne($params['ftps'], $response['fields_ftp'], $io, $response['name_ftp'], $params);            
+                $params = $this->selectOne($params['ftps'], $response['fields_ftp'], $io, $response['name_ftp'], self::INDEX_CONNEXION_FTP, $params);            
             }
         }
      

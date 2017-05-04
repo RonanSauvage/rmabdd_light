@@ -18,6 +18,7 @@ class Rftp implements FtpInterface {
      * @param Array $params
      */
     public function __construct(Array $params){
+        // todo revoir le chargement des paramètres
         if(isset($params['ftp_ip']) && isset($params['ftp_path']) && isset($params['ftp_port']) && isset($params['ftp_timeout']) 
                 && isset($params['repertoire_name']) && isset($params['extension']) && isset($params['dir_fic']) 
                 && isset($params['ftp_username']) && isset($params['ftp_password'])){
@@ -30,12 +31,12 @@ class Rftp implements FtpInterface {
         }
         else {
             $default_value = self::getFields();
-            $this->ftp_connect = ftp_connect($default_value['ftp_ip'], $default_value['ftp_port'], $default_value['ftp_timeout']);
-            $this->_path = $default_value['ftp_path'];
+            $this->ftp_connect = ftp_connect($default_value['ip'], $default_value['port'], $default_value['timeout']);
+            $this->_path = $default_value['path'];
             $this->_fichier = 'defaut_path';
             $this->_dir_fichier = 'file.txt';
-            $this->_username = $default_value['ftp_username'];
-            $this->_password = $default_value['ftp_password'];
+            $this->_username = $default_value['username'];
+            $this->_password = $default_value['password'];
         }
     }
     
@@ -72,12 +73,12 @@ class Rftp implements FtpInterface {
     {
         $fields = array(
             'name_ftp'      => 'nameFTP',
-            'ftp_ip'        => '127.0.0.1',
-            'ftp_port'      => 21,
-            'ftp_timeout'   => 90,
-            'ftp_path'      => '/home/rma/dump',
-            'ftp_username'  => 'ftpUsername',
-            'ftp_password'  => 'ftpPassword',
+            'ip'        => '127.0.0.1',
+            'port'      => 21,
+            'timeout'   => 90,
+            'path'      => '/home/rma/dump',
+            'username'  => 'ftpUsername',
+            'password'  => 'ftpPassword',
         );
         
         return $fields;

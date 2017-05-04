@@ -34,11 +34,11 @@ class InspectFtpParamsCommand extends CommonCommand {
 
         $rows = array();
         $ftp_array = array ();
-        foreach ($params['ftps'] as $ftp)
+        foreach ($params['ftps'] as $name =>$ftp)
         {             
             $ftp_array = array(
-                $ftp['name_ftp'], $ftp['ftp_ip'], $ftp['ftp_port'], $ftp['ftp_timeout'], $ftp['ftp_path'], 
-                $ftp['ftp_username'], $ftp['ftp_password'] 
+                $name, $ftp['ip'], $ftp['port'], $ftp['timeout'], $ftp['path'], 
+                $ftp['username'], $ftp['password'] 
             );
             array_push($rows, $ftp_array);
         }

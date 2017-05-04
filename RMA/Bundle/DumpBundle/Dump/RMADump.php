@@ -89,7 +89,7 @@ class RMADump {
     public function rmaDumpGetListDatabases()
     {
         $databases = $this->_connexiondb->getListDatabases();
-        return $this->_dump->unsetDataTablesExclude($databases, $this->_params['excludes']);
+        return $this->_dump->unsetDataTablesExclude($databases, $this->_params['connexion_db']['excludes']);
     }
     
     /**

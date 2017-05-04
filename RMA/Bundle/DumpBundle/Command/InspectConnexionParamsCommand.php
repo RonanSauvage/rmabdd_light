@@ -29,7 +29,7 @@ class InspectConnexionParamsCommand extends CommonCommand {
         $io->title('Description des connexions à partir des paramètres définis : ');
 
         $headers = array (
-            'Nom de la connexion', 'Host', 'Driver', 'Username', 'Password', 'Port', 'Excludes'
+            'Nom de la connexion', 'Host', 'Driver', 'Username', 'Password', 'Port'
         );
         
         $rows = array();
@@ -43,8 +43,7 @@ class InspectConnexionParamsCommand extends CommonCommand {
                 $connexion->getDriver(),
                 $connexion->getUsername(),
                 $connexion->getPassword(),
-                $connexion->getPort(),
-                implode(',', $connexion->getExcludes())
+                $connexion->getPort()
             );
             array_push($rows, $connexion_array);
         }

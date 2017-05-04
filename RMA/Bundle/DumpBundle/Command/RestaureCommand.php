@@ -11,6 +11,7 @@ use RMA\Bundle\DumpBundle\Command\CommonCommand;
 use RMA\Bundle\DumpBundle\Tools\Tools;
 use RMA\Bundle\DumpBundle\Factory\RDumpFactory;
 use RMA\Bundle\DumpBundle\ConnexionDB\ConnexionDB;
+use RMA\Bundle\DumpBundle\Tools\SyncDump;
 
 class RestaureCommand extends CommonCommand {
     
@@ -116,17 +117,21 @@ class RestaureCommand extends CommonCommand {
             }
             
             while (is_array($dumps)){
-                $resuls = array();
+                $results = array();
                 foreach ($dumps as $dump => $value){
                     // Si c'est à nouveau un folder
                     if (is_array($value)){
-                        array_push($resuls, $dump);
+                        array_push($results, $dump);
                     }
                     else {
-                        array_push($resuls, $value);
+                        // On enlève le nom du fichier de synchronisation 
+                        if ($value == SyncDump::NAME_DUMP){
+                            continue;
+                        }
+                        array_push($results, $value);
                     }
                 }
-                $choice = $io->choice("Quel script voulez-vous executer ou dans quel répertoire souhaitez-vous vous rendre ?" , $resuls);
+                $choice = $io->choice("Quel script voulez-vous executer ou dans quel répertoire souhaitez-vous vous rendre ?" , $results);
                 $dir = $dir . DIRECTORY_SEPARATOR . $choice;
                 if (is_dir($dir)){
                     $dumps = $tools->scanDirectory($dir);

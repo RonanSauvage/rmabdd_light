@@ -12,6 +12,9 @@ use RMA\Bundle\DumpBundle\Tools\Tools;
 
 class CommonCommand extends ContainerAwareCommand {
     
+    const INDEX_CONNEXION_FTP = 'connexion_ftp';
+    const INDEX_CONNEXION_DB = 'connexion_db';
+    
     protected function configure() {
       
         $this->setName('rma:dump:help');
@@ -123,7 +126,7 @@ class CommonCommand extends ContainerAwareCommand {
             $load = 'load'.$object;
             $params = $this->$load($params, $fields_object);
         }
-        
+
         return $this->loadOptions($input, $params);
     }
     
@@ -221,9 +224,9 @@ class CommonCommand extends ContainerAwareCommand {
         if ($container->hasParameter($object_name_with_prefix)){
             $arrays_params_for_object = $container->getParameter($object_name_with_prefix);
             if(is_array($arrays_params_for_object)){
-                foreach ($arrays_params_for_object as $array_params_for_object){
+                foreach ($arrays_params_for_object as $name => $array_params_for_object){
                     foreach ($array_params_for_object as $key => $value){
-                        $results[$array_params_for_object['rma_name_'. substr($object_name, 0, -1)]][substr($key,4)] = $value;        
+                        $results[$name][$key] = $value;        
                     }
                 
                     // On vérifie s'il manque des paramètres par rapport aux obligatoires
@@ -231,7 +234,7 @@ class CommonCommand extends ContainerAwareCommand {
             
                     // Pour tous les paramètres manquants on définit la valeur par défaut  
                     foreach($params_missing as $param_missing => $value){
-                            $results[$array_params_for_object['rma_name_'. substr($object_name, 0, -1)]][$param_missing] = $fields[$param_missing]; 
+                            $results[$name][$param_missing] = $fields[$param_missing]; 
                     }
                 }
             } 
@@ -280,10 +283,11 @@ class CommonCommand extends ContainerAwareCommand {
     * @param array $fields
     * @param SymfonyStyle $io
     * @param string $name
+    * @param string $index_array
     * @param array $params
     * @return array $params
     */
-    public function selectOne(array $choices, array $fields, SymfonyStyle $io, $name, array $params){
+    public function selectOne(array $choices, array $fields, SymfonyStyle $io, $name, $index_array, array $params){
         if(count($choices) == 0){
             Throw new \Exception ('Vous devez définir au moins une configuration pour ' . $name);
         }
@@ -293,10 +297,10 @@ class CommonCommand extends ContainerAwareCommand {
             $choiceSelected = $choices[$choice[0]];
             foreach ($fields as $field => $default){
                 if(isset($choiceSelected[$field])){
-                    $params[$field] = $choiceSelected[$field];
+                    $params[$index_array][$field] = $choiceSelected[$field];
                 }
                 else {
-                    $params[$field] = $choiceSelected[$field][$default];
+                    $params[$index_array][$field] = $choiceSelected[$field][$default];
                 }  
             }
         }
@@ -305,25 +309,26 @@ class CommonCommand extends ContainerAwareCommand {
             $array_keys =  array_keys($choices);
             foreach ($fields as $field => $value){
                  if(isset($choices[$array_keys[0]][$field]) || is_null($choices[$array_keys[0]][$field])){
-                    $params[$field] = $choices[$array_keys[0]][$field];
+                    $params[$index_array][$field] = $choices[$array_keys[0]][$field];
                  }  
                  else {
-                    $params[$field] = $value;
+                    $params[$index_array][$field] = $value;
                  }            
             }
         }
+
         return $params;
     }
 
     /**
-    * Permet de comparer les keys de deux chaînes en appliquant un traitement sur les key de la deuxième chaînes
+    * Permet de comparer les deux chaines
+    * Retourne false si la clé n'existe pas par exemple
     * @param : string $key1
     * @param : string $key2
     * @return : -1 si différent 0 si similaire
     */
     public static function compareKeys($key1, $key2){
-        $keyAfterTreatment = substr($key2, 4);
-        if ($keyAfterTreatment != $key1){
+        if ($key2 != $key1){
             return -1;
         }
         return 0;

@@ -34,9 +34,19 @@ class ConnexionDB implements ConnexionDBInterface
     private $host;
     
     /**
-     * 
+     * @var string
      */
     private $driver;
+
+    /**
+     * @var string
+     */
+    private $name;
+
+    /**
+     * @var array
+     */
+    private $excludes;
     
     /**
      * Construct pour la classe ConnexionDB
@@ -44,11 +54,13 @@ class ConnexionDB implements ConnexionDBInterface
      */
     public function __construct(Array $params)
     {
-        $this->host = $params['host'];
-        $this->port = $params['port'];
-        $this->username = $params['user'];
-        $this->password = $params['password'];
-        $this->driver = $params['driver'];
+        $paramsDB = $params['connexion_db'];
+        $this->host = $paramsDB['host'];
+        $this->port = $paramsDB['port'];
+        $this->username = $paramsDB['user'];
+        $this->password = $paramsDB['password'];
+        $this->driver = $paramsDB['driver'];
+        $this->excludes = $paramsDB['excludes'];
     }
     
     public function getUsername(){
@@ -57,6 +69,49 @@ class ConnexionDB implements ConnexionDBInterface
     
     public function getPassword(){
         return $this->password;
+    }
+
+    /**
+     * @param string $name
+     */
+    public function setName($name){
+        $this->name = $name;
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getName(){
+        return $this->name;
+    }
+
+    /**
+     * @return string
+     */
+    public function getHost(){
+        return $this->host;
+    }
+
+    /**
+     * @return string
+     */
+    public function getDriver(){
+        return $this->driver;
+    }
+
+    /**
+     * @return string
+     */
+    public function getPort(){
+        return $this->port;
+    }
+
+    /**
+     * @return array
+     */
+    public function getExcludes(){
+        return $this->excludes;
     }
     
     /**

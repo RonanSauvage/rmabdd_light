@@ -142,9 +142,21 @@ Pour vous aider dans la définition de vos configurations, vous avez accès à d
 Retourne un tableau avec les différentes connexions chargées et les paramètres correspondants
 
 ### Configuration dump et export : 
+ _ Nouveautés v0.6 _  Vous pouvez définir en index de vos connexions le nom de votre connexion
+ ATTENTION ! Les clés de parameters ont changées ! Il n'est plus nécessaire de prefixer les keys
     - rma_connexions:
-        - { rma_name_connexion: Centos 6.7, rma_driver: pdo_mysql, rma_host: 192.154.125.154, rma_port: 3306, rma_user: ronan-user, rma_password: passwordInconnu, rma_exclude: [mysql_schema, performance_schema]}
-        - { rma_name_connexion: Localhost, rma_driver: pdo_mysql, rma_host: localhost, rma_port: 3306, rma_user: root, rma_password: none  }     
+        localhost: 
+           driver: pdo_mysql
+           host: 192.154.125.154
+           port: 3306, 
+           user: ronan-user 
+           password: passwordInconnu 
+        Integration: 
+            driver: pdo_mysql
+            user: testt
+            password: toto
+            port: 33009
+            host: 192.168.104.2     
     - rma_nb_jour:                  5
     - rma_nombre_dump:              10
     - rma_dir_dump:                 %kernel.root_dir%/../../rmabundle/dump
