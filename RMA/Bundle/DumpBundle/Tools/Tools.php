@@ -104,7 +104,7 @@ class Tools implements ToolsInterface{
      * @return array $r
      * @throws \Exception
      */
-    public function scanDirectory($Directory, array $excludes = array())
+    public function scanDirectory($Directory)
     {
         $ritit = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($Directory), \RecursiveIteratorIterator::CHILD_FIRST); 
         $r = array(); 
@@ -121,7 +121,7 @@ class Tools implements ToolsInterface{
            } 
            $r = array_merge_recursive($r, $path); 
         } 
-        
+
         return $r;
     }  
     
@@ -139,3 +139,4 @@ class Tools implements ToolsInterface{
         return array_values($dirs);
     }
 }
+
