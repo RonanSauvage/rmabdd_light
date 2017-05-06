@@ -24,13 +24,13 @@ Ensuite, vous pouvez lancer composer update afin configurer votre bundle.
 
 ## Dépendances
     "php": ">=5.6",
-    "symfony/symfony": ">=2.8.6|<3.0",
-    "doctrine/orm": "^2.4.8",
+    "symfony/symfony": ">=2.8.6|^3.2",
+    "doctrine/orm": "^2.4",
     "doctrine/doctrine-bundle": "~1.4",
     "symfony/monolog-bundle": "~2.4",
     "sensio/distribution-bundle": ">=3.0|<=5.0.5",
     "incenteev/composer-parameter-handler": "~2.0",
-    "ifsnop/mysqldump-php" : "~2.1"
+    "ifsnop/mysqldump-php" : "~2.2"
 
 ## Les commandes :
 
@@ -117,8 +117,9 @@ Pour voir les commandes mises à votre disposition rendez-vous à la racine et �
             --keep_tmp ; laisse la basededonnées temporaire créée pour la migration sur le serveur database
             --name_database_temp ; permet de donner un nom custom à la database créée pour l'export (ce nom ne doit pas être porté par une database déjà existante sur le serveur)
             --ftp  ; permet d'envoyer l'export en FTP selon les paramètres définis dans parameters.yml pour rma_ftp
-
-    > rma:restaure:database ---- (alias [restaure]) Permet de restaurer une base à partir d'un script SQL
+        
+/!\ le nom de la commande a été modifiée en ^0.6 pour adopter l'orthographe anglais
+    > rma:restore:database ---- (alias [restore]) Permet de restaurer une base à partir d'un script SQL
         Options : 
             --new_database_name ; le nom à donner à la base de données restaurée - Obligatoire
             --script_sql ; le nom du fichier (.sql) à importer - Optionnel
@@ -185,10 +186,21 @@ Vous pouvez définir votre connexion à partir des informations suivantes :
 
 
 ### Configuration FTP des dump 
+_ Nouveautés v0.6 _  Vous pouvez définir en index de vos connexions FTP le nom de votre connexion
+ ATTENTION ! Les clés de parameters ont changées ! Il n'est plus nécessaire de prefixer les keys
     - rma_ftp:  no ; {yes|no} 
     - rma_ftps:
-        - { rma_name_ftp: Serveur 1, rma_ftp_ip: 127.0.0.1, rma_ftp_username: rma, rma_ftp_password: password, rma_ftp_port: 21, rma_ftp_timeout: 120}
-        - { rma_name_ftp: Intégration, rma_ftp_ip: 127.0.0.12, rma_ftp_username: root, rma_ftp_password: secret, rma_ftp_path: /home/root/dump}     
+        prod: 
+            ftp_ip: 127.0.0.1
+            ftp_username: rma
+            ftp_password: password
+            ftp_port: 21
+            ftp_timeout: 120
+        integration
+            ftp_ip: 127.0.0.12
+            ftp_username: root
+            ftp_password: secret
+            ftp_path: /home/root/dump  
 
 ### Configuration compression des dump 
     - rma_compress:                 gzip ; {none|gzip}

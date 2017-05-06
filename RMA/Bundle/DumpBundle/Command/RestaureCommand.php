@@ -17,11 +17,11 @@ class RestaureCommand extends CommonCommand {
     
     protected function configure() {
       
-        $this->setName('rma:restaure:database')
+        $this->setName('rma:restore:database')
             ->setDescription('Permet de restaurer une base de données.')
             ->addOption('new_database_name', null, InputOption::VALUE_REQUIRED, 'Permet de spécifier un nom pour la base de données')
             ->addOption('script_sql', null, InputOption::VALUE_REQUIRED, "Désigne le path d'accès au script SQL à restaurer")
-            ->setAliases(['restaure']);       
+            ->setAliases(['restore']);       
     }
     
     protected function execute(InputInterface $input, OutputInterface $output) 

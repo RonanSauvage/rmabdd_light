@@ -18,10 +18,10 @@ class ExportCommand extends CommonCommand {
       
         $this->setName('rma:dump:export')
             ->setDescription("Permet de réaliser un export d'une base de données.")
-            ->addOption('script', null, InputOption::VALUE_OPTIONAL, "Le script a appliquer sur le fichier pour l'export")
-            ->addOption('repertoire_name', null, InputOption::VALUE_OPTIONAL, "Permet de donner un nom custom à l'export")
+            ->addOption('script', null, InputOption::VALUE_REQUIRED, "Le script a appliquer sur le fichier pour l'export")
+            ->addOption('repertoire_name', null, InputOption::VALUE_REQUIRED, "Permet de donner un nom custom à l'export")
             ->addOption('keep_tmp', null, InputOption::VALUE_NONE, "Permet de ne pas effacer la base de données temporaire créée")
-            ->addOption('name_database_temp', null, InputOption::VALUE_OPTIONAL, "Permet de ne pas effacer la base de données temporaire créée")
+            ->addOption('name_database_temp', null, InputOption::VALUE_REQUIRED, "Permet de ne pas effacer la base de données temporaire créée")
             ->addOption('ftp', null, InputOption::VALUE_NONE, "Permet d'envoyer l'export en FTP selon les parmaètres définis")
             ->setAliases(['export']);       
     }

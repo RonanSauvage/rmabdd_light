@@ -73,7 +73,7 @@ class CommonCommand extends ContainerAwareCommand {
                 '-',
                 '-'
            ),
-           array ('rma:restaure:database alias restaure', 
+           array ('rma:restore:database alias restore', 
                 "Cette commande permet de restaurer une base de données à partir d'un script SQL",
                 '--new_database_name, --script_sql',
                 '-'
