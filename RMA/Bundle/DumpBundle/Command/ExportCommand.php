@@ -114,14 +114,14 @@ class ExportCommand extends CommonCommand {
             $params['name_database_temp'] = Tools::cleanString($input->getOption('name_database_temp'));
         }
 
-        $params = $this->selectOne($params['connexions'], $response['fields_connexion'], $io, $response['name_connexion'], $params);
+        $params = $this->selectOne($params['connexions'], $response['fields_connexion'], $io, $response['name_connexion'], self::INDEX_CONNEXION_DB, $params);
 
         // On surcharge le paramètre rma_ftp défini pour les dump selon que l'option était été envoyée ou non
         if ($input->getOption('ftp'))
         {
             $params['ftp'] = 'yes';
             $params['extension'] = '.sql';
-            $params = $this->selectOne($params['ftps'], $response['fields_ftp'], $io, $response['name_ftp'], $params);
+            $params = $this->selectOne($params['ftps'], $response['fields_ftp'], $io, $response['name_ftp'], self::INDEX_CONNEXION_FTP, $params);
         }
         else {
             $params['ftp'] = 'no';

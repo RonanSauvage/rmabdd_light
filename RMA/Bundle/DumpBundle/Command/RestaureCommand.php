@@ -21,6 +21,7 @@ class RestaureCommand extends CommonCommand {
             ->setDescription('Permet de restaurer une base de données.')
             ->addOption('new_database_name', null, InputOption::VALUE_REQUIRED, 'Permet de spécifier un nom pour la base de données')
             ->addOption('script_sql', null, InputOption::VALUE_REQUIRED, "Désigne le path d'accès au script SQL à restaurer")
+            ->addOption('replace', null, InputOption::VALUE_NONE, "Permet de définir que nous allons remplacer une base existante")
             ->setAliases(['restore']);       
     }
     
@@ -31,14 +32,23 @@ class RestaureCommand extends CommonCommand {
         // On charge l'array params avec les options / parameters
         $params = $this->hydrateCommand($input, $io); 
         $rmaRestaureManager = $this->getContainer()->get('rma.restaure.manager');
+        $databaseManager = $this->getContainer()->get('rma.database.manager');
         
         // On charge l'objet dump pour gérer toutes les fonctionnalités 
         $dump = RDumpFactory::create($params);
+        $connexionDB = new ConnexionDB($params);
         
         $databases = $dump->rmaDumpGetListDatabases();
+        $replace = false;
 
+        // Si l'utilisateur a spécifié l'option replace alors on ne gère pas d'unicité de nouveau nom de base
+        if ($input->getOption('replace'))
+        {
+            // On garde l'information de procéder à sa suppression une fois le load des params fini
+            $replace = true ;
+        }
         // On vérifie qu'il n'existe pas déjà une base de données avec ce nom
-        if(in_array(strtolower($params['new_database_name']), $databases)){
+        else if(in_array(strtolower($params['new_database_name']), $databases)){
            throw new \Exception ('Il existe déjà une base de données avec le nom ' . $params['new_database_name']);
         }
         
@@ -47,9 +57,12 @@ class RestaureCommand extends CommonCommand {
         // On vérifie que le fichier de script est disponible
         if(!file_exists($params['script_sql'])){
             throw new \Exception ('Le fichier de restauration est introuvable : ' . $params['script_sql']); 
-        }
+        }   
         
-        $connexionDB = new ConnexionDB($params);
+        // On attend la dernière exécution pour supprimer la base de données si nécessaire
+        if($remplace){
+            $databaseManager->deleteOneDatabase($connexionDB, $params['new_database_name']);
+        }
  
         $io->title('Lancement de la restauration de la base. Le nom de la base sera : ' . $params['new_database_name']);
         $rmaRestaureManager->restaureOneDatabase($connexionDB, $params['new_database_name'], $params['script_sql']);
@@ -84,7 +97,7 @@ class RestaureCommand extends CommonCommand {
         $params['dir_fic'] = $params['dir_dump'];
         $params['new_database_name'] = Tools::cleanString($new_name_database, true);
 
-        $params = $this->selectOne($params['connexions'], $response['fields_connexion'], $io, $response['name_connexion'], $params);
+        $params = $this->selectOne($params['connexions'], $response['fields_connexion'], $io, $response['name_connexion'], self::INDEX_CONNEXION_DB, $params);
 
         return $params;
     }

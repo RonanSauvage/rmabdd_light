@@ -121,8 +121,9 @@ Pour voir les commandes mises à votre disposition rendez-vous à la racine et �
 /!\ le nom de la commande a été modifiée en ^0.6 pour adopter l'orthographe anglais
     > rma:restore:database ---- (alias [restore]) Permet de restaurer une base à partir d'un script SQL
         Options : 
-            --new_database_name ; le nom à donner à la base de données restaurée - Obligatoire
+            --new_database_name ; le nom à donner à la base de données restaurée - Optionnel
             --script_sql ; le nom du fichier (.sql) à importer - Optionnel
+            --replace ; permet de définir que vous acceptez de remplacer une base de données déjà existante 
 
 ## Définition des configurations 
 
