@@ -1,5 +1,4 @@
-services:   
-       
+services:    
     rma.database.manager:
         class: RMA\Bundle\DumpBundle\Tools\DatabaseManager
         arguments : ["@logger"]
@@ -23,7 +22,8 @@ services:
         arguments: ["@logger"]
         tags:
             - { name: monolog.logger, channel: rma_bdd }
-            
+                    
     rma.tools:
         class: RMA\Bundle\DumpBundle\Tools\Tools
         
+

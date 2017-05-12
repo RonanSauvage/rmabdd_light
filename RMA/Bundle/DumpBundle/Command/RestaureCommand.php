@@ -11,6 +11,7 @@ use RMA\Bundle\DumpBundle\Command\CommonCommand;
 use RMA\Bundle\DumpBundle\Tools\Tools;
 use RMA\Bundle\DumpBundle\Factory\RDumpFactory;
 use RMA\Bundle\DumpBundle\ConnexionDB\ConnexionDB;
+use RMA\Bundle\DumpBundle\Tools\SyncDump;
 
 class RestaureCommand extends CommonCommand {
     
@@ -20,6 +21,7 @@ class RestaureCommand extends CommonCommand {
             ->setDescription('Permet de restaurer une base de données.')
             ->addOption('new_database_name', null, InputOption::VALUE_REQUIRED, 'Permet de spécifier un nom pour la base de données')
             ->addOption('script_sql', null, InputOption::VALUE_REQUIRED, "Désigne le path d'accès au script SQL à restaurer")
+            ->addOption('replace', null, InputOption::VALUE_NONE, "Permet de définir que nous allons remplacer une base existante")
             ->setAliases(['restaure']);       
     }
     
@@ -32,12 +34,21 @@ class RestaureCommand extends CommonCommand {
         $rmaRestaureManager = $this->getContainer()->get('rma.restaure.manager');
         
         // On charge l'objet dump pour gérer toutes les fonctionnalités 
-        $dump = RDumpFactory::create($params);
+        $dump = RDumpFactory::create($params);       
+        $connexionDB = new ConnexionDB($params);
         
         $databases = $dump->rmaDumpGetListDatabases();
 
-        // On vérifie qu'il n'existe pas déjà une base de données avec ce nom
-        if(in_array(strtolower($params['new_database_name']), $databases)){
+                $replace = false;
+
+        // Si l'utilisateur a spécifié l'option replace alors on ne gère pas d'unicité de nouveau nom de base
+        if ($input->getOption('replace'))
+        {
+            $io->warning("Attention vous vous apprétez à remplacer une base de données potentiellement déjà existante. A ne pas utiliser en prod /!\ ");
+            // On garde l'information de procéder à sa suppression une fois le load des params fini
+            $replace = true ;
+        }
+        else if(in_array(strtolower($params['new_database_name']), $databases)){
            throw new \Exception ('Il existe déjà une base de données avec le nom ' . $params['new_database_name']);
         }
         
@@ -47,9 +58,14 @@ class RestaureCommand extends CommonCommand {
         if(!file_exists($params['script_sql'])){
             throw new \Exception ('Le fichier de restauration est introuvable : ' . $params['script_sql']); 
         }
-        
-        $connexionDB = new ConnexionDB($params);
+
  
+        // On attend la dernière exécution pour supprimer la base de données si nécessaire
+        if($replace){
+            $databaseManager = $this->getContainer()->get('rma.database.manager');
+            $databaseManager->deleteOneDatabase($connexionDB, $params['new_database_name']);
+        }
+
         $io->title('Lancement de la restauration de la base. Le nom de la base sera : ' . $params['new_database_name']);
         $rmaRestaureManager->restaureOneDatabase($connexionDB, $params['new_database_name'], $params['script_sql']);
         $io->success("La base de données a été correctement restaurée : " . $params['new_database_name']);    
@@ -116,17 +132,21 @@ class RestaureCommand extends CommonCommand {
             }
             
             while (is_array($dumps)){
-                $resuls = array();
+                $results = array();
                 foreach ($dumps as $dump => $value){
                     // Si c'est à nouveau un folder
                     if (is_array($value)){
-                        array_push($resuls, $dump);
+                        array_push($results, $dump);
                     }
                     else {
-                        array_push($resuls, $value);
+                        // On enlève le nom du fichier de synchronisation 
+                        if ($value == SyncDump::NAME_DUMP){
+                            continue;
+                        }
+                        array_push($results, $value);
                     }
                 }
-                $choice = $io->choice("Quel script voulez-vous executer ou dans quel répertoire souhaitez-vous vous rendre ?" , $resuls);
+                $choice = $io->choice("Quel script voulez-vous executer ou dans quel répertoire souhaitez-vous vous rendre ?" , $results);
                 $dir = $dir . DIRECTORY_SEPARATOR . $choice;
                 if (is_dir($dir)){
                     $dumps = $tools->scanDirectory($dir);
