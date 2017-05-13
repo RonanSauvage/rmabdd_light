@@ -19,6 +19,8 @@ Class DumpCommandTest extends KernelTestCase
     public function testExecute()
     {
         $kernel = $this->createKernel();
+        $kernel = $this->getMockKernel();
+        var_dump($kernel);
         $kernel->boot();
 
         $app = new Application($kernel);

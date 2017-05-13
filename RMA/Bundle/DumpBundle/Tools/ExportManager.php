@@ -67,10 +67,9 @@ class ExportManager implements ExportManagerInterface {
                 // On exécute l'import 
                 try {
                     $pdo->query($op_data);
-                    $this->logger->notice('Requête importée : ' . $op_data);
                     $op_data = '';
                 } catch (\Exception $ex) {
-                    $this->logger->notice('Error lors de la requête : ' . $ex->getMessage());
+                    $this->logger->error('Error lors de la requête : ' . $ex->getMessage());
                     throw new \Exception ($ex);
                 }  
             }

@@ -65,7 +65,7 @@ class CronDumpCommand extends CommonCommand {
             throw new \Exception("Vous devez définir une connexion custom ou insérer dans votre parameters les paramètres de Doctrine");
         }
         
-        $params = $this->selectOne($params['connexions'], $response['fields_connexion'], $io, $response['name_connexion'], $params);
+        $params = $this->selectOne($params['connexions'], $response['fields_connexion'], $io, $response['name_connexion'], self::INDEX_CONNEXION_DB, $params);
         
         if (isset($params['password']) && $params['password'] == 'none')
         {
