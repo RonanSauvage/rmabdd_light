@@ -18,7 +18,6 @@ class Rftp implements FtpInterface {
      * @param Array $params
      */
     public function __construct(Array $params){
-        // todo revoir le chargement des paramètres
         if(isset($params['ftp_ip']) && isset($params['ftp_path']) && isset($params['ftp_port']) && isset($params['ftp_timeout']) 
                 && isset($params['repertoire_name']) && isset($params['extension']) && isset($params['dir_fic']) 
                 && isset($params['ftp_username']) && isset($params['ftp_password'])){

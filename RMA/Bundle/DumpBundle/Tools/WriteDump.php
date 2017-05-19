@@ -105,6 +105,5 @@ class WriteDump implements WriteDumpInterface {
         $path_file = Tools::formatDirWithFile($path_dir, self::NAME_DUMP);
  
         $this->putInitFile($path_file, $infos);
-    }
-    
+    } 
 }

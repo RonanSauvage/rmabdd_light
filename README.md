@@ -118,8 +118,8 @@ Pour voir les commandes mises à votre disposition rendez-vous à la racine et �
             --name_database_temp ; permet de donner un nom custom à la database créée pour l'export (ce nom ne doit pas être porté par une database déjà existante sur le serveur)
             --ftp  ; permet d'envoyer l'export en FTP selon les paramètres définis dans parameters.yml pour rma_ftp
         
-/!\ le nom de la commande a été modifiée en ^0.6 pour adopter l'orthographe anglais
     > rma:restore:database ---- (alias [restore]) Permet de restaurer une base à partir d'un script SQL
+        /!\ le nom de la commande a été modifiée en ^0.6 pour adopter l'orthographe anglais
         Options : 
             --new_database_name ; le nom à donner à la base de données restaurée - Optionnel
             --script_sql ; le nom du fichier (.sql) à importer - Optionnel
@@ -131,6 +131,7 @@ Par défaut, *les paramètres définis pour doctrine* seront pris pour effectuer
 
 *Nouveauté 0.5* : 
         ** Vous pouvez désormais définir plusieurs configurations de connexion.
+
         ** Vous pouvez désormais définir plusieurs configurations FTP.
 
 Si vous souhaitez modifier les configurations, vous avez accès aux paramètres suivants à mettre directement dans vos parameters.
@@ -144,13 +145,14 @@ Pour vous aider dans la définition de vos configurations, vous avez accès à d
 Retourne un tableau avec les différentes connexions chargées et les paramètres correspondants
 
 ### Configuration dump et export : 
- _ Nouveautés v0.6 _  Vous pouvez définir en index de vos connexions le nom de votre connexion
+ *Nouveautés v0.6*  Vous pouvez définir en index de vos connexions le nom de votre connexion
  ATTENTION ! Les clés de parameters ont changées ! Il n'est plus nécessaire de prefixer les keys
-    - rma_connexions:
+   
+> - rma_connexions:
         localhost: 
            driver: pdo_mysql
            host: 192.154.125.154
-           port: 3306, 
+           port: 3306
            user: ronan-user 
            password: passwordInconnu 
         Integration: 
@@ -187,9 +189,10 @@ Vous pouvez définir votre connexion à partir des informations suivantes :
 
 
 ### Configuration FTP des dump 
-_ Nouveautés v0.6 _  Vous pouvez définir en index de vos connexions FTP le nom de votre connexion
+*Nouveautés v0.6*  Vous pouvez définir en index de vos connexions FTP le nom de votre connexion
  ATTENTION ! Les clés de parameters ont changées ! Il n'est plus nécessaire de prefixer les keys
-    - rma_ftp:  no ; {yes|no} 
+
+>   - rma_ftp:  no ; {yes|no} 
     - rma_ftps:
         prod: 
             ftp_ip: 127.0.0.1
@@ -204,7 +207,8 @@ _ Nouveautés v0.6 _  Vous pouvez définir en index de vos connexions FTP le nom
             ftp_path: /home/root/dump  
 
 ### Configuration compression des dump 
-    - rma_compress:                 gzip ; {none|gzip}
+ 
+>   - rma_compress:                 gzip ; {none|gzip}
     - rma_zip:                      no ; {yes|no} 
     - rma_dir_zip:                  %kernel.root_dir%/../web/zip
 

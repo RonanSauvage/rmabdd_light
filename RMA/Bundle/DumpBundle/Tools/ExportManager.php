@@ -55,25 +55,30 @@ class ExportManager implements ExportManagerInterface {
     public function launchScriptSQL($fic_script_sql, \PDO $pdo){
         $op_data = '';
         $lines = file($fic_script_sql);
-        foreach ($lines as $line)
-        {
-            if (substr($line, 0, 2) == '--' || $line == '')//This IF Remove Comment Inside SQL FILE
+        try {
+            $pdo->beginTransaction();
+            foreach ($lines as $line)
             {
-                continue;
+                if (substr($line, 0, 2) == '--' || $line == '')//This IF Remove Comment Inside SQL FILE
+                {
+                    continue;
+                }
+                $op_data .= $line;
+                if (substr(trim($line), -1, 1) == ';')//Breack Line Upto ';' NEW QUERY
+                {
+                    // On exécute l'import 
+                
+                        $pdo->query($op_data);
+                        $op_data = '';
+                    
+                }
             }
-            $op_data .= $line;
-            if (substr(trim($line), -1, 1) == ';')//Breack Line Upto ';' NEW QUERY
-            {
-                // On exécute l'import 
-                try {
-                    $pdo->query($op_data);
-                    $this->logger->notice('Requête importée : ' . $op_data);
-                    $op_data = '';
-                } catch (\Exception $ex) {
-                    $this->logger->notice('Error lors de la requête : ' . $ex->getMessage());
-                    throw new \Exception ($ex);
-                }  
-            }
+            $pdo->commit();
         }
+        catch (\Exception $ex) {
+            $pdo->rollBack();
+            $this->logger->error('Error lors de la tentative de restauration');
+            throw new \Exception ($ex);
+        }  
     }
 }
