@@ -36,7 +36,7 @@ Ensuite, vous pouvez lancer composer update afin configurer votre bundle.
 
 Pour voir les commandes mises à votre disposition rendez-vous à la racine et écrivez :
     
-> php app/console 
+> php bin/console 
 
 *Les commandes mises à disposition sont préfixées par "rma:"*
     
@@ -130,6 +130,7 @@ Pour voir les commandes mises à votre disposition rendez-vous à la racine et �
 Par défaut, *les paramètres définis pour doctrine* seront pris pour effectuer les dumps.
 
 *Nouveauté 0.5* : 
+
         ** Vous pouvez désormais définir plusieurs configurations de connexion.
 
         ** Vous pouvez désormais définir plusieurs configurations FTP.
@@ -145,10 +146,11 @@ Pour vous aider dans la définition de vos configurations, vous avez accès à d
 Retourne un tableau avec les différentes connexions chargées et les paramètres correspondants
 
 ### Configuration dump et export : 
- *Nouveautés v0.6*  Vous pouvez définir en index de vos connexions le nom de votre connexion
+ 
+ *Nouveautés v0.6*   Vous pouvez définir en index de vos connexions le nom de votre connexion
  ATTENTION ! Les clés de parameters ont changées ! Il n'est plus nécessaire de prefixer les keys
    
-> - rma_connexions:
+    - rma_connexions:
         localhost: 
            driver: pdo_mysql
            host: 192.154.125.154
@@ -192,7 +194,7 @@ Vous pouvez définir votre connexion à partir des informations suivantes :
 *Nouveautés v0.6*  Vous pouvez définir en index de vos connexions FTP le nom de votre connexion
  ATTENTION ! Les clés de parameters ont changées ! Il n'est plus nécessaire de prefixer les keys
 
->   - rma_ftp:  no ; {yes|no} 
+    - rma_ftp:  no ; {yes|no} 
     - rma_ftps:
         prod: 
             ftp_ip: 127.0.0.1
@@ -207,8 +209,8 @@ Vous pouvez définir votre connexion à partir des informations suivantes :
             ftp_path: /home/root/dump  
 
 ### Configuration compression des dump 
- 
->   - rma_compress:                 gzip ; {none|gzip}
+  
+    - rma_compress:                 gzip ; {none|gzip}
     - rma_zip:                      no ; {yes|no} 
     - rma_dir_zip:                  %kernel.root_dir%/../web/zip
 
